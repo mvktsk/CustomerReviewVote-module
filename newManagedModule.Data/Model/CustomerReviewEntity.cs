@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Collections.ObjectModel;
 using newManagedModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -21,6 +22,13 @@ namespace newManagedModule.Data.Model
         public string ProductId { get; set; }
 
         
+        public int? TotalVoteIdx { get; set; }
+
+        #region Link To CustomerReviewVote Entity
+        public virtual ObservableCollection<CustomerReviewVoteEntity> CustomerReviewVotes { get; set; }
+        #endregion
+
+
         public virtual CustomerReview ToModel(CustomerReview customerReview)
         {
             if (customerReview == null)
@@ -35,6 +43,10 @@ namespace newManagedModule.Data.Model
             customerReview.Content = Content;
             customerReview.IsActive = IsActive;
             customerReview.ProductID = ProductId;
+
+            
+//            customerReview.CustomerReviewVotes = CustomerReviewVotes;
+
 
             return customerReview;
         }
@@ -56,7 +68,11 @@ namespace newManagedModule.Data.Model
             Content = customerReview.Content;
             IsActive = customerReview.IsActive;
             ProductId = customerReview.ProductID;
-            
+
+            TotalVoteIdx = customerReview.TotalVoteIdx;
+
+            //CustomerReviewVotes.CollectionChanged
+
             return this;
         }
 
@@ -69,6 +85,8 @@ namespace newManagedModule.Data.Model
             target.Content = Content;
             target.IsActive = IsActive;
             target.ProductId = ProductId;
+            target.TotalVoteIdx = TotalVoteIdx;
+
         }
     }
 }

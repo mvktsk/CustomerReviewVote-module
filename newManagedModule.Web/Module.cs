@@ -53,11 +53,15 @@ namespace newManagedModule.Web
             // This method is called for each installed module on the second stage of initialization.
 
             // Register implementations 
-            
+
 
             // Resolve registered implementations:
+
             var settingManager = _container.Resolve<ISettingsManager>();
-            var value = settingManager.GetValue("newManagedModule.Web.General.String", string.Empty);
+            var storeSettingsNames = new[] { "CustomerReviews.CustomerReviewsEnabled" };
+            var storeSettings = settingManager.GetModuleSettings("CustomerReviews.Web").Where(x => storeSettingsNames.Contains(x.Name)).ToArray();
+            settingManager.RegisterModuleSettings("VirtoCommerce.Store", storeSettings);
+            
  
         }
     }
