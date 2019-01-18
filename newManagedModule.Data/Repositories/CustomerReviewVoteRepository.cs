@@ -33,6 +33,13 @@ namespace newManagedModule.Data.Repositories
         {
             return CustomerReviewVotes.Where(x => ids.Contains(x.Id)).ToArray();
         }
+
+        public CustomerReviewVoteEntity[] GetByReviewIds(string[] ids)
+        {
+            return CustomerReviewVotes.Where(x => ids.Contains(x.CustomerReviewId)).ToArray();
+        }
+
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Entity<CustomerReviewEntity>().ToTable("CustomerReviewVote").HasKey(x => x.Id).Property(x => x.Id);

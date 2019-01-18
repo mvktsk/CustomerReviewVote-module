@@ -9,6 +9,7 @@ namespace newManagedModule.Data.Repositories
         IQueryable<CustomerReviewVoteEntity> CustomerReviewVotes { get; }
 
         CustomerReviewVoteEntity[] GetByIds(string[] ids);
+        CustomerReviewVoteEntity[] GetByReviewIds(string[] ids);
         void DeleteCustomerReviewVotes(string[] ids);
     }
 }
