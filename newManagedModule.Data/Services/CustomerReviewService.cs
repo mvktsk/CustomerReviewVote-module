@@ -27,11 +27,11 @@ namespace newManagedModule.Data.Services
             }
         }
 
-        public CustomerReview[] GetByIds(string[] ids)
+        public CustomerReview[] GetReviewByIds(string[] ids)
         {
             using (var repository = _repositoryFactory())
             {
-                return repository.GetByIds(ids).Select(x => x.ToModel(AbstractTypeFactory<CustomerReview>.TryCreateInstance())).ToArray();
+                return repository.GetReviewByIds(ids).Select(x => x.ToModel(AbstractTypeFactory<CustomerReview>.TryCreateInstance())).ToArray();
             }
         }
 
@@ -45,7 +45,7 @@ namespace newManagedModule.Data.Services
             {
                 using (var changeTracker = GetChangeTracker(repository))
                 {
-                    var alreadyExistEntities = repository.GetByIds(items.Where(m => !m.IsTransient()).Select(x => x.Id).ToArray());
+                    var alreadyExistEntities = repository.GetReviewByIds(items.Where(m => !m.IsTransient()).Select(x => x.Id).ToArray());
                     foreach (var devirativeContract in items)
                     {
                         var sourceEntity = AbstractTypeFactory<CustomerReviewEntity>.TryCreateInstance().FromModel(devirativeContract, pkMap);

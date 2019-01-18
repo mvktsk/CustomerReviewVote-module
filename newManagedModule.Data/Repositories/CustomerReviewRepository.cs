@@ -18,27 +18,48 @@ namespace newManagedModule.Data.Repositories
             Configuration.LazyLoadingEnabled = false;
         }
 
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CustomerReviewEntity>().ToTable("CustomerReview").HasKey(x => x.Id).Property(x => x.Id);
+            modelBuilder.Entity<CustomerReviewVoteEntity>().ToTable("CustomerReviewVote").HasKey(x => x.Id).Property(x => x.Id);
+
+            base.OnModelCreating(modelBuilder);
+        }
+
+        #region CustomerReview Members
         public IQueryable<CustomerReviewEntity> CustomerReviews => GetAsQueryable<CustomerReviewEntity>();
-  
+        
+        public CustomerReviewEntity[] GetReviewByIds(string[] ids)
+        {
+            return CustomerReviews.Where(x => ids.Contains(x.Id)).ToArray();
+        }
+
         public void DeleteCustomerReviews(string[] ids)
         {
-            var items = GetByIds(ids);
+            var items = GetReviewByIds(ids);
             foreach (var item in items)
             {
                 Remove(item);
             }
         }
+        #endregion
 
-        public CustomerReviewEntity[] GetByIds(string[] ids)
+        #region CustomerReviewVote Members
+        public IQueryable<CustomerReviewVoteEntity> CustomerReviewVotes => GetAsQueryable<CustomerReviewVoteEntity>();
+        public CustomerReviewVoteEntity[] GetVoteByIds(string[] ids)
         {
-            return CustomerReviews.Where(x => ids.Contains(x.Id)).ToArray();
+            return CustomerReviewVotes.Where(x => ids.Contains(x.Id)).ToArray();
         }
-        protected override void OnModelCreating(DbModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<CustomerReviewEntity>().ToTable("CustomerReview").HasKey(x => x.Id).Property(x => x.Id);
 
-            base.OnModelCreating(modelBuilder);
+        public void DeleteCustomerReviewVotes(string[] ids)
+        {
+            var items = GetVoteByIds(ids);
+            foreach (var item in items)
+            {
+                Remove(item);
+            }
         }
+        #endregion
 
     }
 }

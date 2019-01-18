@@ -86,12 +86,9 @@
     <Compile Include="Model\CustomerReviewVoteEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\CustomerReviewRepository.cs" />
-    <Compile Include="Repositories\CustomerReviewVoteRepository.cs" />
     <Compile Include="Repositories\ICustomerReviewRepository.cs" />
-    <Compile Include="Repositories\ICustomerReviewVoteRepository.cs" />
     <Compile Include="Services\CustomerReviewSearchService.cs" />
     <Compile Include="Services\CustomerReviewService.cs" />
-    <Compile Include="Services\CustomerReviewVoteSearchService.cs" />
     <Compile Include="Services\CustomerReviewVoteService.cs" />
   </ItemGroup>
   <ItemGroup>

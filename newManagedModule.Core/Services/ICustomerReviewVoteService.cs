@@ -4,7 +4,7 @@ namespace newManagedModule.Core.Services
 {
     public interface ICustomerReviewVoteService
     {
-        CustomerReviewVote[] GetByIds(string[] ids);
+        CustomerReviewVote[] GetVoteByIds(string[] ids);
 
         void SaveCustomerReviewVotes(CustomerReviewVote[] items);
     }

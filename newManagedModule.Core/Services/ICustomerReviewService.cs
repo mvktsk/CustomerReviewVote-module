@@ -4,7 +4,7 @@ namespace newManagedModule.Core.Services
 {
     public interface ICustomerReviewService
     {
-        CustomerReview[] GetByIds(string[] ids);
+        CustomerReview[] GetReviewByIds(string[] ids);
 
         void SaveCustomerReviews(CustomerReview[] items);
 

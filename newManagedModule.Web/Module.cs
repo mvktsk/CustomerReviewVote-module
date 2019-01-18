@@ -40,11 +40,10 @@ namespace newManagedModule.Web
 
             // Register implementations:
             _container.RegisterType<ICustomerReviewRepository>(new InjectionFactory(c => new CustomerReviewRepository(_connectionString, new EntityPrimaryKeyGeneratorInterceptor(), _container.Resolve<AuditableInterceptor>())));
-            _container.RegisterType<ICustomerReviewVoteRepository>(new InjectionFactory(c => new CustomerReviewVoteRepository(_connectionString, new EntityPrimaryKeyGeneratorInterceptor(), _container.Resolve<AuditableInterceptor>())));
             _container.RegisterType<ICustomerReviewService, CustomerReviewService>();
             _container.RegisterType<ICustomerReviewSearchService, CustomerReviewSearchService>();
             _container.RegisterType<ICustomerReviewVoteService, CustomerReviewVoteService>();
-            _container.RegisterType<ICustomerReviewVoteSearchService, CustomerReviewVoteSearchService>();
+            
 
 
 

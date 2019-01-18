@@ -11,18 +11,18 @@ namespace newManagedModule.Data.Services
 {
     public class CustomerReviewVoteService : ServiceBase, ICustomerReviewVoteService
     {
-        private readonly Func<ICustomerReviewVoteRepository> _repositoryFactory;
+        private readonly Func<ICustomerReviewRepository> _repositoryFactory;
 
-        public CustomerReviewVoteService(Func<ICustomerReviewVoteRepository> repositoryFactory)
+        public CustomerReviewVoteService(Func<ICustomerReviewRepository> repositoryFactory)
         {
             _repositoryFactory = repositoryFactory;
         }
 
-        public CustomerReviewVote[] GetByIds(string[] ids)
+        public CustomerReviewVote[] GetVoteByIds(string[] ids)
         {
             using (var repository = _repositoryFactory())
             {
-                return repository.GetByIds(ids).Select(x => x.ToModel(AbstractTypeFactory<CustomerReviewVote>.TryCreateInstance())).ToArray();
+                return repository.GetVoteByIds(ids).Select(x => x.ToModel(AbstractTypeFactory<CustomerReviewVote>.TryCreateInstance())).ToArray();
             }
         }
 

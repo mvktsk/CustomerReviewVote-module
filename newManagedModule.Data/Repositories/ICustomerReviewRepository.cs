@@ -7,8 +7,12 @@ namespace newManagedModule.Data.Repositories
     public interface ICustomerReviewRepository : IRepository
     {
         IQueryable<CustomerReviewEntity> CustomerReviews { get; }
+        IQueryable<CustomerReviewVoteEntity> CustomerReviewVotes { get; }
 
-        CustomerReviewEntity[] GetByIds(string[] ids);
+        CustomerReviewEntity[] GetReviewByIds(string[] ids);
         void DeleteCustomerReviews(string[] ids);
+
+        CustomerReviewVoteEntity[] GetVoteByIds(string[] ids);
+        void DeleteCustomerReviewVotes(string[] ids);
     }
 }

@@ -18,7 +18,8 @@ namespace newManagedModule.Test
         private const string _customerReviewID = "testReviewID";
 
         private ICustomerReviewService _customerReviewService => new CustomerReviewService(GetRepository);
-        private ICustomerReviewSearchService _customerReviewSearchService => new CustomerReviewSearchService(GetRepository, _customerReviewService);
+        private ICustomerReviewVoteService _customerReviewVoteService => new CustomerReviewVoteService(GetRepository);
+        private ICustomerReviewSearchService _customerReviewSearchService => new CustomerReviewSearchService(GetRepository, _customerReviewService, _customerReviewVoteService);
 
         public NewManagedModuleTest()
         {
@@ -38,7 +39,7 @@ namespace newManagedModule.Test
         public void CanDoCRUDandSearch()
         {
             //Read non-existing item
-            var getByIdsResult = _customerReviewService.GetByIds(new[] { _customerReviewID });
+            var getByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewID });
             Assert.NotNull(getByIdsResult);
             Assert.Empty(getByIdsResult);
 
@@ -55,7 +56,7 @@ namespace newManagedModule.Test
 
             _customerReviewService.SaveCustomerReviews(new[] { item });
 
-            getByIdsResult = _customerReviewService.GetByIds(new[] { _customerReviewID });
+            getByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewID });
             Assert.Single(getByIdsResult);
 
             item = getByIdsResult[0];
@@ -67,7 +68,7 @@ namespace newManagedModule.Test
 
             item.Content = updatedConent;
             _customerReviewService.SaveCustomerReviews(new[] { item });
-            getByIdsResult = _customerReviewService.GetByIds(new[] { _customerReviewID });
+            getByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewID });
             Assert.Single(getByIdsResult);
 
             item = getByIdsResult[0];
@@ -91,7 +92,7 @@ namespace newManagedModule.Test
         public void CanDeleteCustomerReviews()
         {
             _customerReviewService.DeleteCustomerRevies(new[] { _customerReviewID });
-            var getByIdsResult = _customerReviewService.GetByIds(new[] { _customerReviewID });
+            var getByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewID });
             Assert.NotNull(getByIdsResult);
             Assert.Empty(getByIdsResult);
 

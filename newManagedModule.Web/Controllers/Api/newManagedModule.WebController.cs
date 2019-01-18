@@ -16,17 +16,14 @@ namespace newManagedModule.Web.Controllers.Api
         private readonly ICustomerReviewSearchService _customerReviewSearchService;
         private readonly ICustomerReviewService _customerReviewService;
 
-        private readonly ICustomerReviewVoteSearchService _customerReviewVoteSearchService;
-
         public ManagedModuleController()
         {
         }
 
-        public ManagedModuleController(ICustomerReviewSearchService customerReviewSearchService,  ICustomerReviewService customerReviewService, ICustomerReviewVoteSearchService customerReviewVoteSearchService)
+        public ManagedModuleController(ICustomerReviewSearchService customerReviewSearchService,  ICustomerReviewService customerReviewService)
         {
             _customerReviewSearchService = customerReviewSearchService;
             _customerReviewService = customerReviewService;
-            _customerReviewVoteSearchService = customerReviewVoteSearchService;
         }
 
         /// <summary>
@@ -85,11 +82,8 @@ namespace newManagedModule.Web.Controllers.Api
         [CheckPermission(Permission = PredefinedPermissions.CustomerReviewRead)]
         public IHttpActionResult SearchCustomerReviewVotes(CustomerReviewVoteSearchCriteria criteria)
         {
-            var result = _customerReviewVoteSearchService.SearchCustomerReviewVotes(criteria);
+            var result = _customerReviewSearchService.SearchCustomerReviewVotes(criteria);
             return Ok(result);
         }
-
-
-
     }
 }

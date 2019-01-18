@@ -6,5 +6,6 @@ namespace newManagedModule.Core.Services
     public interface ICustomerReviewSearchService
     {
         GenericSearchResult<CustomerReview> SearchCustomerReviews(CustomerReviewSearchCriteria criteria);
+        GenericSearchResult<CustomerReviewVote> SearchCustomerReviewVotes(CustomerReviewVoteSearchCriteria criteria);
     }
 }
