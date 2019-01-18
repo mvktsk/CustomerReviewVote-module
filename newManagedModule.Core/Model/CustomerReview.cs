@@ -1,4 +1,5 @@
-﻿using VirtoCommerce.Platform.Core.Common;
+﻿using System.Collections.ObjectModel;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace newManagedModule.Core.Model
 {
