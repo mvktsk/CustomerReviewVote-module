@@ -67,9 +67,11 @@
     <Compile Include="Model\CustomerReview.cs" />
     <Compile Include="Model\CustomerReviewSearchCriteria.cs" />
     <Compile Include="Model\CustomerReviewVote.cs" />
+    <Compile Include="Model\CustomerReviewVoteSearchCriteria.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ICustomerReviewSearchService.cs" />
     <Compile Include="Services\ICustomerReviewService.cs" />
+    <Compile Include="Services\ICustomerReviewVoteSearchService.cs" />
     <Compile Include="Services\ICustomerReviewVoteService.cs" />
   </ItemGroup>
   <ItemGroup>

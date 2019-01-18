@@ -42,7 +42,7 @@ namespace newManagedModule.Data.Repositories
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<CustomerReviewEntity>().ToTable("CustomerReviewVote").HasKey(x => x.Id).Property(x => x.Id);
+            modelBuilder.Entity<CustomerReviewVoteEntity>().ToTable("CustomerReviewVote").HasKey(x => x.Id).Property(x => x.Id);
 
             base.OnModelCreating(modelBuilder);
         }

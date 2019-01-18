@@ -16,19 +16,24 @@ namespace newManagedModule.Web.Controllers.Api
         private readonly ICustomerReviewSearchService _customerReviewSearchService;
         private readonly ICustomerReviewService _customerReviewService;
 
+        private readonly ICustomerReviewVoteSearchService _customerReviewVoteSearchService;
+
         public ManagedModuleController()
         {
         }
 
-        public ManagedModuleController(ICustomerReviewSearchService customerReviewSearchService,  ICustomerReviewService customerReviewService)
+        public ManagedModuleController(ICustomerReviewSearchService customerReviewSearchService,  ICustomerReviewService customerReviewService, ICustomerReviewVoteSearchService customerReviewVoteSearchService)
         {
             _customerReviewSearchService = customerReviewSearchService;
             _customerReviewService = customerReviewService;
+            _customerReviewVoteSearchService = customerReviewVoteSearchService;
         }
 
         /// <summary>
         /// Return product Customer review search results
         /// </summary>
+        ///<param name="criteria">Search criteria</param>
+        ///<returns></returns>
         [HttpPost]
         [Route("search")]
         [ResponseType(typeof(GenericSearchResult<CustomerReview>))]
@@ -69,6 +74,22 @@ namespace newManagedModule.Web.Controllers.Api
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        
+        /// <summary>
+        /// Return product Customer review search results
+        /// </summary>
+        ///<param name="criteria">Search criteria</param>
+        ///<returns></returns>
+        [HttpPost]
+        [Route("vote/search")]
+        [ResponseType(typeof(GenericSearchResult<CustomerReviewVote>))]
+        [CheckPermission(Permission = PredefinedPermissions.CustomerReviewRead)]
+        public IHttpActionResult SearchCustomerReviewVotes(CustomerReviewVoteSearchCriteria criteria)
+        {
+            var result = _customerReviewVoteSearchService.SearchCustomerReviewVotes(criteria);
+            return Ok(result);
+        }
+
+
+
     }
 }

@@ -9,13 +9,21 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace newManagedModule.Data.Services
 {
-    class CustomerReviewVoteService : ServiceBase, ICustomerReviewVoteService
+    public class CustomerReviewVoteService : ServiceBase, ICustomerReviewVoteService
     {
         private readonly Func<ICustomerReviewVoteRepository> _repositoryFactory;
 
+        public CustomerReviewVoteService(Func<ICustomerReviewVoteRepository> repositoryFactory)
+        {
+            _repositoryFactory = repositoryFactory;
+        }
+
         public CustomerReviewVote[] GetByIds(string[] ids)
         {
-            throw new NotImplementedException();
+            using (var repository = _repositoryFactory())
+            {
+                return repository.GetByIds(ids).Select(x => x.ToModel(AbstractTypeFactory<CustomerReviewVote>.TryCreateInstance())).ToArray();
+            }
         }
 
         public void SaveCustomerReviewVotes(CustomerReviewVote[] items)
