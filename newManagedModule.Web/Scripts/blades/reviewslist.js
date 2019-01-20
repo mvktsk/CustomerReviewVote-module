@@ -23,17 +23,17 @@
 
  
             blade.selectNode = function (data) {
-                //$scope.selectedNodeId = data.id;
+                $scope.selectedNodeId = data.id;
 
-                //var newBlade = {
-                //    id: 'reviewDetails',
-                //    currentEntityId: data.id,
-                //    currentEntity: data,
-                //    title: data.name,
-                //    controller: 'virtoCommerce.storeModule.storeDetailController',
-                //    template: 'Modules/$(VirtoCommerce.Store)/Scripts/blades/store-detail.tpl.html'
-                //};
-                //bladeNavigationService.showBlade(newBlade, blade);
+                var newBlade = {
+                    id: 'reviewDetails',
+                    currentEntityId: data.id,
+                    currentEntity: data,
+                    title: data.name,
+                    controller: 'virtoCommerce.storeModule.storeDetailController',
+                    template: 'Modules/$(VirtoCommerce.Store)/Scripts/blades/store-detail.tpl.html'
+                };
+                bladeNavigationService.showBlade(newBlade, blade);
             }
 
             function openBladeNew() {

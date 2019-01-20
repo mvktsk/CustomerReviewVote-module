@@ -13,7 +13,7 @@ namespace newManagedModule.Data.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201901201421382_AddCustomerReviewVote"; }
+            get { return "201901201713052_AddCustomerReviewVote"; }
         }
         
         string IMigrationMetadata.Source

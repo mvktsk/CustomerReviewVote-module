@@ -11,6 +11,7 @@ namespace newManagedModule.Core.Model
         public string ProductID { get; set; }
 
         public int? TotalVoteIdx { get; set; }
+        public int TotalVotes { get; set; }
 
         public virtual ObservableCollection<CustomerReviewVote> CustomerReviewVotes { get; set; }
         

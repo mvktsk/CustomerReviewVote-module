@@ -38,7 +38,8 @@ namespace newManagedModule.Data.Model
             customerReviewVote.AuthorId = AuthorId;
             customerReviewVote.VoteIdx = VoteIdx;
             customerReviewVote.IsActive = IsActive;
-            
+            customerReviewVote.CustomerReviewId = CustomerReviewId;
+
             return customerReviewVote;
         }
 
@@ -58,6 +59,7 @@ namespace newManagedModule.Data.Model
             AuthorId = customerReviewVote.AuthorId;
             VoteIdx = customerReviewVote.VoteIdx;
             IsActive = customerReviewVote.IsActive;
+            CustomerReviewId = customerReviewVote.CustomerReviewId;
 
             return this;
         }

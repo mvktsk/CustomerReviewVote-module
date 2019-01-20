@@ -26,12 +26,14 @@ namespace newManagedModule.Data.Migrations
                 .Index(t => t.CustomerReviewId);
             
             AddColumn("dbo.CustomerReview", "TotalVoteIdx", c => c.Int());
+            AddColumn("dbo.CustomerReview", "TotalVotes", c => c.Int(nullable: false));
         }
         
         public override void Down()
         {
             DropForeignKey("dbo.CustomerReviewVote", "CustomerReviewId", "dbo.CustomerReview");
             DropIndex("dbo.CustomerReviewVote", new[] { "CustomerReviewId" });
+            DropColumn("dbo.CustomerReview", "TotalVotes");
             DropColumn("dbo.CustomerReview", "TotalVoteIdx");
             DropTable("dbo.CustomerReviewVote");
         }
