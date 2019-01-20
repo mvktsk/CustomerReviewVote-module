@@ -77,9 +77,9 @@
     <Compile Include="Migrations\201901151356245_Initial.Designer.cs">
       <DependentUpon>201901151356245_Initial.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201901181235289_AddCustomerReviewVote.cs" />
-    <Compile Include="Migrations\201901181235289_AddCustomerReviewVote.Designer.cs">
-      <DependentUpon>201901181235289_AddCustomerReviewVote.cs</DependentUpon>
+    <Compile Include="Migrations\201901201421382_AddCustomerReviewVote.cs" />
+    <Compile Include="Migrations\201901201421382_AddCustomerReviewVote.Designer.cs">
+      <DependentUpon>201901201421382_AddCustomerReviewVote.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\CustomerReviewEntity.cs" />
@@ -95,8 +95,8 @@
     <EmbeddedResource Include="Migrations\201901151356245_Initial.resx">
       <DependentUpon>201901151356245_Initial.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201901181235289_AddCustomerReviewVote.resx">
-      <DependentUpon>201901181235289_AddCustomerReviewVote.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201901201421382_AddCustomerReviewVote.resx">
+      <DependentUpon>201901201421382_AddCustomerReviewVote.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
