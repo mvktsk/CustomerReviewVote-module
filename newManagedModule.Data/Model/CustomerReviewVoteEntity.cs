@@ -18,7 +18,7 @@ namespace newManagedModule.Data.Model
         public bool IsActive { get; set; }
 
 
-        #region Link to CustomerReview Entity
+        #region Navigation Properties
         [Required]
         [StringLength(128)]
         public string CustomerReviewId { get; set; }

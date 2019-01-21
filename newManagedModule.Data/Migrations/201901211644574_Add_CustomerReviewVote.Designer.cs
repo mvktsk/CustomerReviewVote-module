@@ -7,13 +7,13 @@ namespace newManagedModule.Data.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.2.0-61023")]
-    public sealed partial class AddCustomerReviewVote : IMigrationMetadata
+    public sealed partial class Add_CustomerReviewVote : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(AddCustomerReviewVote));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(Add_CustomerReviewVote));
         
         string IMigrationMetadata.Id
         {
-            get { return "201901201713052_AddCustomerReviewVote"; }
+            get { return "201901211644574_Add_CustomerReviewVote"; }
         }
         
         string IMigrationMetadata.Source

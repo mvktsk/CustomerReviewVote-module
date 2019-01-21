@@ -3,7 +3,7 @@ namespace newManagedModule.Data.Migrations
     using System;
     using System.Data.Entity.Migrations;
     
-    public partial class AddCustomerReviewVote : DbMigration
+    public partial class Add_CustomerReviewVote : DbMigration
     {
         public override void Up()
         {
@@ -25,16 +25,12 @@ namespace newManagedModule.Data.Migrations
                 .ForeignKey("dbo.CustomerReview", t => t.CustomerReviewId, cascadeDelete: true)
                 .Index(t => t.CustomerReviewId);
             
-            AddColumn("dbo.CustomerReview", "TotalVoteIdx", c => c.Int());
-            AddColumn("dbo.CustomerReview", "TotalVotes", c => c.Int(nullable: false));
         }
         
         public override void Down()
         {
             DropForeignKey("dbo.CustomerReviewVote", "CustomerReviewId", "dbo.CustomerReview");
             DropIndex("dbo.CustomerReviewVote", new[] { "CustomerReviewId" });
-            DropColumn("dbo.CustomerReview", "TotalVotes");
-            DropColumn("dbo.CustomerReview", "TotalVoteIdx");
             DropTable("dbo.CustomerReviewVote");
         }
     }

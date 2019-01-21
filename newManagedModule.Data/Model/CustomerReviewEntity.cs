@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.ObjectModel;
 using newManagedModule.Core.Model;
@@ -8,6 +9,11 @@ namespace newManagedModule.Data.Model
 {
     public class CustomerReviewEntity: AuditableEntity
     {
+        public CustomerReviewEntity ()
+        {
+            CustomerReviewVotes = new NullCollection<CustomerReviewVoteEntity>();
+        }
+        
         [StringLength(128)]
         public string AuthorNickname { get; set; }
 
@@ -21,13 +27,12 @@ namespace newManagedModule.Data.Model
         [StringLength(128)]
         public string ProductId { get; set; }
 
-        
-        public int? TotalVoteIdx { get; set; }
-        public int TotalVotes { get; set; }
 
         // Link To CustomerReviewVote Entity
+        #region Navigation Properties
         public virtual ObservableCollection<CustomerReviewVoteEntity> CustomerReviewVotes { get; set; }
-        
+        #endregion
+
         public virtual CustomerReview ToModel(CustomerReview customerReview)
         {
             if (customerReview == null)
@@ -42,13 +47,11 @@ namespace newManagedModule.Data.Model
             customerReview.Content = Content;
             customerReview.IsActive = IsActive;
             customerReview.ProductID = ProductId;
-
-            customerReview.TotalVoteIdx = TotalVoteIdx;
-            customerReview.TotalVotes = TotalVotes;
-
-
-//            customerReview.CustomerReviewVotes = CustomerReviewVotes;
-
+                        
+            
+            customerReview.PositiveVotesCount = CustomerReviewVotes.Count(x => (x.VoteIdx == 1) && (x.CustomerReviewId == Id));
+            customerReview.NegativeVotesCount = CustomerReviewVotes.Count(x => (x.VoteIdx == -1)  && (x.CustomerReviewId == Id)); 
+            customerReview.TotalVotes = CustomerReviewVotes.Count(x => x.CustomerReviewId == Id);
 
             return customerReview;
         }
@@ -71,9 +74,6 @@ namespace newManagedModule.Data.Model
             IsActive = customerReview.IsActive;
             ProductId = customerReview.ProductID;
 
-            TotalVoteIdx = customerReview.TotalVoteIdx;
-            TotalVotes = customerReview.TotalVotes;
-
             //CustomerReviewVotes.CollectionChanged
 
             return this;
@@ -88,10 +88,6 @@ namespace newManagedModule.Data.Model
             target.Content = Content;
             target.IsActive = IsActive;
             target.ProductId = ProductId;
-
-            target.TotalVoteIdx = TotalVoteIdx;
-            target.TotalVotes = TotalVotes;
-
         }
     }
 }

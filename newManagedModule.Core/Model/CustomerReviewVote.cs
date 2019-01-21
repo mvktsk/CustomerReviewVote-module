@@ -9,7 +9,6 @@ namespace newManagedModule.Core.Model
         public bool IsActive { get; set; }
         public string CustomerReviewId { get; set; }
 
-        //       public string CustomerReviewId { get; set; }
         //        public CustomerReview CustomerReview { get; set; }
     }
    
