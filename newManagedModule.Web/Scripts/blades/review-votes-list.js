@@ -1,16 +1,15 @@
 ﻿angular.module('newManagedModule.Web')
-    .controller('reviewsListController', ['$scope', 'newManagedModule.WebApi', 'platformWebApp.bladeUtils', 'uiGridConstants', 'platformWebApp.uiGridHelper',
+    .controller('reviewVotesController', ['$scope', 'newManagedModule.WebApi', 'platformWebApp.bladeUtils', 'uiGridConstants', 'platformWebApp.uiGridHelper',
         function ($scope, reviewAPI, bladeUtils, uiGridConstants, uiGridHelper) {
             $scope.uiGridConstants = uiGridConstants;
 
             var blade = $scope.blade;
             var bladeNavigationService = bladeUtils.bladeNavigationService;
-            blade.title = 'Reviews Blade';
-
-                        
+            blade.title = 'Review Votes Blade';
+            
             blade.refresh = function () {
                 blade.isLoading = true;
-                    reviewAPI.search(angular.extend(filter, {
+                    reviewAPI.searchVotes(angular.extend(filter, {
                     searchPhrase: filter.keyword ? filter.keyword : undefined,
                     sort: uiGridHelper.getSortExpression($scope),
                     skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
@@ -19,35 +18,34 @@
                     blade.isLoading = false;
                     $scope.pageSettings.totalItems = data.totalCount;
                     blade.currentEntities = data.results;
-                        });
+                });
             }
 
-             
+ 
             blade.selectNode = function (data) {
-                $scope.selectedNodeId = data.id;
+                //$scope.selectedNodeId = data.id;
 
-                var filterReviewVotes = { take: 0 };
+                //var newBlade = {
+                //    id: 'reviewVoteDetails',
+                //    currentEntityId: data.id,
+                //    currentEntity: data,
+                //    title: data.name,
+                //    controller: 'virtoCommerce.storeModule.storeDetailController',
+                //    template: 'Modules/$(VirtoCommerce.Store)/Scripts/blades/store-detail.tpl.html'
+                //};
+                //bladeNavigationService.showBlade(newBlade, blade);
+            }
 
-                function refreshReviewVotes() {
-                    $scope.loading = true;
-                    reviewAPI.searchVotes(filterReviewVotes, function (data) {
-                        $scope.loading = false;
-                        $scope.totalCount = data.totalCount;
-                    });
-                }
+            function openBladeNew() {
+                $scope.selectedNodeId = null;
 
-                
-                filterReviewVotes.customerReviewIds = [data.id];
-                refreshReviewVotes();
-
-
-                
                 var newBlade = {
-                    id: 'reviewVotesList',
-                    filter: filterReviewVotes,
-                    title: data.name,
-                    controller: 'reviewVotesController',
-                    template: 'Modules/$(newManagedModule.Web)/Scripts/blades/review-votes-list.tpl.html'
+                    id: 'storeDetails',
+                    currentEntity: {},
+                    title: 'stores.blades.new-store-wizard.title',
+                    subtitle: 'stores.blades.new-store-wizard.subtitle',
+                    controller: 'virtoCommerce.storeModule.newStoreWizardController',
+                    template: 'Modules/$(VirtoCommerce.Store)/Scripts/wizards/newStore/new-store-wizard.tpl.html'
                 };
                 bladeNavigationService.showBlade(newBlade, blade);
             }
@@ -62,10 +60,17 @@
                         return true;
                     }
                 },
+                //{
+                //    name: "platform.commands.add", icon: 'fa fa-plus',
+                //    executeMethod: openBladeNew,
+                //    canExecuteMethod: function () {
+                //        return true;
+                //    },
+                //    permission: 'store:create'
+                //}
             ];
 
             // simple and advanced filtering
-
             var filter = $scope.filter = blade.filter || {};
 
             filter.criteriaChanged = function () {

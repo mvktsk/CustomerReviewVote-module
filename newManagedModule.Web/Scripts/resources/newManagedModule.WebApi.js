@@ -2,6 +2,7 @@
 .factory('newManagedModule.WebApi', ['$resource', function ($resource) {
     return $resource('api/newManagedModule', {}, {
         search: { method: 'POST', url: 'api/newManagedModule/search' },
-        update: { method: 'PUT' }
+        update: { method: 'PUT' },
+        searchVotes: { method: 'POST', url: 'api/newManagedModule/vote/search' }
     });
 }]);
