@@ -91,7 +91,7 @@ namespace newManagedModule.Test
         [Fact]
         public void CanDeleteCustomerReviews()
         {
-            _customerReviewService.DeleteCustomerRevies(new[] { _customerReviewID });
+            _customerReviewService.DeleteCustomerReviews(new[] { _customerReviewID });
             var getByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewID });
             Assert.NotNull(getByIdsResult);
             Assert.Empty(getByIdsResult);

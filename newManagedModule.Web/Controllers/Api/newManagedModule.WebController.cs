@@ -15,15 +15,17 @@ namespace newManagedModule.Web.Controllers.Api
     {
         private readonly ICustomerReviewSearchService _customerReviewSearchService;
         private readonly ICustomerReviewService _customerReviewService;
+        private readonly ICustomerReviewVoteService _customerReviewVoteService;
 
         public ManagedModuleController()
         {
         }
 
-        public ManagedModuleController(ICustomerReviewSearchService customerReviewSearchService,  ICustomerReviewService customerReviewService)
+        public ManagedModuleController(ICustomerReviewSearchService customerReviewSearchService,  ICustomerReviewService customerReviewService, ICustomerReviewVoteService customerReviewVoteService)
         {
             _customerReviewSearchService = customerReviewSearchService;
             _customerReviewService = customerReviewService;
+            _customerReviewVoteService = customerReviewVoteService;
         }
 
         /// <summary>
@@ -67,12 +69,12 @@ namespace newManagedModule.Web.Controllers.Api
         [CheckPermission(Permission = PredefinedPermissions.CustomerReviewDelete)]
         public IHttpActionResult Delete([FromUri] string[] ids)
         {
-            _customerReviewService.DeleteCustomerRevies(ids);
+            _customerReviewService.DeleteCustomerReviews(ids);
             return StatusCode(HttpStatusCode.NoContent);
         }
 
         /// <summary>
-        /// Return product Customer review search results
+        /// Return product Customer review votes search results
         /// </summary>
         ///<param name="criteria">Search criteria</param>
         ///<returns></returns>
@@ -84,6 +86,36 @@ namespace newManagedModule.Web.Controllers.Api
         {
             var result = _customerReviewSearchService.SearchCustomerReviewVotes(criteria);
             return Ok(result);
+        }
+
+        /// <summary>
+        /// Create new or update existing customer review
+        /// </summary>
+        /// <param name="customerRevies">Customer reviews</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("vote")]
+        [ResponseType(typeof(void))]
+        [CheckPermission(Permission = PredefinedPermissions.CustomerReviewUpdate)]
+        public IHttpActionResult UpdateVotes(CustomerReviewVote[] customerReviewVotes)
+        {
+            _customerReviewVoteService.SaveCustomerReviewVotes(customerReviewVotes);
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        ///<summary>
+        ///Delete Customer Review Votes by IDs
+        ///</summary>
+        ///<param name="ids">IDs</param>
+        ///<returns></returns>
+        [HttpDelete]
+        [Route("vote")]
+        [ResponseType(typeof(void))]
+        [CheckPermission(Permission = PredefinedPermissions.CustomerReviewDelete)]
+        public IHttpActionResult DeleteVotes([FromUri] string[] ids)
+        {
+            _customerReviewVoteService.DeleteCustomerReviewVotes(ids);
+            return StatusCode(HttpStatusCode.NoContent);
         }
     }
 }

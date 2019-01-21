@@ -8,6 +8,6 @@ namespace newManagedModule.Core.Services
 
         void SaveCustomerReviews(CustomerReview[] items);
 
-        void DeleteCustomerRevies(string[] ids);
+        void DeleteCustomerReviews(string[] ids);
     }
 }

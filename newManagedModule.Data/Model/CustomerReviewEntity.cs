@@ -25,11 +25,9 @@ namespace newManagedModule.Data.Model
         public int? TotalVoteIdx { get; set; }
         public int TotalVotes { get; set; }
 
-        #region Link To CustomerReviewVote Entity
+        // Link To CustomerReviewVote Entity
         public virtual ObservableCollection<CustomerReviewVoteEntity> CustomerReviewVotes { get; set; }
-        #endregion
-
-
+        
         public virtual CustomerReview ToModel(CustomerReview customerReview)
         {
             if (customerReview == null)
@@ -90,7 +88,9 @@ namespace newManagedModule.Data.Model
             target.Content = Content;
             target.IsActive = IsActive;
             target.ProductId = ProductId;
+
             target.TotalVoteIdx = TotalVoteIdx;
+            target.TotalVotes = TotalVotes;
 
         }
     }

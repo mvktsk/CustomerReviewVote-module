@@ -7,5 +7,7 @@ namespace newManagedModule.Core.Services
         CustomerReviewVote[] GetVoteByIds(string[] ids);
 
         void SaveCustomerReviewVotes(CustomerReviewVote[] items);
+
+        void DeleteCustomerReviewVotes(string[] ids);
     }
 }
