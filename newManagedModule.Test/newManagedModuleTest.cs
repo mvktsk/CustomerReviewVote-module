@@ -18,8 +18,7 @@ namespace newManagedModule.Test
         private const string _customerReviewID = "testReviewID";
 
         private ICustomerReviewService _customerReviewService => new CustomerReviewService(GetRepository);
-        private ICustomerReviewVoteService _customerReviewVoteService => new CustomerReviewVoteService(GetRepository);
-        private ICustomerReviewSearchService _customerReviewSearchService => new CustomerReviewSearchService(GetRepository, _customerReviewService, _customerReviewVoteService);
+        private ICustomerReviewSearchService _customerReviewSearchService => new CustomerReviewSearchService(GetRepository, _customerReviewService);
 
         public NewManagedModuleTest()
         {

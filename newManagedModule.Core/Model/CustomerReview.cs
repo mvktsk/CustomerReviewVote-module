@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace newManagedModule.Core.Model
@@ -14,7 +15,7 @@ namespace newManagedModule.Core.Model
         public int? NegativeVotesCount { get; set; }
         public int TotalVotes { get; set; }
 
-        public virtual ObservableCollection<CustomerReviewVote> CustomerReviewVotes { get; set; }
+        public virtual ICollection<CustomerReviewVote> CustomerReviewVotes { get; set; }
         
 
     }

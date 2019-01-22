@@ -47,8 +47,8 @@ namespace newManagedModule.Data.Model
             customerReview.Content = Content;
             customerReview.IsActive = IsActive;
             customerReview.ProductID = ProductId;
-                        
-            
+
+            customerReview.CustomerReviewVotes = CustomerReviewVotes.Select(x => x.ToModel(AbstractTypeFactory<CustomerReviewVote>.TryCreateInstance())).ToList();
             customerReview.PositiveVotesCount = CustomerReviewVotes.Count(x => (x.VoteIdx == 1) && (x.CustomerReviewId == Id));
             customerReview.NegativeVotesCount = CustomerReviewVotes.Count(x => (x.VoteIdx == -1)  && (x.CustomerReviewId == Id)); 
             customerReview.TotalVotes = CustomerReviewVotes.Count(x => x.CustomerReviewId == Id);

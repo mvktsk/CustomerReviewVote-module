@@ -13,14 +13,11 @@ namespace newManagedModule.Data.Services
     {
         private readonly Func<ICustomerReviewRepository> _repositoryFactory;
         private readonly ICustomerReviewService _customerReviewService;
-        private readonly ICustomerReviewVoteService _customerReviewVoteService;
-
-        public CustomerReviewSearchService(Func<ICustomerReviewRepository> repositoryFactory, ICustomerReviewService customerReviewService, ICustomerReviewVoteService customerReviewVoteService)
+        
+        public CustomerReviewSearchService(Func<ICustomerReviewRepository> repositoryFactory, ICustomerReviewService customerReviewService)
         {
             _repositoryFactory = repositoryFactory;
             _customerReviewService = customerReviewService;
-            _customerReviewVoteService = customerReviewVoteService;
-
         }
 
         public GenericSearchResult<CustomerReview> SearchCustomerReviews(CustomerReviewSearchCriteria criteria)
@@ -112,7 +109,7 @@ namespace newManagedModule.Data.Services
                                  .Select(x => x.Id)
                                  .ToList();
 
-                retVal.Results = _customerReviewVoteService.GetVoteByIds(customerReviewVoteIds.ToArray())
+                retVal.Results = _customerReviewService.GetVoteByIds(customerReviewVoteIds.ToArray())
                                                        .OrderBy(x => customerReviewVoteIds.IndexOf(x.Id)).ToList();
 
                 return retVal;

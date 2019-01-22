@@ -89,7 +89,6 @@
     <Compile Include="Repositories\ICustomerReviewRepository.cs" />
     <Compile Include="Services\CustomerReviewSearchService.cs" />
     <Compile Include="Services\CustomerReviewService.cs" />
-    <Compile Include="Services\CustomerReviewVoteService.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201901151356245_Initial.resx">

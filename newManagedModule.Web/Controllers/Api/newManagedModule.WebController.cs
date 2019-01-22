@@ -15,17 +15,15 @@ namespace newManagedModule.Web.Controllers.Api
     {
         private readonly ICustomerReviewSearchService _customerReviewSearchService;
         private readonly ICustomerReviewService _customerReviewService;
-        private readonly ICustomerReviewVoteService _customerReviewVoteService;
-
+        
         public ManagedModuleController()
         {
         }
 
-        public ManagedModuleController(ICustomerReviewSearchService customerReviewSearchService,  ICustomerReviewService customerReviewService, ICustomerReviewVoteService customerReviewVoteService)
+        public ManagedModuleController(ICustomerReviewSearchService customerReviewSearchService,  ICustomerReviewService customerReviewService)
         {
             _customerReviewSearchService = customerReviewSearchService;
             _customerReviewService = customerReviewService;
-            _customerReviewVoteService = customerReviewVoteService;
         }
 
         /// <summary>
@@ -99,7 +97,7 @@ namespace newManagedModule.Web.Controllers.Api
         [CheckPermission(Permission = PredefinedPermissions.CustomerReviewUpdate)]
         public IHttpActionResult UpdateVotes(CustomerReviewVote[] customerReviewVotes)
         {
-            _customerReviewVoteService.SaveCustomerReviewVotes(customerReviewVotes);
+            _customerReviewService.SaveCustomerReviewVotes(customerReviewVotes);
             return StatusCode(HttpStatusCode.NoContent);
         }
 
@@ -114,7 +112,7 @@ namespace newManagedModule.Web.Controllers.Api
         [CheckPermission(Permission = PredefinedPermissions.CustomerReviewDelete)]
         public IHttpActionResult DeleteVotes([FromUri] string[] ids)
         {
-            _customerReviewVoteService.DeleteCustomerReviewVotes(ids);
+            _customerReviewService.DeleteCustomerReviewVotes(ids);
             return StatusCode(HttpStatusCode.NoContent);
         }
     }
