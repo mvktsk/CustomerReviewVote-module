@@ -23,6 +23,11 @@ namespace newManagedModule.Data.Repositories
             modelBuilder.Entity<CustomerReviewEntity>().ToTable("CustomerReview").HasKey(x => x.Id).Property(x => x.Id);
             modelBuilder.Entity<CustomerReviewVoteEntity>().ToTable("CustomerReviewVote").HasKey(x => x.Id).Property(x => x.Id);
 
+            modelBuilder.Entity<CustomerReviewVoteEntity>()
+                .HasRequired<CustomerReviewEntity>(r => r.CustomerReview)
+                .WithMany(v => v.CustomerReviewVotes)
+                .HasForeignKey<string>(r => r.CustomerReviewId);
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -31,7 +36,7 @@ namespace newManagedModule.Data.Repositories
         
         public CustomerReviewEntity[] GetReviewByIds(string[] ids)
         {
-            return CustomerReviews.Where(x => ids.Contains(x.Id)).ToArray();
+            return CustomerReviews.Include(x => x.CustomerReviewVotes).Where(x => ids.Contains(x.Id)).ToArray();
         }
 
         public void DeleteCustomerReviews(string[] ids)
@@ -46,6 +51,7 @@ namespace newManagedModule.Data.Repositories
 
         #region CustomerReviewVote Members
         public IQueryable<CustomerReviewVoteEntity> CustomerReviewVotes => GetAsQueryable<CustomerReviewVoteEntity>();
+
         public CustomerReviewVoteEntity[] GetVoteByIds(string[] ids)
         {
             return CustomerReviewVotes.Where(x => ids.Contains(x.Id)).ToArray();
