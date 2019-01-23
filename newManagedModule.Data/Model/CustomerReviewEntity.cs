@@ -40,6 +40,7 @@ namespace newManagedModule.Data.Model
 
             customerReview.Id = Id;
             customerReview.CreatedBy = CreatedBy;
+            customerReview.CreatedDate = CreatedDate;
             customerReview.ModifiedBy = ModifiedBy;
             customerReview.ModifiedDate = ModifiedDate;
 
