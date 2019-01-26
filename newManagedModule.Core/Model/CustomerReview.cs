@@ -1,6 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Collections.Generic;
-using VirtoCommerce.Platform.Core.Common;
+﻿using VirtoCommerce.Platform.Core.Common;
 
 namespace newManagedModule.Core.Model
 {
@@ -11,12 +9,8 @@ namespace newManagedModule.Core.Model
         public bool IsActive { get; set; }
         public string ProductID { get; set; }
 
-        public int PositiveVotesCount { get; set; }
-        public int NegativeVotesCount { get; set; }
-        public int TotalVotesCount { get; set; }
-
-        public virtual ICollection<CustomerReviewVote> CustomerReviewVotes { get; set; }
-        
-
+        public VoteRate? HelpfullVotesCount { get; set; }
+        public VoteRate? UselessVotesCount { get; set; }
+        public VoteRate? TotalVotesCount { get; set; }
     }
 }

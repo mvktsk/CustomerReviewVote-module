@@ -27,8 +27,10 @@ namespace newManagedModule.Data.Model
         [StringLength(128)]
         public string ProductId { get; set; }
 
+        public VoteRate? HelpfullVotesCount { get; set; }
+        public VoteRate? UselessVotesCount { get; set; }
+        public VoteRate? TotalVotesCount { get; set; }
 
-        // Link To CustomerReviewVote Entity
         #region Navigation Properties
         public virtual ObservableCollection<CustomerReviewVoteEntity> CustomerReviewVotes { get; set; }
         #endregion
@@ -49,9 +51,13 @@ namespace newManagedModule.Data.Model
             customerReview.IsActive = IsActive;
             customerReview.ProductID = ProductId;
 
-            customerReview.PositiveVotesCount = CustomerReviewVotes.Count(x => (x.VoteIdx == 1) && (x.CustomerReviewId == Id));
-            customerReview.NegativeVotesCount = CustomerReviewVotes.Count(x => (x.VoteIdx == -1) && (x.CustomerReviewId == Id)); 
-            customerReview.TotalVotesCount = CustomerReviewVotes.Count(x => x.CustomerReviewId == Id);
+            customerReview.HelpfullVotesCount = HelpfullVotesCount;
+            customerReview.UselessVotesCount = UselessVotesCount; 
+            customerReview.TotalVotesCount = TotalVotesCount;
+
+            //customerReview.PositiveVotesCount = CustomerReviewVotes.Count(x => (x.VoteIdx == VoteRate.Positive) && (x.CustomerReviewId == Id));
+            //customerReview.NegativeVotesCount = CustomerReviewVotes.Count(x => (x.VoteIdx == VoteRate.Negative) && (x.CustomerReviewId == Id)); 
+            //customerReview.TotalVotesCount = CustomerReviewVotes.Count(x => x.CustomerReviewId == Id);
 
             return customerReview;
         }

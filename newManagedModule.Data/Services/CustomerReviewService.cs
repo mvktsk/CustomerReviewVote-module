@@ -110,13 +110,37 @@ namespace newManagedModule.Data.Services
                     pkMap.ResolvePrimaryKeys();
                 }
             }
+            var reveiwIds = items.Select(x => x.Id).ToArray();
+            UpdateCustomerReviewVotesCount(reveiwIds);
         }
+
+        public void UpdateCustomerReviewVotesCount(string[] reviewIds)
+        {
+            if (reviewIds == null)
+                throw new ArgumentNullException(nameof(reviewIds));
+
+            using (var repository = _repositoryFactory())
+            {
+
+                var query = repository.CustomerReviews.Where(x => reviewIds.Contains(x.Id)); 
+                                
+                foreach( var item in query)
+                {
+                    item.HelpfullVotesCount = (VoteRate?)item.CustomerReviewVotes.Count(x => (x.VoteIdx == VoteRate.Helpfull) && (x.CustomerReviewId == item.Id));
+                    item.UselessVotesCount = (VoteRate?)item.CustomerReviewVotes.Count(x => (x.VoteIdx == VoteRate.Useless) && (x.CustomerReviewId == item.Id));
+                    item.TotalVotesCount = (VoteRate?)item.CustomerReviewVotes.Count(x => x.CustomerReviewId == item.Id);
+                }
+                CommitChanges(repository);
+            }
+        }
+
         public void DeleteCustomerReviewVotes(string[] ids)
         {
             using (var repository = _repositoryFactory())
             {
                 repository.DeleteCustomerReviewVotes(ids);
                 CommitChanges(repository);
+                UpdateCustomerReviewVotesCount(ids);
             }
         }
     }

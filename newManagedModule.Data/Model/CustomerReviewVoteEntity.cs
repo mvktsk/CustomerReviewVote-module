@@ -13,7 +13,7 @@ namespace newManagedModule.Data.Model
         public string AuthorId { get; set; }
 
         [Required]
-        public int VoteIdx { get; set; }
+        public VoteRate VoteIdx { get; set; }
 
         public bool IsActive { get; set; }
 
