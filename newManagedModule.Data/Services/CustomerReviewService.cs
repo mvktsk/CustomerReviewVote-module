@@ -126,9 +126,9 @@ namespace newManagedModule.Data.Services
                                 
                 foreach( var item in query)
                 {
-                    item.HelpfullVotesCount = (VoteRate?)item.CustomerReviewVotes.Count(x => (x.VoteIdx == VoteRate.Helpfull) && (x.CustomerReviewId == item.Id));
-                    item.UselessVotesCount = (VoteRate?)item.CustomerReviewVotes.Count(x => (x.VoteIdx == VoteRate.Useless) && (x.CustomerReviewId == item.Id));
-                    item.TotalVotesCount = (VoteRate?)item.CustomerReviewVotes.Count(x => x.CustomerReviewId == item.Id);
+                    item.HelpfullVotesCount = item.CustomerReviewVotes.Count(x => (x.VoteIdx == VoteRate.Helpfull) && (x.CustomerReviewId == item.Id));
+                    item.UselessVotesCount = item.CustomerReviewVotes.Count(x => (x.VoteIdx == VoteRate.Useless) && (x.CustomerReviewId == item.Id));
+                    item.TotalVotesCount = item.CustomerReviewVotes.Count(x => x.CustomerReviewId == item.Id);
                 }
                 CommitChanges(repository);
             }

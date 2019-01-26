@@ -9,8 +9,8 @@ namespace newManagedModule.Core.Model
         public bool IsActive { get; set; }
         public string ProductID { get; set; }
 
-        public VoteRate? HelpfullVotesCount { get; set; }
-        public VoteRate? UselessVotesCount { get; set; }
-        public VoteRate? TotalVotesCount { get; set; }
+        public int? HelpfullVotesCount { get; set; }
+        public int? UselessVotesCount { get; set; }
+        public int? TotalVotesCount { get; set; }
     }
 }
