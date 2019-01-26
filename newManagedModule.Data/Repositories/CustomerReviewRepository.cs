@@ -28,7 +28,10 @@ namespace newManagedModule.Data.Repositories
                 .WithMany(v => v.CustomerReviewVotes)
                 .HasForeignKey<string>(r => r.CustomerReviewId);
 
-            modelBuilder.Entity<CustomerReviewVoteEntity>().HasIndex(x => x.AuthorId).IsUnique();
+            modelBuilder.Entity<CustomerReviewEntity>().Property(x => x.HelpfullVotesCount).HasColumnAnnotation("DefaultValue", 0);
+            modelBuilder.Entity<CustomerReviewEntity>().Property(x => x.UselessVotesCount).HasColumnAnnotation("DefaultValue", 0);
+            modelBuilder.Entity<CustomerReviewEntity>().Property(x => x.TotalVotesCount).HasColumnAnnotation("DefaultValue", 0);
+
             base.OnModelCreating(modelBuilder);
         }
 

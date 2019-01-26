@@ -27,9 +27,9 @@ namespace newManagedModule.Data.Model
         [StringLength(128)]
         public string ProductId { get; set; }
 
-        public int? HelpfullVotesCount { get; set; }
-        public int? UselessVotesCount { get; set; }
-        public int? TotalVotesCount { get; set; }
+        public int HelpfullVotesCount { get; set; }
+        public int UselessVotesCount { get; set; }
+        public int TotalVotesCount { get; set; }
 
         #region Navigation Properties
         public virtual ObservableCollection<CustomerReviewVoteEntity> CustomerReviewVotes { get; set; }

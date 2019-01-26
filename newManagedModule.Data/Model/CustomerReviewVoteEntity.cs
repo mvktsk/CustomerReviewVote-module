@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using newManagedModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -8,8 +9,8 @@ namespace newManagedModule.Data.Model
     public class CustomerReviewVoteEntity : AuditableEntity
     {
         [Required]
-        [ConcurrencyCheck]
         [StringLength(1024)]
+        [Index("IX_AuthorIdAndCustomerReviewId", 1, IsUnique = true)]
         public string AuthorId { get; set; }
 
         [Required]
@@ -21,7 +22,9 @@ namespace newManagedModule.Data.Model
         #region Navigation Properties
         [Required]
         [StringLength(128)]
+        [Index("IX_AuthorIdAndCustomerReviewId", 2, IsUnique = true)]
         public string CustomerReviewId { get; set; }
+
         public virtual CustomerReviewEntity CustomerReview { get; set; }
         #endregion
 
