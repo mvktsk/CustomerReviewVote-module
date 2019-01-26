@@ -28,6 +28,7 @@ namespace newManagedModule.Data.Repositories
                 .WithMany(v => v.CustomerReviewVotes)
                 .HasForeignKey<string>(r => r.CustomerReviewId);
 
+            modelBuilder.Entity<CustomerReviewVoteEntity>().HasIndex(x => x.AuthorId).IsUnique();
             base.OnModelCreating(modelBuilder);
         }
 

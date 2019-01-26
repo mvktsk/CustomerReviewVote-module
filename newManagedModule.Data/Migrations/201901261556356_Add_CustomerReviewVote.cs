@@ -23,14 +23,22 @@ namespace newManagedModule.Data.Migrations
                     })
                 .PrimaryKey(t => t.Id)
                 .ForeignKey("dbo.CustomerReview", t => t.CustomerReviewId, cascadeDelete: true)
+                .Index(t => t.AuthorId, unique: true)
                 .Index(t => t.CustomerReviewId);
             
+            AddColumn("dbo.CustomerReview", "HelpfullVotesCount", c => c.Int());
+            AddColumn("dbo.CustomerReview", "UselessVotesCount", c => c.Int());
+            AddColumn("dbo.CustomerReview", "TotalVotesCount", c => c.Int());
         }
         
         public override void Down()
         {
             DropForeignKey("dbo.CustomerReviewVote", "CustomerReviewId", "dbo.CustomerReview");
             DropIndex("dbo.CustomerReviewVote", new[] { "CustomerReviewId" });
+            DropIndex("dbo.CustomerReviewVote", new[] { "AuthorId" });
+            DropColumn("dbo.CustomerReview", "TotalVotesCount");
+            DropColumn("dbo.CustomerReview", "UselessVotesCount");
+            DropColumn("dbo.CustomerReview", "HelpfullVotesCount");
             DropTable("dbo.CustomerReviewVote");
         }
     }
