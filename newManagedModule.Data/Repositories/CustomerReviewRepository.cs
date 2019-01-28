@@ -43,6 +43,7 @@ namespace newManagedModule.Data.Repositories
             return CustomerReviews.Include(x => x.CustomerReviewVotes).Where(x => ids.Contains(x.Id)).ToArray();
         }
 
+ 
         public void DeleteCustomerReviews(string[] ids)
         {
             var items = GetReviewByIds(ids);
@@ -58,7 +59,7 @@ namespace newManagedModule.Data.Repositories
 
         public CustomerReviewVoteEntity[] GetVoteByIds(string[] ids)
         {
-            return CustomerReviewVotes.Where(x => ids.Contains(x.Id)).ToArray();
+            return CustomerReviewVotes.Include(x => x.CustomerReview).Where(x => ids.Contains(x.Id)).ToArray();
         }
 
         public void DeleteCustomerReviewVotes(string[] ids)

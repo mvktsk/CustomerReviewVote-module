@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Entity;
 using System.Linq;
 using newManagedModule.Core.Model;
 using newManagedModule.Core.Services;
@@ -106,41 +107,39 @@ namespace newManagedModule.Data.Services
                             repository.Add(sourceEntity);
                         }
                     }
+
+                    var reveiwIds = items.Select(x => x.CustomerReviewId).ToArray();
+                    UpdateCustomerReviewVotesCount(repository, reveiwIds);
+
                     CommitChanges(repository);
                     pkMap.ResolvePrimaryKeys();
                 }
             }
-            var reveiwIds = items.Select(x => x.Id).ToArray();
-            UpdateCustomerReviewVotesCount(reveiwIds);
+            
         }
 
-        public void UpdateCustomerReviewVotesCount(string[] reviewIds)
+        public void UpdateCustomerReviewVotesCount(ICustomerReviewRepository repository, string[] reviewIds)
         {
-            if (reviewIds == null)
-                throw new ArgumentNullException(nameof(reviewIds));
+                var query = repository.GetReviewByIds(reviewIds);
 
-            using (var repository = _repositoryFactory())
-            {
-
-                var query = repository.CustomerReviews.Where(x => reviewIds.Contains(x.Id)); 
-                                
-                foreach( var item in query)
+                 foreach ( var item in query)
                 {
                     item.HelpfullVotesCount = item.CustomerReviewVotes.Count(x => (x.VoteIdx == VoteRate.Helpfull) && (x.CustomerReviewId == item.Id));
                     item.UselessVotesCount = item.CustomerReviewVotes.Count(x => (x.VoteIdx == VoteRate.Useless) && (x.CustomerReviewId == item.Id));
                     item.TotalVotesCount = item.CustomerReviewVotes.Count(x => x.CustomerReviewId == item.Id);
                 }
-                CommitChanges(repository);
-            }
         }
 
         public void DeleteCustomerReviewVotes(string[] ids)
         {
             using (var repository = _repositoryFactory())
             {
+
+                var reveiwIds = repository.GetVoteByIds(ids).Select(x => x.CustomerReviewId).ToArray();
+
                 repository.DeleteCustomerReviewVotes(ids);
+                UpdateCustomerReviewVotesCount(repository, reveiwIds);
                 CommitChanges(repository);
-                UpdateCustomerReviewVotesCount(ids);
             }
         }
     }

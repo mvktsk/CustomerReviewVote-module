@@ -14,15 +14,15 @@ namespace newManagedModule.Test
 {
     public class NewManagedModuleTest : FunctionalTestBase
     {
-        private const string _productID        = "testProductID";
-        private const string _customerReviewID = "testReviewID";
+        private const string _productId        = "testProductId";
+        private const string _customerReviewId = "testReviewId";
 
         private ICustomerReviewService _customerReviewService => new CustomerReviewService(GetRepository);
         private ICustomerReviewSearchService _customerReviewSearchService => new CustomerReviewSearchService(GetRepository, _customerReviewService);
 
         public NewManagedModuleTest()
         {
-            ConnectionString = "VirtoCommerce";
+            ConnectionString = "VirtoCommerce0";
         }
         
 
@@ -38,15 +38,15 @@ namespace newManagedModule.Test
         public void CanDoCRUDandSearch()
         {
             //Read non-existing item
-            var getByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewID });
+            var getByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewId });
             Assert.NotNull(getByIdsResult);
             Assert.Empty(getByIdsResult);
 
             //Create new item
             var item = new CustomerReview
             {
-                Id = _customerReviewID,
-                ProductID = _productID,
+                Id = _customerReviewId,
+                ProductID = _productId,
                 CreatedDate = DateTime.Now,
                 CreatedBy = "initial data seed",
                 AuthorNickname = "John Doe",
@@ -55,11 +55,11 @@ namespace newManagedModule.Test
 
             _customerReviewService.SaveCustomerReviews(new[] { item });
 
-            getByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewID });
+            getByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewId });
             Assert.Single(getByIdsResult);
 
             item = getByIdsResult[0];
-            Assert.Equal(_customerReviewID, item.Id);
+            Assert.Equal(_customerReviewId, item.Id);
 
             //Update existing item
             var updatedConent = "Updated content";
@@ -67,7 +67,7 @@ namespace newManagedModule.Test
 
             item.Content = updatedConent;
             _customerReviewService.SaveCustomerReviews(new[] { item });
-            getByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewID });
+            getByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewId });
             Assert.Single(getByIdsResult);
 
             item = getByIdsResult[0];
@@ -76,7 +76,7 @@ namespace newManagedModule.Test
             //Search by creteria
             Assert.Throws<ArgumentNullException>(() => _customerReviewSearchService.SearchCustomerReviews(null));
 
-            var criteria = new CustomerReviewSearchCriteria { ProductsID = new[] { _productID } };
+            var criteria = new CustomerReviewSearchCriteria { ProductsID = new[] { _productId } };
             var searchResult = _customerReviewSearchService.SearchCustomerReviews(criteria);
 
             Assert.NotNull(searchResult);
@@ -90,8 +90,8 @@ namespace newManagedModule.Test
         [Fact]
         public void CanDeleteCustomerReviews()
         {
-            _customerReviewService.DeleteCustomerReviews(new[] { _customerReviewID });
-            var getByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewID });
+            _customerReviewService.DeleteCustomerReviews(new[] { _customerReviewId });
+            var getByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewId });
             Assert.NotNull(getByIdsResult);
             Assert.Empty(getByIdsResult);
 
