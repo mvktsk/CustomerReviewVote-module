@@ -55,10 +55,6 @@ namespace newManagedModule.Data.Model
             customerReview.UselessVotesCount = UselessVotesCount; 
             customerReview.TotalVotesCount = TotalVotesCount;
 
-            //customerReview.PositiveVotesCount = CustomerReviewVotes.Count(x => (x.VoteIdx == VoteRate.Positive) && (x.CustomerReviewId == Id));
-            //customerReview.NegativeVotesCount = CustomerReviewVotes.Count(x => (x.VoteIdx == VoteRate.Negative) && (x.CustomerReviewId == Id)); 
-            //customerReview.TotalVotesCount = CustomerReviewVotes.Count(x => x.CustomerReviewId == Id);
-
             return customerReview;
         }
 
