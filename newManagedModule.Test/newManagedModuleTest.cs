@@ -111,19 +111,12 @@ namespace newManagedModule.Test
             var itemVote = new CustomerReviewVote
             {
                 Id = _customerReviewVoteId,
+                AuthorId = _authorId,
                 CustomerReviewId = _customerReviewId,
                 CreatedDate = DateTime.Now,
                 CreatedBy = "initial data seed",
                 VoteIdx = VoteRate.Helpfull
-
             };
-
-            //Save ReviewVote item for non-existing Review item
-            _customerReviewService.SaveCustomerReviewVotes(new[] { itemVote });
-
-            getVoteByIdsResult = _customerReviewService.GetVoteByIds(new[] { _customerReviewVoteId });
-            Assert.NotNull(getVoteByIdsResult);
-            Assert.Empty(getVoteByIdsResult);
 
             //Create new Review item
             var itemReview = new CustomerReview
@@ -137,11 +130,12 @@ namespace newManagedModule.Test
             };
 
             _customerReviewService.SaveCustomerReviews(new[] { itemReview });
-            var getReviewByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewId });
-            Assert.Single(getReviewByIdsResult);
-
+            
             //Save ReviewVote item for existing Review item
             _customerReviewService.SaveCustomerReviewVotes(new[] { itemVote });
+
+            var getReviewByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewId });
+            Assert.Single(getReviewByIdsResult);
 
             getVoteByIdsResult = _customerReviewService.GetVoteByIds(new[] { _customerReviewVoteId });
             Assert.Single(getVoteByIdsResult);
