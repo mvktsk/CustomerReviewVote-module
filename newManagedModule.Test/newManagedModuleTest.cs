@@ -17,6 +17,7 @@ namespace newManagedModule.Test
         private const string _productId = "testProductId";
         private const string _customerReviewId = "testReviewId";
         private const string _customerReviewVoteId = "testReviewVoteId";
+        private const string _authorId = "testAuthorId";
 
         private ICustomerReviewService _customerReviewService => new CustomerReviewService(GetRepository);
         private ICustomerReviewSearchService _customerReviewSearchService => new CustomerReviewSearchService(GetRepository, _customerReviewService);
@@ -77,7 +78,7 @@ namespace newManagedModule.Test
             //Search by creteria
             Assert.Throws<ArgumentNullException>(() => _customerReviewSearchService.SearchCustomerReviews(null));
 
-            var criteria = new CustomerReviewSearchCriteria { ProductIds = new[] { _productId } };
+            var criteria = new CustomerReviewSearchCriteria { ProductIds = new[] { _productId }, AuthorId = _authorId};
             var searchResult = _customerReviewSearchService.SearchCustomerReviews(criteria);
 
             Assert.NotNull(searchResult);
@@ -154,11 +155,35 @@ namespace newManagedModule.Test
             itemVote = getVoteByIdsResult[0];
             Assert.Equal(_customerReviewVoteId, itemVote.Id);
 
-           
+
+            //Search Votes by creteria
+            Assert.Throws<ArgumentNullException>(() => _customerReviewSearchService.SearchCustomerReviewVotes(null));
+
+            var criteriaVote = new CustomerReviewVoteSearchCriteria { CustomerReviewIds = new[] { _customerReviewId } };
+            var searchResultVote = _customerReviewSearchService.SearchCustomerReviewVotes(criteriaVote);
+
+            Assert.NotNull(searchResultVote);
+            Assert.Equal(1, searchResultVote.TotalCount);
+            Assert.Single(searchResultVote.Results);
+
+            //Update existing item
+            var updatedVoteIdx = VoteRate.Useless;
+            Assert.NotEqual(updatedVoteIdx, itemVote.VoteIdx);
+
+            itemVote.VoteIdx = updatedVoteIdx;
+            _customerReviewService.SaveCustomerReviewVotes(new[] { itemVote });
+            getVoteByIdsResult = _customerReviewService.GetVoteByIds(new[] { _customerReviewVoteId });
+            Assert.Single(getVoteByIdsResult);
+
+            itemVote = getVoteByIdsResult[0];
+            Assert.Equal(updatedVoteIdx, itemVote.VoteIdx);
+
+
 
             //Delete existing items
-            CanDeleteCustomerReviews();
             CanDeleteCustomerReviewVotes();
+            CanDeleteCustomerReviews();
+           
 
         }
 

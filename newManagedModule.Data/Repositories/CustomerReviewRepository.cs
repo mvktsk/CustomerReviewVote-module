@@ -24,9 +24,9 @@ namespace newManagedModule.Data.Repositories
             modelBuilder.Entity<CustomerReviewVoteEntity>().ToTable("CustomerReviewVote").HasKey(x => x.Id).Property(x => x.Id);
 
             modelBuilder.Entity<CustomerReviewVoteEntity>()
-                .HasRequired<CustomerReviewEntity>(r => r.CustomerReview)
-                .WithMany(v => v.CustomerReviewVotes)
-                .HasForeignKey<string>(r => r.CustomerReviewId);
+                .HasRequired<CustomerReviewEntity>(x => x.CustomerReview)
+                .WithMany(y => y.CustomerReviewVotes)
+                .HasForeignKey<string>(z => z.CustomerReviewId);
 
             modelBuilder.Entity<CustomerReviewEntity>().Property(x => x.HelpfullVotesCount).HasColumnAnnotation("DefaultValue", 0);
             modelBuilder.Entity<CustomerReviewEntity>().Property(x => x.UselessVotesCount).HasColumnAnnotation("DefaultValue", 0);
