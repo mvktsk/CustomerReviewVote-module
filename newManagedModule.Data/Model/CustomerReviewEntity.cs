@@ -49,7 +49,7 @@ namespace newManagedModule.Data.Model
             customerReview.AuthorNickname = AuthorNickname;
             customerReview.Content = Content;
             customerReview.IsActive = IsActive;
-            customerReview.ProductID = ProductId;
+            customerReview.ProductId = ProductId;
 
             customerReview.HelpfullVotesCount = HelpfullVotesCount;
             customerReview.UselessVotesCount = UselessVotesCount; 
@@ -74,7 +74,7 @@ namespace newManagedModule.Data.Model
             AuthorNickname = customerReview.AuthorNickname;
             Content = customerReview.Content;
             IsActive = customerReview.IsActive;
-            ProductId = customerReview.ProductID;
+            ProductId = customerReview.ProductId;
 
             //CustomerReviewVotes.CollectionChanged
 

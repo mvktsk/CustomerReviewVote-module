@@ -47,7 +47,7 @@ namespace newManagedModule.Test
             var item = new CustomerReview
             {
                 Id = _customerReviewId,
-                ProductID = _productId,
+                ProductId = _productId,
                 CreatedDate = DateTime.Now,
                 CreatedBy = "initial data seed",
                 AuthorNickname = "John Doe",
@@ -77,7 +77,7 @@ namespace newManagedModule.Test
             //Search by creteria
             Assert.Throws<ArgumentNullException>(() => _customerReviewSearchService.SearchCustomerReviews(null));
 
-            var criteria = new CustomerReviewSearchCriteria { ProductsId = new[] { _productId } };
+            var criteria = new CustomerReviewSearchCriteria { ProductIds = new[] { _productId } };
             var searchResult = _customerReviewSearchService.SearchCustomerReviews(criteria);
 
             Assert.NotNull(searchResult);
@@ -128,7 +128,7 @@ namespace newManagedModule.Test
             var itemReview = new CustomerReview
             {
                 Id = _customerReviewId,
-                ProductID = _productId,
+                ProductId = _productId,
                 CreatedDate = DateTime.Now,
                 CreatedBy = "initial data seed",
                 AuthorNickname = "John Doe",

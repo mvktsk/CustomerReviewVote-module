@@ -33,9 +33,9 @@ namespace newManagedModule.Data.Services
             {
                 var query = repository.CustomerReviews;
 
-                if (!criteria.ProductsId.IsNullOrEmpty())
+                if (!criteria.ProductIds.IsNullOrEmpty())
                 {
-                    query = query.Where(x => criteria.ProductsId.Contains(x.ProductId));
+                    query = query.Where(x => criteria.ProductIds.Contains(x.ProductId));
                 }
 
                 if (criteria.IsActive.HasValue)
@@ -62,6 +62,7 @@ namespace newManagedModule.Data.Services
                                  .Select(x => x.Id)
                                  .ToList();
 
+                //TODO revrite for a 1 query
                 var customerReviews = _customerReviewService.GetReviewByIds(customerReviewIds.ToArray())
                                                        .OrderBy(x => customerReviewIds.IndexOf(x.Id)).ToList();
 

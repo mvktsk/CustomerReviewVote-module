@@ -134,8 +134,8 @@
     <Content Include="Content\css\newManagedModule.Web.css" />
     <Content Include="Scripts\blades\review-votes-list.js" />
     <Content Include="Scripts\blades\review-votes-list.tpl.html" />
-    <Content Include="Scripts\blades\reviewslist.js" />
-    <Content Include="Scripts\blades\reviewslist.tpl.html" />
+    <Content Include="Scripts\blades\review-slist.js" />
+    <Content Include="Scripts\blades\reviews-list.tpl.html" />
     <Content Include="Scripts\newManagedModule.Web.js" />
     <Content Include="Scripts\resources\newManagedModule.WebApi.js" />
     <Content Include="Scripts\Widgets\customerReviewWidget.js" />

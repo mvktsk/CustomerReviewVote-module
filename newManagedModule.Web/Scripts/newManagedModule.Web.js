@@ -17,7 +17,7 @@ angular.module(moduleTemplateName, [])
                         var newBlade = {
                             id: 'reiewsList',
                             controller: 'reviewsListController',
-                            template: 'Modules/$(newManagedModule.Web)/Scripts/blades/reviewslist.tpl.html',
+                            template: 'Modules/$(newManagedModule.Web)/Scripts/blades/reviews-list.tpl.html',
                             isClosingDisabled: true
                         };
                         bladeNavigationService.showBlade(newBlade);

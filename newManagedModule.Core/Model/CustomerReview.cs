@@ -7,7 +7,7 @@ namespace newManagedModule.Core.Model
         public string AuthorNickname { get; set; }
         public string Content { get; set; }
         public bool IsActive { get; set; }
-        public string ProductID { get; set; }
+        public string ProductId { get; set; }
 
         public VoteRate? UserVoteIdx { get; set; }
 
