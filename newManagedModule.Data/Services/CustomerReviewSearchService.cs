@@ -1,8 +1,8 @@
-﻿using System;
-using System.Linq;
-using CustomerReviewVotes.Core.Model;
+﻿using CustomerReviewVotes.Core.Model;
 using CustomerReviewVotes.Core.Services;
 using CustomerReviewVotes.Data.Repositories;
+using System;
+using System.Linq;
 using VirtoCommerce.Domain.Commerce.Model.Search;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
@@ -13,7 +13,7 @@ namespace CustomerReviewVotes.Data.Services
     {
         private readonly Func<ICustomerReviewRepository> _repositoryFactory;
         private readonly ICustomerReviewService _customerReviewService;
-        
+
         public CustomerReviewSearchService(Func<ICustomerReviewRepository> repositoryFactory, ICustomerReviewService customerReviewService)
         {
             _repositoryFactory = repositoryFactory;
@@ -42,7 +42,7 @@ namespace CustomerReviewVotes.Data.Services
                 {
                     query = query.Where(x => x.IsActive == criteria.IsActive);
                 }
-                
+
                 if (!criteria.SearchPhrase.IsNullOrEmpty())
                 {
                     query = query.Where(x => x.Content.Contains(criteria.SearchPhrase));
@@ -76,12 +76,12 @@ namespace CustomerReviewVotes.Data.Services
                                                     .FirstOrDefault();
                 }
 
-                retVal.Results = customerReviews; 
+                retVal.Results = customerReviews;
 
                 return retVal;
             }
 
-           
+
 
         }
 

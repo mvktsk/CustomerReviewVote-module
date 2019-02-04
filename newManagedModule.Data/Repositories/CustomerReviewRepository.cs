@@ -1,10 +1,10 @@
-﻿using System.Data.Entity;
+﻿using CustomerReviewVotes.Data.Model;
+using System.Data.Entity;
 using System.Linq;
-using CustomerReviewVotes.Data.Model;
 using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.Platform.Data.Infrastructure.Interceptors;
 
-namespace CustomerReviewVotes.Data.Repositories 
+namespace CustomerReviewVotes.Data.Repositories
 {
     public class CustomerReviewRepository : EFRepositoryBase, ICustomerReviewRepository
     {
@@ -21,7 +21,7 @@ namespace CustomerReviewVotes.Data.Repositories
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Entity<CustomerReviewEntity>().ToTable("CustomerReview").HasKey(x => x.Id).Property(x => x.Id);
-            
+
 
             modelBuilder.Entity<CustomerReviewEntity>().Property(x => x.HelpfullVotesCount).HasColumnAnnotation("DefaultValue", 0);
             modelBuilder.Entity<CustomerReviewEntity>().Property(x => x.UselessVotesCount).HasColumnAnnotation("DefaultValue", 0);
@@ -35,7 +35,7 @@ namespace CustomerReviewVotes.Data.Repositories
                 .HasForeignKey<string>(z => z.CustomerReviewId);
 
             modelBuilder.Entity<CustomerReviewVoteEntity>()
-                .HasIndex(x => new{ x.AuthorId, x.CustomerReviewId})
+                .HasIndex(x => new { x.AuthorId, x.CustomerReviewId })
                 .IsUnique()
                 .HasName("IX_AuthorIdCustomerReviewId");
 
@@ -44,13 +44,13 @@ namespace CustomerReviewVotes.Data.Repositories
 
         #region CustomerReview Members
         public IQueryable<CustomerReviewEntity> CustomerReviews => GetAsQueryable<CustomerReviewEntity>();
-        
+
         public CustomerReviewEntity[] GetReviewByIds(string[] ids)
         {
             return CustomerReviews.Include(x => x.CustomerReviewVotes).Where(x => ids.Contains(x.Id)).ToArray();
         }
 
- 
+
         public void DeleteCustomerReviews(string[] ids)
         {
             var items = GetReviewByIds(ids);
