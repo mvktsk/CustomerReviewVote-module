@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Linq;
-using newManagedModule.Core.Model;
-using newManagedModule.Core.Services;
-using newManagedModule.Data.Repositories;
+using CustomerReviewVotes.Core.Model;
+using CustomerReviewVotes.Core.Services;
+using CustomerReviewVotes.Data.Repositories;
 using VirtoCommerce.Domain.Commerce.Model.Search;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
-namespace newManagedModule.Data.Services
+namespace CustomerReviewVotes.Data.Services
 {
     public class CustomerReviewSearchService : ServiceBase, ICustomerReviewSearchService
     {
@@ -53,6 +53,8 @@ namespace newManagedModule.Data.Services
                 {
                     sortInfos = new[] { new SortInfo { SortColumn = "CreatedDate", SortDirection = SortDirection.Descending } };
                 }
+                retVal.TotalCount = query.Count();
+
                 query = query.OrderBySortInfos(sortInfos);
 
                 retVal.TotalCount = query.Count();
@@ -62,15 +64,15 @@ namespace newManagedModule.Data.Services
                                  .Select(x => x.Id)
                                  .ToList();
 
-                //TODO revrite for a 1 query
+                //TODO rewrite for a 1 query
                 var customerReviews = _customerReviewService.GetReviewByIds(customerReviewIds.ToArray())
                                                        .OrderBy(x => customerReviewIds.IndexOf(x.Id)).ToList();
 
                 foreach (var item in customerReviews)
                 {
-                    item.UserVoteIdx = repository.CustomerReviewVotes
+                    item.UserReviewRate = repository.CustomerReviewVotes
                                                     .Where(x => criteria.AuthorId.Equals(x.AuthorId) && item.Id.Equals(x.CustomerReviewId))
-                                                    .Select(x => x.VoteIdx)
+                                                    .Select(x => x.ReviewRate)
                                                     .FirstOrDefault();
                 }
 
@@ -99,11 +101,6 @@ namespace newManagedModule.Data.Services
                 if (!criteria.CustomerReviewIds.IsNullOrEmpty())
                 {
                     query = query.Where(x => criteria.CustomerReviewIds.Contains(x.CustomerReviewId));
-                }
-
-                if (criteria.IsActive.HasValue)
-                {
-                    query = query.Where(x => x.IsActive == criteria.IsActive);
                 }
 
                 var sortInfos = criteria.SortInfos;

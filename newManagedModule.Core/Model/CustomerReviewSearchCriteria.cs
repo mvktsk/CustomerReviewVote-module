@@ -1,5 +1,5 @@
 ﻿using VirtoCommerce.Domain.Commerce.Model.Search;
-namespace newManagedModule.Core.Model
+namespace CustomerReviewVotes.Core.Model
 {
     public class CustomerReviewSearchCriteria : SearchCriteriaBase
     {

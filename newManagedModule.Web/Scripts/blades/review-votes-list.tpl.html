@@ -18,8 +18,8 @@
                     rowTemplate: 'list.row.html',
                     columnDefs: [
                                 { name: 'actions', displayName: '', enableColumnResizing: false, enableSorting: false, width: 30, cellTemplate: 'list-actions.cell.html', pinnedLeft:true },
-                                { name: 'content', displayName: 'newManagedModule.blades.review-list.labels.content' },
-                                { name: 'modifiedDate', displayName: 'newManagedModule.blades.review-list.labels.modifiedDate', sort: { direction: uiGridConstants.DESC }}
+                                { name: 'reviewRate', displayName: 'CustomerReviewVotes.blades.review-votes-list.labels.reviewRate', sort: { direction: uiGridConstants.DESC }},
+                                { name: 'modifiedDate', displayName: 'CustomerReviewVotes.blades.review-votes-list.labels.modifiedDate', sort: { direction: uiGridConstants.DESC }}
                         ]})">
                 <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-resize-columns ui-grid-move-columns ui-grid-pinning ui-grid-height></div>
                 <ul class="menu __context" role="menu" id="rev_menu">
@@ -28,7 +28,7 @@
                     </li>
                 </ul>
             </div>
-            <p class="note" ng-if="!blade.currentEntities.length">{{ 'newManagedModule.blades.reviewslist.labels.no-review' | translate }}</p>
+            <p class="note" ng-if="!blade.currentEntities.length">{{ 'CustomerReviewVotes.blades.review-votes-list.labels.no-votes' | translate }}</p>
         </div>
     </div>
 </div>

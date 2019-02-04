@@ -1,7 +1,7 @@
 ﻿using System.Linq;
-using newManagedModule.Core.Services;
-using newManagedModule.Data.Services;
-using newManagedModule.Data.Repositories;
+using CustomerReviewVotes.Core.Services;
+using CustomerReviewVotes.Data.Repositories;
+using CustomerReviewVotes.Data.Services;
 using Microsoft.Practices.Unity;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Common;
@@ -10,7 +10,7 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.Platform.Data.Infrastructure.Interceptors;
 
 
-namespace newManagedModule.Web
+namespace CustomerReviewVotes.Web
 {
     public class Module : ModuleBase
     {
@@ -48,16 +48,10 @@ namespace newManagedModule.Web
         {
             base.PostInitialize();
 
-            // This method is called for each installed module on the second stage of initialization.
-
-            // Register implementations 
-
-
-            // Resolve registered implementations:
-
+            //Registering settings to store module allows to use individual values in each store
             var settingManager = _container.Resolve<ISettingsManager>();
-            var storeSettingsNames = new[] { "CustomerReviews.CustomerReviewsEnabled" };
-            var storeSettings = settingManager.GetModuleSettings("CustomerReviews.Web").Where(x => storeSettingsNames.Contains(x.Name)).ToArray();
+            var storeSettingsNames = new[] { "CustomerReviewVotes.CustomerReviewsEnabled" };
+            var storeSettings = settingManager.GetModuleSettings("CustomerReviewVotes.Web").Where(x => storeSettingsNames.Contains(x.Name)).ToArray();
             settingManager.RegisterModuleSettings("VirtoCommerce.Store", storeSettings);
             
  

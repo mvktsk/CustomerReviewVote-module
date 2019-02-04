@@ -1,4 +1,4 @@
-﻿namespace newManagedModule.Web.Security
+﻿namespace CustomerReviewVotes.Web.Security
 {
     public static class PredefinedPermissions
     {

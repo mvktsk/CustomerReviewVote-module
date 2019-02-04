@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.271
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "newManagedModule.Web", "newManagedModule.Web\newManagedModule.Web.csproj", "{0AC79ECB-4160-4DE1-B3DD-1BC070D86965}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomerReviewVotes.Web", "newManagedModule.Web\CustomerReviewVotes.Web.csproj", "{0AC79ECB-4160-4DE1-B3DD-1BC070D86965}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "newManagedModule.Core", "newManagedModule.Core\newManagedModule.Core.csproj", "{7B70D7CC-5A90-47D5-B3C0-145D0C703274}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomerReviewVotes.Core", "newManagedModule.Core\CustomerReviewVotes.Core.csproj", "{7B70D7CC-5A90-47D5-B3C0-145D0C703274}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "newManagedModule.Data", "newManagedModule.Data\newManagedModule.Data.csproj", "{9413258F-02D8-42B2-8AAC-919AFDF667D4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomerReviewVotes.Data", "newManagedModule.Data\CustomerReviewVotes.Data.csproj", "{9413258F-02D8-42B2-8AAC-919AFDF667D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "newManagedModule.Test", "newManagedModule.Test\newManagedModule.Test.csproj", "{A5E6A998-2548-4056-9A86-8FFBB5BEEDA7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomerReviewVotes.Test", "newManagedModule.Test\CustomerReviewVotes.Test.csproj", "{A5E6A998-2548-4056-9A86-8FFBB5BEEDA7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("newManagedModule.Data")]
+[assembly: AssemblyTitle("CustomerReviewVotes.Data")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Hewlett-Packard")]
-[assembly: AssemblyProduct("newManagedModule.Data")]
+[assembly: AssemblyProduct("CustomerReviewVotes.Data")]
 [assembly: AssemblyCopyright("Copyright © Hewlett-Packard 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

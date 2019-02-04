@@ -1,8 +1,8 @@
 ﻿using System.Linq;
-using newManagedModule.Data.Model;
+using CustomerReviewVotes.Data.Model;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace newManagedModule.Data.Repositories 
+namespace CustomerReviewVotes.Data.Repositories 
 {
     public interface ICustomerReviewRepository : IRepository
     {

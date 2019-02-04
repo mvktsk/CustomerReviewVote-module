@@ -1,28 +1,22 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using newManagedModule.Core.Model;
+using CustomerReviewVotes.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace newManagedModule.Data.Model
+namespace CustomerReviewVotes.Data.Model
 {
     public class CustomerReviewVoteEntity : AuditableEntity
     {
         [Required]
         [StringLength(1024)]
-        [Index("IX_AuthorIdAndCustomerReviewId", 1, IsUnique = true)]
         public string AuthorId { get; set; }
 
         [Required]
-        public VoteRate VoteIdx { get; set; }
-
-        public bool IsActive { get; set; }
-
+        public VoteRate ReviewRate { get; set; }
 
         #region Navigation Properties
         [Required]
         [StringLength(128)]
-        [Index("IX_AuthorIdAndCustomerReviewId", 2, IsUnique = true)]
         public string CustomerReviewId { get; set; }
 
         public virtual CustomerReviewEntity CustomerReview { get; set; }
@@ -39,8 +33,7 @@ namespace newManagedModule.Data.Model
             customerReviewVote.ModifiedDate = ModifiedDate;
 
             customerReviewVote.AuthorId = AuthorId;
-            customerReviewVote.VoteIdx = VoteIdx;
-            customerReviewVote.IsActive = IsActive;
+            customerReviewVote.ReviewRate = ReviewRate;
             customerReviewVote.CustomerReviewId = CustomerReviewId;
 
             return customerReviewVote;
@@ -60,8 +53,7 @@ namespace newManagedModule.Data.Model
             ModifiedDate = customerReviewVote.ModifiedDate;
 
             AuthorId = customerReviewVote.AuthorId;
-            VoteIdx = customerReviewVote.VoteIdx;
-            IsActive = customerReviewVote.IsActive;
+            ReviewRate = customerReviewVote.ReviewRate;
             CustomerReviewId = customerReviewVote.CustomerReviewId;
 
             return this;
@@ -73,8 +65,8 @@ namespace newManagedModule.Data.Model
                 throw new ArgumentNullException(nameof(target));
 
             target.AuthorId = AuthorId;
-            target.VoteIdx = VoteIdx;
-            target.IsActive = IsActive;
+            target.ReviewRate = ReviewRate;
+            
         }
 
 

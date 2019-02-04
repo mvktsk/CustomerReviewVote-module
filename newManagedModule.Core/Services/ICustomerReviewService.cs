@@ -1,6 +1,6 @@
-﻿using newManagedModule.Core.Model;
+﻿using CustomerReviewVotes.Core.Model;
 
-namespace newManagedModule.Core.Services
+namespace CustomerReviewVotes.Core.Services
 {
     public interface ICustomerReviewService
     {

@@ -2,10 +2,10 @@
 using System.Linq;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.ObjectModel;
-using newManagedModule.Core.Model;
+using CustomerReviewVotes.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace newManagedModule.Data.Model
+namespace CustomerReviewVotes.Data.Model
 {
     public class CustomerReviewEntity: AuditableEntity
     {

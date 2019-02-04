@@ -1,14 +1,16 @@
 ﻿angular.module('CustomerReviewVotes.Web')
-    .controller('reviewVotesController', ['$scope', 'CustomerReviewVotes.WebApi', 'platformWebApp.bladeUtils', 'uiGridConstants', 'platformWebApp.uiGridHelper',
+    .controller('reviewsListController', ['$scope', 'CustomerReviewVotes.WebApi', 'platformWebApp.bladeUtils', 'uiGridConstants', 'platformWebApp.uiGridHelper',
         function ($scope, reviewAPI, bladeUtils, uiGridConstants, uiGridHelper) {
             $scope.uiGridConstants = uiGridConstants;
 
             var blade = $scope.blade;
+            var bladeNavigationService = bladeUtils.bladeNavigationService;
             
-            
+
+                        
             blade.refresh = function () {
                 blade.isLoading = true;
-                    reviewAPI.searchVotes(angular.extend(filter, {
+                    reviewAPI.search(angular.extend(filter, {
                     searchPhrase: filter.keyword ? filter.keyword : undefined,
                     sort: uiGridHelper.getSortExpression($scope),
                     skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
@@ -17,10 +19,23 @@
                     blade.isLoading = false;
                     $scope.pageSettings.totalItems = data.totalCount;
                     blade.currentEntities = data.results;
-                });
+                        });
             }
 
- 
+             
+            blade.selectNode = function (data) {
+                $scope.selectedNodeId = data.id;
+
+                var newBlade = {
+                    id: 'reviewVotesList',
+                    filter: { customerReviewIds : [data.id] },
+                    title: 'Votes for review "' + data.content + '"',
+                    controller: 'reviewVotesController',
+                    template: 'Modules/$(CustomerReviewVotes.Web)/Scripts/blades/review-votes-list.tpl.html'
+                };
+                bladeNavigationService.showBlade(newBlade, blade);
+            }
+
             blade.headIcon = 'fa-comments';
 
             blade.toolbarCommands = [
@@ -31,10 +46,10 @@
                         return true;
                     }
                 },
-               
             ];
 
             // simple and advanced filtering
+
             var filter = $scope.filter = blade.filter || {};
 
             filter.criteriaChanged = function () {

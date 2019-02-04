@@ -1,18 +1,26 @@
 {
-    "newManagedModule": {
-        "blades": {
-            "review-list": {
-                "labels": {
-                    "content": "Content",
-                    "modifiedDate": "Last updated",
-                    "no-review": "No Customer Reviews found"
-                }
-            }
-        },
-        "widgets": {
-            "item-detail": {
-                "title": "Customer reviews"
-            }
+  "CustomerReviewVotes": {
+    "blades": {
+      "review-list": {
+        "labels": {
+          "content": "Content",
+          "modifiedDate": "Last updated",
+          "no-review": "No Customer Reviews found"
         }
+      },
+      "review-votes-list": {
+        "labels": {
+          "reviewRate": "Review rate",
+          "modifiedDate": "Last updated",
+          "no-votes": "No Votes found"
+        }
+      }
+    },
+    "widgets": {
+      "item-detail": {
+        "title": "Customer reviews"
+      }
     }
+  }
 }
+

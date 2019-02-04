@@ -1,5 +1,5 @@
-angular.module('newManagedModule.Web')
-    .controller('reviewWidgetController', ['$scope', 'newManagedModule.WebApi', 'platformWebApp.bladeNavigationService', function ($scope, reviewsApi, bladeNavigationService) {
+angular.module('CustomerReviewVotes.Web')
+    .controller('reviewWidgetController', ['$scope', 'CustomerReviewVotes.WebApi', 'platformWebApp.bladeNavigationService', function ($scope, reviewsApi, bladeNavigationService) {
         var blade = $scope.blade;
         var filter = { take: 0 };
 
@@ -20,7 +20,7 @@ angular.module('newManagedModule.Web')
                 filter: filter,
                 title: 'Customer reviews for "' + blade.title + '"',
                 controller: 'reviewsListController',
-                template: 'Modules/$(newManagedModule.Web)/Scripts/blades/reviewslist.tpl.html'
+                template: 'Modules/$(CustomerReviewVotes.Web)/Scripts/blades/reviews-list.tpl.html'
             };
             bladeNavigationService.showBlade(newBlade, blade);
         };

@@ -1,10 +1,10 @@
 ﻿using System.Data.Entity;
 using System.Linq;
-using newManagedModule.Data.Model;
+using CustomerReviewVotes.Data.Model;
 using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.Platform.Data.Infrastructure.Interceptors;
 
-namespace newManagedModule.Data.Repositories 
+namespace CustomerReviewVotes.Data.Repositories 
 {
     public class CustomerReviewRepository : EFRepositoryBase, ICustomerReviewRepository
     {
@@ -21,6 +21,12 @@ namespace newManagedModule.Data.Repositories
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Entity<CustomerReviewEntity>().ToTable("CustomerReview").HasKey(x => x.Id).Property(x => x.Id);
+            
+
+            modelBuilder.Entity<CustomerReviewEntity>().Property(x => x.HelpfullVotesCount).HasColumnAnnotation("DefaultValue", 0);
+            modelBuilder.Entity<CustomerReviewEntity>().Property(x => x.UselessVotesCount).HasColumnAnnotation("DefaultValue", 0);
+            modelBuilder.Entity<CustomerReviewEntity>().Property(x => x.TotalVotesCount).HasColumnAnnotation("DefaultValue", 0);
+
             modelBuilder.Entity<CustomerReviewVoteEntity>().ToTable("CustomerReviewVote").HasKey(x => x.Id).Property(x => x.Id);
 
             modelBuilder.Entity<CustomerReviewVoteEntity>()
@@ -28,9 +34,10 @@ namespace newManagedModule.Data.Repositories
                 .WithMany(y => y.CustomerReviewVotes)
                 .HasForeignKey<string>(z => z.CustomerReviewId);
 
-            modelBuilder.Entity<CustomerReviewEntity>().Property(x => x.HelpfullVotesCount).HasColumnAnnotation("DefaultValue", 0);
-            modelBuilder.Entity<CustomerReviewEntity>().Property(x => x.UselessVotesCount).HasColumnAnnotation("DefaultValue", 0);
-            modelBuilder.Entity<CustomerReviewEntity>().Property(x => x.TotalVotesCount).HasColumnAnnotation("DefaultValue", 0);
+            modelBuilder.Entity<CustomerReviewVoteEntity>()
+                .HasIndex(x => new{ x.AuthorId, x.CustomerReviewId})
+                .IsUnique()
+                .HasName("IX_AuthorIdCustomerReviewId");
 
             base.OnModelCreating(modelBuilder);
         }

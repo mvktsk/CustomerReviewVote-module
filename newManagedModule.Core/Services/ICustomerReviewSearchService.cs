@@ -1,7 +1,7 @@
-﻿using newManagedModule.Core.Model;
+﻿using CustomerReviewVotes.Core.Model;
 using VirtoCommerce.Domain.Commerce.Model.Search;
 
-namespace newManagedModule.Core.Services
+namespace CustomerReviewVotes.Core.Services
 {
     public interface ICustomerReviewSearchService
     {

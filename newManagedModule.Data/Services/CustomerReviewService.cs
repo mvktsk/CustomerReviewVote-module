@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Data.Entity;
 using System.Linq;
-using newManagedModule.Core.Model;
-using newManagedModule.Core.Services;
-using newManagedModule.Data.Model;
-using newManagedModule.Data.Repositories;
+using CustomerReviewVotes.Core.Model;
+using CustomerReviewVotes.Core.Services;
+using CustomerReviewVotes.Data.Model;
+using CustomerReviewVotes.Data.Repositories;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
-namespace newManagedModule.Data.Services
+namespace CustomerReviewVotes.Data.Services
 {
     public class CustomerReviewService : ServiceBase, ICustomerReviewService
     {
@@ -124,8 +124,8 @@ namespace newManagedModule.Data.Services
 
                  foreach ( var item in query)
                 {
-                    item.HelpfullVotesCount = item.CustomerReviewVotes.Count(x => (x.VoteIdx == VoteRate.Helpfull) && (x.CustomerReviewId == item.Id));
-                    item.UselessVotesCount = item.CustomerReviewVotes.Count(x => (x.VoteIdx == VoteRate.Useless) && (x.CustomerReviewId == item.Id));
+                    item.HelpfullVotesCount = item.CustomerReviewVotes.Count(x => (x.ReviewRate == VoteRate.Helpfull) && (x.CustomerReviewId == item.Id));
+                    item.UselessVotesCount = item.CustomerReviewVotes.Count(x => (x.ReviewRate == VoteRate.Useless) && (x.CustomerReviewId == item.Id));
                     item.TotalVotesCount = item.CustomerReviewVotes.Count(x => x.CustomerReviewId == item.Id);
                 }
         }
