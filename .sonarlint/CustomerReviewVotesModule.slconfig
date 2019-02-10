@@ -1,0 +1,14 @@
+{
+  "ServerUri": "https://sonarcloud.io/",
+  "Organization": {
+    "Key": "mvktsk-github",
+    "Name": "mvktsk"
+  },
+  "ProjectKey": "customerreviewmodule",
+  "Profiles": {
+    "CSharp": {
+      "ProfileKey": "AWjLFZrkMCde0Rxe73qY",
+      "ProfileTimestamp": "2019-01-14T16:58:53+07:00"
+    }
+  }
+}

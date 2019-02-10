@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="SonarQube - customerreviewmodule Sonar way" ToolsVersion="15.0">
+  <Include Path="..\.sonarlint\customerreviewmodulecsharp.ruleset" Action="Default" />
+</RuleSet>

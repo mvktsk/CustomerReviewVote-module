@@ -1,0 +1,1 @@
+d:\Data\Sources\CustomerReviewVote-module\.sonarqube\out\2

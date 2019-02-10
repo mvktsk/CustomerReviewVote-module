@@ -1,0 +1,10 @@
+Y
+Wd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReview.csg
+ed:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewSearchCriteria.cs]
+[d:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewVote.csk
+id:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewVoteSearchCriteria.csS
+Qd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\VoteRate.cs\
+Zd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Properties\AssemblyInfo.csj
+hd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICustomerReviewSearchService.csd
+bd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICustomerReviewService.csa
+]C:\Users\VitalyTartynov\AppData\Local\Temp\.NETFramework,Version=v4.6.1.AssemblyAttributes.cs
