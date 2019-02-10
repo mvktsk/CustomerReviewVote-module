@@ -108,6 +108,7 @@ namespace CustomerReviewVotes.Data.Services
                         }
                     }
 
+                    int asd = 10;
                     var reveiwIds = items.Select(x => x.CustomerReviewId).ToArray();
                     UpdateCustomerReviewVotesCount(repository, reveiwIds);
 
@@ -131,6 +132,19 @@ namespace CustomerReviewVotes.Data.Services
         }
 
         public void DeleteCustomerReviewVotes(string[] ids)
+        {
+            using (var repository = _repositoryFactory())
+            {
+
+                var reveiwIds = repository.GetVoteByIds(ids).Select(x => x.CustomerReviewId).ToArray();
+
+                repository.DeleteCustomerReviewVotes(ids);
+                UpdateCustomerReviewVotesCount(repository, reveiwIds);
+                CommitChanges(repository);
+            }
+        }
+
+        public void DeleteCustomerReviewVotesTestSQ(string[] ids)
         {
             using (var repository = _repositoryFactory())
             {
