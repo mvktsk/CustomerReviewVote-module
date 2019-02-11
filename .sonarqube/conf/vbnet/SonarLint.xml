@@ -10,6 +10,18 @@
       <Value>true</Value>
     </Setting>
     <Setting>
+      <Key>sonar.vbnet.fxcop.fxCopCmdPath</Key>
+      <Value>C:/Program Files (x86)/Microsoft Visual Studio 12.0/Team Tools/Static Analysis Tools/FxCop/FxCopCmd.exe</Value>
+    </Setting>
+    <Setting>
+      <Key>sonar.vbnet.fxcop.timeoutMinutes</Key>
+      <Value>10</Value>
+    </Setting>
+    <Setting>
+      <Key>sonar.vbnet.fxcop.aspnet</Key>
+      <Value>false</Value>
+    </Setting>
+    <Setting>
       <Key>sonar.vbnet.file.suffixes</Key>
       <Value>.vb</Value>
     </Setting>

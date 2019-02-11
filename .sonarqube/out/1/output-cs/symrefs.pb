@@ -177,13 +177,14 @@ gD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\Custom
 jj kk mm oo/ 8
 ss )xxE ZyyE Z
 uu) *uu. /
-yy@ Ayyc d×
+yy@ Ayyc d•
 aD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\CustomerReviewService.cs
 
- &h
+ &t
 9 K $ 6  $ 6,,$ 6FF$ 6NN$ 6ZZ$ 6
 ‡‡$ 6
 ””$ 6
+¡¡$ 6
 
  $
 E V! 2
@@ -236,10 +237,11 @@ aD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\Custom
 
 nn 
 oo !pp? H
-oo1 2oo6 7,
+oo1 2oo6 78
 yy 2pp 2
  .
-šš .
+šš .
+§§ .
 yyM W{{ "
 yyb k{{2 ;
 {{ }}! &t
@@ -293,4 +295,22 @@ aD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\Custom
 šš; D
 
 ——D E
-——I J
+——I J
+
+ŸŸ 4$
+
+ŸŸ> A
+¤¤8 ;
+¦¦5 8<
+
+¡¡ !
+¤¤  *
+¦¦ 
+§§/ 9
+¨¨ (
+
+¤¤ 
+§§; D
+
+¤¤D E
+¤¤I J

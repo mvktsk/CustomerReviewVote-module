@@ -17,7 +17,6 @@ iD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Repositories\IC
 ’
 gD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\CustomerReviewSearchService.cs( (08@HR 0=0;5=0;10=1;20=0;30=0;60=0;90=0Z1=1;2=0;4=1;6=0;8=1;10=0;12=0jCrc
  !"$%&')*+,./01345678:<>?@ADEGHIJKLMOQRVXYZ[\]_abcefghjklmnoqstuvxy{|}Äx
-Ç. "$&)+.03468:<>?@DEGIJKOQZ\acegjkmoqstuxy{¶
-aD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\CustomerReviewService.cs; 
-(08@HR 0=0;5=0;10=1;20=0;30=0;60=0;90=0Z1=7;2=0;4=3;6=0;8=0;10=0;12=0r¶
- !"#$&'()+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRTUVWYZ[\]^_`abcdefghijklnoprstuwyz{}~ÄÅÇÉÖÜáàäåçéèêíìîïóôöõúùûüxÇD "(),.0134578<?@FHINPVWZ\^_abcefjoprs{}ÄÅáäåçéîóôöõ
+Ç. "$&)+.03468:<>?@DEGIJKOQZ\acegjkmoqstuxy{ƒ
+aD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\CustomerReviewService.cs@ (08@HR 0=0;5=0;10=0;20=1;30=0;60=0;90=0Z1=8;2=0;4=3;6=0;8=0;10=0;12=0r∫
+ !"#$&'()+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRTUVWYZ[\]^_`abcdefghijklnoprstuwyz{}~ÄÅÇÉÖÜáàäåçéèêíìîïóôöõúùü†°¢§¶ß®©™´¨xÇN "(),.0134578<?@FHINPVWZ\^_abcefjoprs{}ÄÅáäåçéîóôöõ°§¶ß®

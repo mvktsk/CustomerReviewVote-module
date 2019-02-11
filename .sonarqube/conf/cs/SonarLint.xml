@@ -6,8 +6,20 @@
       <Value>true</Value>
     </Setting>
     <Setting>
+      <Key>sonar.cs.fxcop.fxCopCmdPath</Key>
+      <Value>C:/Program Files (x86)/Microsoft Visual Studio 12.0/Team Tools/Static Analysis Tools/FxCop/FxCopCmd.exe</Value>
+    </Setting>
+    <Setting>
+      <Key>sonar.cs.fxcop.aspnet</Key>
+      <Value>false</Value>
+    </Setting>
+    <Setting>
       <Key>sonar.cs.roslyn.ignoreIssues</Key>
       <Value>false</Value>
+    </Setting>
+    <Setting>
+      <Key>sonar.cs.fxcop.timeoutMinutes</Key>
+      <Value>10</Value>
     </Setting>
     <Setting>
       <Key>sonar.cs.file.suffixes</Key>
