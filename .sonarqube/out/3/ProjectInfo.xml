@@ -4,10 +4,10 @@
   <ProjectLanguage>C#</ProjectLanguage>
   <ProjectType>Test</ProjectType>
   <ProjectGuid>a5e6a998-2548-4056-9a86-8ffbb5beeda7</ProjectGuid>
-  <FullPath>d:\Data\Sources\CustomerReviewVote-module\newManagedModule.Test\CustomerReviewVotes.Test.csproj</FullPath>
+  <FullPath>D:\Data\Sources\CustomerReviewVote-module\newManagedModule.Test\CustomerReviewVotes.Test.csproj</FullPath>
   <IsExcluded>false</IsExcluded>
   <AnalysisResults>
-    <AnalysisResult Id="FilesToAnalyze" Location="d:\Data\Sources\CustomerReviewVote-module\.sonarqube\out\3\FilesToAnalyze.txt" />
+    <AnalysisResult Id="FilesToAnalyze" Location="D:\Data\Sources\CustomerReviewVote-module\.sonarqube\out\3\FilesToAnalyze.txt" />
   </AnalysisResults>
   <AnalysisSettings />
   <Configuration>Debug</Configuration>

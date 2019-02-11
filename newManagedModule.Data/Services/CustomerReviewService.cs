@@ -1,10 +1,9 @@
-﻿using System;
-using System.Data.Entity;
-using System.Linq;
-using CustomerReviewVotes.Core.Model;
+﻿using CustomerReviewVotes.Core.Model;
 using CustomerReviewVotes.Core.Services;
 using CustomerReviewVotes.Data.Model;
 using CustomerReviewVotes.Data.Repositories;
+using System;
+using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
@@ -116,19 +115,19 @@ namespace CustomerReviewVotes.Data.Services
                     pkMap.ResolvePrimaryKeys();
                 }
             }
-            
+
         }
 
         public void UpdateCustomerReviewVotesCount(ICustomerReviewRepository repository, string[] reviewIds)
         {
-                var query = repository.GetReviewByIds(reviewIds);
+            var query = repository.GetReviewByIds(reviewIds);
 
-                 foreach ( var item in query)
-                {
-                    item.HelpfullVotesCount = item.CustomerReviewVotes.Count(x => (x.ReviewRate == VoteRate.Helpfull) && (x.CustomerReviewId == item.Id));
-                    item.UselessVotesCount = item.CustomerReviewVotes.Count(x => (x.ReviewRate == VoteRate.Useless) && (x.CustomerReviewId == item.Id));
-                    item.TotalVotesCount = item.CustomerReviewVotes.Count(x => x.CustomerReviewId == item.Id);
-                }
+            foreach (var item in query)
+            {
+                item.HelpfullVotesCount = item.CustomerReviewVotes.Count(x => (x.ReviewRate == VoteRate.Helpfull) && (x.CustomerReviewId == item.Id));
+                item.UselessVotesCount = item.CustomerReviewVotes.Count(x => (x.ReviewRate == VoteRate.Useless) && (x.CustomerReviewId == item.Id));
+                item.TotalVotesCount = item.CustomerReviewVotes.Count(x => x.CustomerReviewId == item.Id);
+            }
         }
 
         public void DeleteCustomerReviewVotes(string[] ids)
@@ -145,6 +144,19 @@ namespace CustomerReviewVotes.Data.Services
         }
 
         public void DeleteCustomerReviewVotesTestSQ(string[] ids)
+        {
+            using (var repository = _repositoryFactory())
+            {
+
+                var reveiwIds = repository.GetVoteByIds(ids).Select(x => x.CustomerReviewId).ToArray();
+
+                repository.DeleteCustomerReviewVotes(ids);
+                UpdateCustomerReviewVotesCount(repository, reveiwIds);
+                CommitChanges(repository);
+            }
+        }
+
+        public void DeleteCustomerReviewVotesTestSQ2(string[] ids)
         {
             using (var repository = _repositoryFactory())
             {

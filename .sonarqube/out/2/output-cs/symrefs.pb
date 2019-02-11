@@ -1,5 +1,5 @@
 ¦
-sd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Controllers\Api\customerReviewVotes.WebController.cs
+sD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Controllers\Api\customerReviewVotes.WebController.cs
 
  ((
 6 R ((( 5UU 5<
@@ -30,7 +30,7 @@ sd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Controllers\Api\
 
 qq! ,
 qq@ Css= @­
-Hd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Module.cs
+HD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Module.cs
 
  
   19 J	**v ‡R
@@ -54,8 +54,8 @@ Hd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Module.cs
 66 77I V
 66b c
 66ƒ „[
-Yd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Properties\AssemblyInfo.cs’
-`d:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Security\PredefinedPermissions.cs
+YD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Properties\AssemblyInfo.cs’
+`D:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Security\PredefinedPermissions.cs
 
  -
 

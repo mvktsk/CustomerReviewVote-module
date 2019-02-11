@@ -1,5 +1,5 @@
 Î
-ed:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Migrations\201902030903567_Initial.cs
+eD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Migrations\201902030903567_Initial.cs
 
   
 
@@ -14,7 +14,7 @@ ed:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Migrations\2019
 CC CC" #CC. /
 
 GG !³
-[d:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Migrations\Configuration.cs
+[D:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Migrations\Configuration.cs
 
 		 %
 
@@ -30,7 +30,7 @@ ed:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Migrations\2019
 ž ¡
 Ÿ ¢
 Ÿ ¢Ý
-]d:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Model\CustomerReviewEntity.cs
+]D:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Model\CustomerReviewEntity.cs
 
 
  %== +TT" 6
@@ -54,7 +54,7 @@ ed:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Migrations\2019
 
 TT !F
 TT7 =VV WW7 =YY ZZ [[ \\ ï
-ad:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Model\CustomerReviewVoteEntity.cs
+aD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Model\CustomerReviewVoteEntity.cs
  )** />>" :2
  ##* 277 CC CC &2
  "$$, 688 DD DD  *
@@ -71,8 +71,8 @@ ad:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Model\CustomerR
 
 >> !2
 >>; A@@ AA7 =CC DD \
-Zd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Properties\AssemblyInfo.cs–
-hd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Repositories\CustomerReviewRepository.cs
+ZD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Properties\AssemblyInfo.cs–
+hD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Repositories\CustomerReviewRepository.cs
 
 		 )
 
@@ -115,7 +115,7 @@ hd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Repositories\Cu
 HH7 :JJ% (
 JJ KK! &
 KK MM ï
-id:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Repositories\ICustomerReviewRepository.cs
+iD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Repositories\ICustomerReviewRepository.cs
 
  .
 
@@ -141,7 +141,7 @@ id:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Repositories\IC
 
 0 3
 
-gd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\CustomerReviewSearchService.cs
+gD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\CustomerReviewSearchService.cs
 
  ,(
 9 K   $ 6aa$ 6(
@@ -177,83 +177,87 @@ gd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\Custom
 jj kk mm oo/ 8
 ss )xxE ZyyE Z
 uu) *uu. /
-yy@ Ayyc d
-ad:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\CustomerReviewService.cs
+yy@ Ayyc d×
+aD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\CustomerReviewService.cs
 
- &\
-9 K $ 6!!$ 6--$ 6GG$ 6OO$ 6[[$ 6
+ &h
+9 K $ 6  $ 6,,$ 6FF$ 6NN$ 6ZZ$ 6
 ‡‡$ 6
+””$ 6
 
- $
-E V! 2
+ $
+E V! 2
 
- (
-2 51 4
- !  (
+ (
+2 51 4
+ !  (
 
-  .
-8 ;##1 4
-!! !## !
-##= >##B C
+  .
+8 ;""1 4
+   !"" !
+""= >""B C
 
-'' '2
-''9 >)) **7 <11I N227 < 
-,, 
-44‡ ŒAA 2
--- !//< F11/ 9== &@@" ,
-// (88 )
-11 ,55+ ?
-11U V11[ \
-11s t11x y
-22! 3	44s …(
-44 (55\ h99 (==+ 7(
-55 (66 (881 =99/ ;
-55O P55T U
+&& '2
+&&9 >(( ))7 <00I N117 < 
+++ 
+33‡ Œ@@ 2
+,, !..< F00/ 9<< &??" ,
+.. (77 )
+00 ,44+ ?
+00U V00[ \
+00s t00x y
+11! 3	33s …(
+33 (44\ h88 (<<+ 7(
+44 (55 (771 =88/ ;
+44O P44T U
 
-EE )
-EE3 6II1 4
-GG !II JJ (
+DD )
+DD3 6HH1 4
+FF !HH II (
 
-MM$ 0
-MM: =QQ/ 2
-OO !QQ !
-QQ; <QQ@ A
+LL$ 0
+LL: =PP/ 2
+NN !PP !
+PP; <PP@ A
 
-UU +<
-UUA FWW XX7 <__G L``7 <oo$ ) 
-ZZ 
-bb‹ ss <
-[[ !]]< F__/ 9kk &pp3 =rr" ,
-]] (ff )
-__ ,cc+ ?
-__S T__Y Z
-__q r__v w
-``! 3	bbw ‰(
-bb (cc\ hgg (kk+ 7(
-cc (dd (ff1 =gg/ ;
-ccO PccT U
+TT +<
+TTA FVV WW7 <^^G L__7 <oo$ ) 
+YY 
+aa‹ ss <
+ZZ !\\< F^^/ 9jj &pp3 =rr" ,
+\\ (ee )
+^^ ,bb+ ?
+^^S T^^Y Z
+^^q r^^v w
+__! 3	aaw ‰(
+aa (bb\ hff (jj+ 7(
+bb (cc (ee1 =ff/ ;
+bbO PbbT U
+
+nn 
 oo !pp? H
-oo1 2oo6 7 
+oo1 2oo6 7,
 yy 2pp 2
- .
-yyM W{{ &
-yyb k{{6 ?
-{{ }}' ,t
-}} # . 2
- ”
-€€ 
-€€- 1€€Ž ’
- 
-+ /
-e i
-M NS Tz {$
+ .
+šš .
+yyM W{{ "
+yyb k{{2 ;
+{{ }}! &t
+}}  * .
+Œ 
+€€ 
+€€) -€€Š Ž
+ 
+' +
+a e
+I JO Pv w$
 
-€€L M
-€€R S
-€€x y
+€€H I
+€€N O
+€€t u
 
-J K
-O P
+F G
+K L
 
 …… -$
 
@@ -271,4 +275,22 @@ ad:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\Custom
 ; D
 
 ŠŠD E
-ŠŠI J
+ŠŠI J
+
+’’ 3$
+
+’’= @
+——8 ;
+™™5 8<
+
+”” !
+——  *
+™™ 
+šš/ 9
+›› (
+
+—— 
+šš; D
+
+——D E
+——I J

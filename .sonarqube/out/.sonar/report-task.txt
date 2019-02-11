@@ -1,7 +1,6 @@
-organization=mvktsk-github
-projectKey=customerreviewmodule
-serverUrl=https://sonarcloud.io
-serverVersion=7.7.0.21686
-dashboardUrl=https://sonarcloud.io/dashboard?id=customerreviewmodule
-ceTaskId=AWjL4E3hfKyRSqG24YzI
-ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AWjL4E3hfKyRSqG24YzI
+projectKey=CustomerReviewVote
+serverUrl=http://localhost:9000
+serverVersion=7.6.0.21501
+dashboardUrl=http://localhost:9000/dashboard?id=CustomerReviewVote
+ceTaskId=AWjamd-gpBzXQxX-Q2aZ
+ceTaskUrl=http://localhost:9000/api/ce/task?id=AWjamd-gpBzXQxX-Q2aZ

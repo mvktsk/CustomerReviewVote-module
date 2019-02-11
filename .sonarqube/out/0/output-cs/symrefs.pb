@@ -1,5 +1,5 @@
 ≈
-Wd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReview.cs
+WD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReview.cs
 
  
 
@@ -20,7 +20,7 @@ Wd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerR
  $
 
  "ó
-ed:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewSearchCriteria.cs
+eD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewSearchCriteria.cs
 
  -
 
@@ -29,7 +29,7 @@ ed:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerR
  
 
  ç
-[d:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewVote.cs
+[D:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewVote.cs
 
  #
 
@@ -40,20 +40,20 @@ ed:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerR
 
 
  &É
-id:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewVoteSearchCriteria.cs
+iD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewVoteSearchCriteria.cs
 
  1
 
  )w
-Qd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\VoteRate.cs
+QD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\VoteRate.cs
 
  
 
  
 
  \
-Zd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Properties\AssemblyInfo.cs¶
-hd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICustomerReviewSearchService.cs
+ZD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Properties\AssemblyInfo.cs¶
+hD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICustomerReviewSearchService.cs
 
  1
 
@@ -64,7 +64,7 @@ hd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICusto
 		0 I
 
 		k sÄ
-bd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICustomerReviewService.cs
+bD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICustomerReviewService.cs
 
  +
 

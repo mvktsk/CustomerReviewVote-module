@@ -1,5 +1,5 @@
 …
-Wd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReview.cs
+WD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReview.cs
 	namespace 	
 CustomerReviewVotes
  
@@ -108,7 +108,7 @@ Wd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerR
 }/ 0
 } 
 } ™
-ed:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewSearchCriteria.cs
+eD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewSearchCriteria.cs
 	namespace 	
 CustomerReviewVotes
  
@@ -159,7 +159,7 @@ ProductIds "
 }
 
  á
-[d:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewVote.cs
+[D:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewVote.cs
 	namespace 	
 CustomerReviewVotes
  
@@ -223,7 +223,7 @@ ReviewRate		 "
 3 4
 } 
 } ã
-id:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewVoteSearchCriteria.cs
+iD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewVoteSearchCriteria.cs
 	namespace 	
 CustomerReviewVotes
  
@@ -252,7 +252,7 @@ id:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerR
 }6 7
 } 
 } Ë
-Qd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\VoteRate.cs
+QD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\VoteRate.cs
 	namespace 	
 CustomerReviewVotes
  
@@ -276,7 +276,7 @@ Qd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\VoteRate.
 $num 
 } 
 }		 …
-Zd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Properties\AssemblyInfo.cs
+ZD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Properties\AssemblyInfo.cs
 [ 
 assembly 	
 :	 
@@ -402,7 +402,7 @@ ComVisible 
 $str$$ (
 )$$( )
 ]$$) *Õ
-hd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICustomerReviewSearchService.cs
+hD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICustomerReviewSearchService.cs
 	namespace 	
 CustomerReviewVotes
  
@@ -440,7 +440,7 @@ hd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICusto
 
  
 } ¥
-bd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICustomerReviewService.cs
+bD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICustomerReviewService.cs
 	namespace 	
 CustomerReviewVotes
  
