@@ -45,10 +45,10 @@ sD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Controllers\Api\
 ICustomerReviewSearchService' C'
 customerReviewSearchServiceD _
 ,_ `"
-ICustomerReviewServiceb x"
-customerReviewService	y é
+ICustomerReviewServicea w"
+customerReviewService	x ç
 )
-é è
+ç é
 { 	(
 _customerReviewSearchService (
 =) *'
