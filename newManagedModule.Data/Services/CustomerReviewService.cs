@@ -92,6 +92,7 @@ namespace CustomerReviewVotes.Data.Services
 
             var pkMap = new PrimaryKeyResolvingMap();
             int i = 0;
+            int r = 0;
             using (var repository = _repositoryFactory())
             {
                 using (var changeTracker = GetChangeTracker(repository))

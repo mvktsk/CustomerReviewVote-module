@@ -2,5 +2,5 @@ projectKey=CustomerReveiwVote
 serverUrl=http://localhost:9000
 serverVersion=6.7.6.38781
 dashboardUrl=http://localhost:9000/dashboard/index/CustomerReveiwVote
-ceTaskId=AWj-3N1b7NMuL0D2cpZB
-ceTaskUrl=http://localhost:9000/api/ce/task?id=AWj-3N1b7NMuL0D2cpZB
+ceTaskId=AWj-80G37NMuL0D2cpZC
+ceTaskUrl=http://localhost:9000/api/ce/task?id=AWj-80G37NMuL0D2cpZC
