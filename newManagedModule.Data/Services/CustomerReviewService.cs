@@ -91,8 +91,15 @@ namespace CustomerReviewVotes.Data.Services
             }
 
             var pkMap = new PrimaryKeyResolvingMap();
+#pragma warning disable CS0219 // Variable is assigned but its value is never used
+#pragma warning disable S3353 // Unchanged local variables should be "const"
+#pragma warning disable S1481 // Unused local variables should be removed
             int i = 0;
             int r = 0;
+#pragma warning restore S1481 // Unused local variables should be removed
+#pragma warning restore S3353 // Unchanged local variables should be "const"
+#pragma warning restore CS0219 // Variable is assigned but its value is never used
+            string str = "empty";
             using (var repository = _repositoryFactory())
             {
                 using (var changeTracker = GetChangeTracker(repository))
