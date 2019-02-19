@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\converters\blogsearchconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using VirtoCommerce.LiquidThemeEngine.Objects;
+using StorefrontModel = VirtoCommerce.Storefront.Model.StaticContent;
+
+namespace VirtoCommerce.LiquidThemeEngine.Converters
+{
+    public static class BlogSearchConverter
+    {
+        public static BlogSearch ToShopifyModel(this StorefrontModel.BlogSearchCriteria blogSearchCriteria)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidBlogSearch(blogSearchCriteria);
+        }
+    }
+
+    public partial class ShopifyModelConverter
+    {
+        public virtual BlogSearch ToLiquidBlogSearch(StorefrontModel.BlogSearchCriteria blogSearchCriteria)
+        {
+            var retVal = new BlogSearch();
+            retVal.Author = blogSearchCriteria.Author;
+            retVal.Category = blogSearchCriteria.Category;
+            retVal.Tag = blogSearchCriteria.Tag;
+
+            return retVal;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,9,9,10,0],[10,13,10,57,0],[11,13,11,69,0],[12,9,12,10,0],[18,9,18,10,0],[19,13,19,43,0],[20,13,20,55,0],[21,13,21,59,0],[22,13,22,49,0],[24,13,24,27,0],[25,9,25,10,0]]);
+    </script>
+  </body>
+</html>

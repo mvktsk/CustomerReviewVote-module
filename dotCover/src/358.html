@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\extensions\querycollectionextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.AspNetCore.Http;
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
+
+namespace VirtoCommerce.Storefront.Extensions
+{
+    public static class QueryCollectionExtensions
+    {
+        public static NameValueCollection ToNameValueCollection(this IQueryCollection queryCollection, HtmlEncoder htmlEncoder)
+        {
+            if (queryCollection == null)
+            {
+                throw new ArgumentNullException(nameof(queryCollection));
+            }
+            var result = new NameValueCollection();
+            foreach (var pair in queryCollection)
+            {
+                result.Add(htmlEncoder.Encode(pair.Key), htmlEncoder.Encode(pair.Value));
+            }
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,14,10,0],[15,13,15,41,0],[16,13,16,14,0],[17,17,17,74,0],[19,13,19,52,0],[20,13,20,20,0],[20,22,20,30,0],[20,31,20,33,0],[20,34,20,49,0],[21,13,21,14,0],[22,17,22,90,0],[23,13,23,14,0],[24,13,24,27,0],[25,9,25,10,0]]);
+    </script>
+  </body>
+</html>

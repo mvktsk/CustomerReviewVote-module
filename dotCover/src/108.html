@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\converters\shippingmethodconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using VirtoCommerce.LiquidThemeEngine.Objects;
+using VirtoCommerce.Storefront.Model.Order;
+
+namespace VirtoCommerce.LiquidThemeEngine.Converters
+{
+    public static class ShippingMethodConverter
+    {
+        public static ShippingMethod ToShopifyModel(this Shipment shipment)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidShippingMethod(shipment);
+        }
+
+        public static ShippingMethod ToShopifyModel(this Storefront.Model.ShippingMethod shippingMethod)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidShippingMethod(shippingMethod);
+        }
+    }
+
+    public partial class ShopifyModelConverter
+    {
+        public virtual ShippingMethod ToLiquidShippingMethod(Shipment shipment)
+        {
+            var result = new ShippingMethod();
+            result.Price = shipment.Total.Amount * 100;
+            result.PriceWithTax = shipment.TotalWithTax.Amount * 100;
+            result.Title = shipment.ShipmentMethodCode;
+            result.Handle = shipment.ShipmentMethodCode;
+
+            return result;
+        }
+
+        public virtual ShippingMethod ToLiquidShippingMethod(Storefront.Model.ShippingMethod shippingMethod)
+        {
+            var result = new ShippingMethod();
+
+            result.Handle = shippingMethod.ShipmentMethodCode;
+            result.Price = shippingMethod.Price.Amount;
+            result.TaxType = shippingMethod.TaxType;
+            result.Title = shippingMethod.Name;
+
+            return result;
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,9,9,10,0],[10,13,10,57,0],[11,13,11,63,0],[12,9,12,10,0],[15,9,15,10,0],[16,13,16,57,0],[17,13,17,69,0],[18,9,18,10,0],[24,9,24,10,0],[25,13,25,47,0],[26,13,26,56,0],[27,13,27,70,0],[28,13,28,56,0],[29,13,29,57,0],[31,13,31,27,0],[32,9,32,10,0],[35,9,35,10,0],[36,13,36,47,0],[38,13,38,63,0],[39,13,39,56,0],[40,13,40,53,0],[41,13,41,48,0],[43,13,43,27,0],[44,9,44,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\reflectionextension.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace VirtoCommerce.Storefront.Model.Common
+{
+    public static class ReflectionExtension
+    {
+        public static IEnumerable&lt;PropertyInfo&gt; GetTypePropsRecursively(this Type baseType, Func&lt;PropertyInfo, bool&gt; predicate)
+        {
+            return IteratePropsInner(baseType, predicate);
+        }
+
+        private static IEnumerable&lt;PropertyInfo&gt; IteratePropsInner(Type baseType, Func&lt;PropertyInfo, bool&gt; predicate)
+        {
+            var props = baseType.GetProperties(BindingFlags.Instance | BindingFlags.Public);
+
+            foreach (var property in props.Where(x=&gt; predicate(x)))
+            {
+                var type = ListTypesOrSelf(property.PropertyType);
+
+                foreach (var info in IteratePropsInner(type, predicate))
+                    yield return info;
+
+                yield return property;
+            }
+        }
+
+        public static Type ListTypesOrSelf(Type type)
+        {
+            if (!type.IsGenericType)
+                return type;
+            return type.GetGenericArguments()[0];
+        }
+
+        public static Type GetEnumerableType(this Type type)
+        {
+            foreach (Type intType in type.GetInterfaces())
+            {
+                if (intType.IsGenericType
+                    &amp;&amp; intType.GetGenericTypeDefinition() == typeof(IEnumerable&lt;&gt;))
+                {
+                    return intType.GetGenericArguments()[0];
+                }
+            }
+            return null;
+        }
+
+        public static bool IsAssignableFromGenericList(this Type type)
+        {
+            foreach (var intType in type.GetInterfaces())
+            {
+                if (intType.IsGenericType
+                    &amp;&amp; intType.GetGenericTypeDefinition() == typeof(IList&lt;&gt;))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static T[] GetFlatObjectsListWithInterface&lt;T&gt;(this object obj, List&lt;T&gt; resultList = null)
+        {
+            var retVal = new List&lt;T&gt;();
+
+            if (resultList == null)
+            {
+                resultList = new List&lt;T&gt;();
+            }
+            //Ignore cycling references
+            if (!resultList.Any(x =&gt; object.ReferenceEquals(x, obj)))
+            {
+                var objectType = obj.GetType();
+
+                if (objectType.GetInterface(typeof(T).Name) != null)
+                {
+                    retVal.Add((T)obj);
+                    resultList.Add((T)obj);
+                }
+
+                var properties = objectType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+                var objects = properties.Where(x =&gt; x.PropertyType.GetInterface(typeof(T).Name) != null)
+                                        .Select(x =&gt; (T)x.GetValue(obj)).ToList();
+
+                //Recursive call for single properties
+                retVal.AddRange(objects.Where(x =&gt; x != null).SelectMany(x =&gt; x.GetFlatObjectsListWithInterface(resultList)));
+
+                //Handle collection and arrays
+                var collections = properties.Where(p =&gt; p.GetIndexParameters().Length == 0)
+                                            .Select(x =&gt; x.GetValue(obj, null))
+                                            .Where(x =&gt; x is IEnumerable &amp;&amp; !(x is String))
+                                            .Cast&lt;IEnumerable&gt;();
+
+                foreach (var collection in collections)
+                {
+                    foreach (var collectionObject in collection)
+                    {
+                        if (collectionObject is T)
+                        {
+                            retVal.AddRange(collectionObject.GetFlatObjectsListWithInterface(resultList));
+                        }
+                    }
+                }
+            }
+            return retVal.ToArray();
+        }
+
+        public static IDictionary&lt;string, object&gt; AsDictionary(this object source, Func&lt;string, string&gt; nameNormalizer = null, BindingFlags bindingAttr = BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance)
+        {
+            return source.GetType().GetProperties(bindingAttr).ToDictionary
+            (
+                propInfo =&gt; nameNormalizer != null ? nameNormalizer(propInfo.Name) : propInfo.Name,
+                propInfo =&gt; propInfo.GetValue(source, null)
+            );
+
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,14,10,0],[15,13,15,59,0],[16,9,16,10,0],[19,9,19,10,0],[20,13,20,93,0],[22,13,22,20,0],[22,22,22,34,0],[22,35,22,37,0],[22,38,22,67,0],[22,54,22,66,0],[23,13,23,14,0],[24,17,24,67,0],[26,17,26,24,0],[26,26,26,34,0],[26,35,26,37,0],[26,38,26,72,0],[27,21,27,39,0],[29,17,29,39,0],[30,13,30,14,0],[31,9,31,10,0],[34,9,34,10,0],[35,13,35,37,0],[36,17,36,29,0],[37,13,37,50,0],[38,9,38,10,0],[41,9,41,10,0],[42,13,42,20,0],[42,22,42,34,0],[42,35,42,37,0],[42,38,42,58,0],[43,13,43,14,0],[44,17,45,84,0],[46,17,46,18,0],[47,21,47,61,0],[49,13,49,14,0],[50,13,50,25,0],[51,9,51,10,0],[54,9,54,10,1],[55,13,55,20,1],[55,22,55,33,1],[55,34,55,36,1],[55,37,55,57,1],[56,13,56,14,1],[57,17,58,78,1],[59,17,59,18,1],[60,21,60,33,1],[62,13,62,14,1],[63,13,63,26,1],[64,9,64,10,1],[67,9,67,10,0],[68,13,68,40,0],[70,13,70,36,0],[71,13,71,14,0],[72,17,72,44,0],[73,13,73,14,0],[75,13,75,70,0],[75,38,75,68,0],[76,13,76,14,0],[77,17,77,48,0],[79,17,79,69,0],[80,17,80,18,0],[81,21,81,40,0],[82,21,82,44,0],[83,17,83,18,0],[85,17,85,104,0],[87,17,88,83,0],[87,53,87,104,0],[88,54,88,72,0],[91,17,91,127,0],[91,52,91,61,0],[91,79,91,124,0],[94,17,97,66,0],[94,57,94,91,0],[95,58,95,79,0],[96,57,96,91,0],[99,17,99,24,0],[99,26,99,40,0],[99,41,99,43,0],[99,44,99,55,0],[100,17,100,18,0],[101,21,101,28,0],[101,30,101,50,0],[101,51,101,53,0],[101,54,101,64,0],[102,21,102,22,0],[103,25,103,51,0],[104,25,104,26,0],[105,29,105,107,0],[106,25,106,26,0],[107,21,107,22,0],[108,17,108,18,0],[109,13,109,14,0],[110,13,110,37,0],[111,9,111,10,0],[114,9,114,10,0],[115,13,119,15,0],[117,29,117,99,0],[118,29,118,60,0],[121,9,121,10,0]]);
+    </script>
+  </body>
+</html>

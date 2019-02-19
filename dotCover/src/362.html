@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\cart\cartcacheregion.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.Extensions.Primitives;
+using System;
+using System.Collections.Concurrent;
+using System.Threading;
+using VirtoCommerce.Storefront.Model.Cart;
+using VirtoCommerce.Storefront.Model.Common.Caching;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public class CartCacheRegion : CancellableCacheRegion&lt;CartCacheRegion&gt;
+    {
+        private static readonly ConcurrentDictionary&lt;ShoppingCart, CancellationTokenSource&gt; _cartRegionTokenLookup = new ConcurrentDictionary&lt;ShoppingCart, CancellationTokenSource&gt;();
+        private static readonly ConcurrentDictionary&lt;string, CancellationTokenSource&gt; _cartSearchRegionLookup = new ConcurrentDictionary&lt;string, CancellationTokenSource&gt;();
+
+        public static IChangeToken CreateCustomerChangeToken(string customerId)
+        {
+            if (customerId == null)
+            {
+                throw new ArgumentNullException(nameof(customerId));
+            }
+
+            var cancellationTokenSource = _cartSearchRegionLookup.GetOrAdd(customerId, new CancellationTokenSource());
+            return new CompositeChangeToken(new[] { CreateChangeToken(), new CancellationChangeToken(cancellationTokenSource.Token) });
+        }
+   
+        public static IChangeToken CreateChangeToken(ShoppingCart cart)
+        {
+            if (cart == null)
+            {
+                throw new ArgumentNullException(nameof(cart));
+            }
+            var cancellationTokenSource = _cartRegionTokenLookup.GetOrAdd(cart, new CancellationTokenSource());
+            return new CompositeChangeToken(new[] { CreateChangeToken(), new CancellationChangeToken(cancellationTokenSource.Token) });
+        }
+
+        public static void ExpireCart(ShoppingCart cart)
+        {
+            if (cart != null)
+            {
+                if (_cartRegionTokenLookup.TryRemove(cart, out CancellationTokenSource token))
+                {
+                    token.Cancel();
+                    token.Dispose();
+                }
+                ExpireCustomerCarts(cart.CustomerId);
+            }
+        }
+
+        public static void ExpireCustomerCarts(string customerId)
+        {
+            if (_cartSearchRegionLookup.TryRemove(customerId, out CancellationTokenSource token))
+            {
+                token.Cancel();
+                token.Dispose();
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,184,0],[13,9,13,173,0],[16,9,16,10,0],[17,13,17,36,0],[18,13,18,14,0],[19,17,19,69,0],[22,13,22,119,0],[23,13,23,136,0],[24,9,24,10,0],[27,9,27,10,0],[28,13,28,30,0],[29,13,29,14,0],[30,17,30,63,0],[32,13,32,112,0],[33,13,33,136,0],[34,9,34,10,0],[37,9,37,10,0],[38,13,38,30,0],[39,13,39,14,0],[40,17,40,95,0],[41,17,41,18,0],[42,21,42,36,0],[43,21,43,37,0],[44,17,44,18,0],[45,17,45,54,0],[46,13,46,14,0],[47,9,47,10,0],[50,9,50,10,0],[51,13,51,98,0],[52,13,52,14,0],[53,17,53,32,0],[54,17,54,33,0],[55,13,55,14,0],[56,9,56,10,0]]);
+    </script>
+  </body>
+</html>

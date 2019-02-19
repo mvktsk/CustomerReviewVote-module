@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\security\usertypeauthorizationhandlerbase.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Security;
+
+
+namespace VirtoCommerce.Storefront.Domain.Security
+{
+    public class UserTypeAuthorizationHandlerBase&lt;T&gt; : AuthorizationHandler&lt;T&gt; where T : IAuthorizationRequirement
+    {
+        protected readonly IWorkContextAccessor _workContextAccessor;
+
+        protected string UserTypeName { get; set; }
+
+        public UserTypeAuthorizationHandlerBase(IWorkContextAccessor workContextAccessor)
+        {
+            _workContextAccessor = workContextAccessor;
+        }
+
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, T requirement)
+        {
+            if (context.User.IsInRole(SecurityConstants.Roles.Administrator))
+            {
+                context.Succeed(requirement);
+            }
+
+            var workContext = _workContextAccessor.WorkContext;
+            var currentUser = workContext.CurrentUser;
+            if (currentUser.UserType.EqualsInvariant(UserTypeName))
+            {
+                context.Succeed(requirement);
+            }
+
+            return Task.CompletedTask;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,41,14,45,0],[14,46,14,50,0],[16,9,16,90,0],[17,9,17,10,0],[18,13,18,56,0],[19,9,19,10,0],[22,9,22,10,0],[23,13,23,78,0],[24,13,24,14,0],[25,17,25,46,0],[26,13,26,14,0],[28,13,28,64,0],[29,13,29,55,0],[30,13,30,68,0],[31,13,31,14,0],[32,17,32,46,0],[33,13,33,14,0],[35,13,35,39,0],[36,9,36,10,0]]);
+    </script>
+  </body>
+</html>

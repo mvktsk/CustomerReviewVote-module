@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\discount.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using DotLiquid;
+using System.Runtime.Serialization;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// The discount object contains information about a discount, including its id,
+    /// code, amount, savings, and type. 
+    /// &lt;/summary&gt;
+    /// &lt;remarks&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/objects/discount
+    /// &lt;/remarks&gt;
+    [DataContract]
+    public partial class Discount : Drop
+    {
+        /// &lt;summary&gt;
+        /// Returns the amount of the discount. Use one of the money filters to return
+        /// the value in a monetary format.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal Amount { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the title or discount code of the discount. Same as discount.title.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Code { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the id of the discount.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Id { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the amount of the discount&#39;s savings. The negative opposite of amount.
+        /// Use one of the money filters to return the value in a monetary format.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal Savings { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the type of the discount. The possible values of discount.type are:
+        /// FixedAmountDiscount, PercentageDiscount, ShippingDiscount
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Type { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the promotion id
+        /// &lt;/summary&gt;
+        public string PromotionId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the coupon code
+        /// &lt;/summary&gt;
+        public string Coupon { get; set; }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[21,33,21,37,0],[21,38,21,42,0],[27,30,27,34,0],[27,35,27,39,0],[33,28,33,32,0],[33,33,33,37,0],[40,34,40,38,0],[40,39,40,43,0],[47,30,47,34,0],[47,35,47,39,0],[52,37,52,41,0],[52,42,52,46,0],[57,32,57,36,0],[57,37,57,41,0]]);
+    </script>
+  </body>
+</html>

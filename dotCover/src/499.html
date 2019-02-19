@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\api\apiaccountcontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Storefront.AutoRestClients.CoreModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.PlatformModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.PlatformModuleApi.Models;
+using VirtoCommerce.Storefront.Domain;
+using VirtoCommerce.Storefront.Domain.Common;
+using VirtoCommerce.Storefront.Domain.Security;
+using VirtoCommerce.Storefront.Domain.Security.Notifications;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Common.Events;
+using VirtoCommerce.Storefront.Model.Customer;
+using VirtoCommerce.Storefront.Model.Customer.Services;
+using VirtoCommerce.Storefront.Model.Security;
+using VirtoCommerce.Storefront.Model.Security.Events;
+
+namespace VirtoCommerce.Storefront.Controllers.Api
+{
+    public class ApiAccountController : StorefrontControllerBase
+    {
+        private readonly IEventPublisher _publisher;
+        private readonly UserManager&lt;User&gt; _userManager;
+        private readonly SignInManager&lt;User&gt; _signInManager;
+        private readonly IMemberService _memberService;
+        private readonly IStorefrontSecurity _commerceCoreApi;
+        private readonly INotifications _platformNotificationApi;
+        private readonly IAuthorizationService _authorizationService;
+
+        public ApiAccountController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder, UserManager&lt;User&gt; userManager, SignInManager&lt;User&gt; signInManager, IAuthorizationService authorizationService,
+        IMemberService memberService, IEventPublisher publisher, IStorefrontSecurity commerceCoreApi, INotifications platformNotificationApi)
+            : base(workContextAccessor, urlBuilder)
+        {
+            _userManager = userManager;
+            _memberService = memberService;
+            _publisher = publisher;
+            _commerceCoreApi = commerceCoreApi;
+            _platformNotificationApi = platformNotificationApi;
+            _authorizationService = authorizationService;
+            _signInManager = signInManager;
+        }
+
+        // GET: storefrontapi/account
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult GetCurrentUser()
+        {
+            return Json(WorkContext.CurrentUser);
+        }
+
+        /// &lt;summary&gt;
+        /// // GET: storefrontapi/account/{userId}
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;contactId&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        [HttpGet]
+        [Authorize(SecurityConstants.Permissions.CanViewUsers)]
+        public async Task&lt;ActionResult&gt; GetUserById([FromRoute] string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null &amp;&amp; !string.IsNullOrEmpty(user.ContactId))
+            {
+                var authorizationResult = await _authorizationService.AuthorizeAsync(User, user?.Contact?.Organization, CanEditOrganizationResourceAuthorizeRequirement.PolicyName);
+                if (!authorizationResult.Succeeded)
+                {
+                    return Unauthorized();
+                }
+            }
+            return Json(user);
+        }
+
+        // DELETE: storefrontapi/account/{userId}
+        [HttpDelete]
+        [Authorize(SecurityConstants.Permissions.CanDeleteUsers)]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; DeleteUser([FromRoute] string userId)
+        {
+            //TODO: Authorization check
+            var result = IdentityResult.Success;
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                var authorizationResult = await _authorizationService.AuthorizeAsync(User, user?.Contact?.Organization, CanEditOrganizationResourceAuthorizeRequirement.PolicyName);
+                if (!authorizationResult.Succeeded)
+                {
+                    return Unauthorized();
+                }
+
+                result = await _userManager.DeleteAsync(user);
+                if (result.Succeeded)
+                {
+                    await _publisher.Publish(new UserDeletedEvent(WorkContext, user));
+                }
+            }
+            return Json(result);
+        }
+
+        // POST: storefrontapi/account/organization
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; RegisterOrganization([FromBody] OrganizationRegistration orgRegistration)
+        {
+            var result = IdentityResult.Success;
+
+            TryValidateModel(orgRegistration);
+
+            if (ModelState.IsValid)
+            {
+                var organization = orgRegistration.ToOrganization();
+                organization = await _memberService.CreateOrganizationAsync(organization);
+                var contact = orgRegistration.ToContact();
+                contact.OrganizationId = organization.Id;
+
+                var user = orgRegistration.ToUser();
+                user.Contact = contact;
+                user.StoreId = WorkContext.CurrentStore.Id;
+                user.Roles = new[] { SecurityConstants.Roles.OrganizationMaintainer };
+
+                result = await _userManager.CreateAsync(user, orgRegistration.Password);
+                if (result.Succeeded)
+                {
+                    user = await _userManager.FindByNameAsync(user.UserName);
+                    await _publisher.Publish(new UserRegisteredEvent(WorkContext, user, orgRegistration));
+                    await _signInManager.SignInAsync(user, isPersistent: true);
+                    await _publisher.Publish(new UserLoginEvent(WorkContext, user));
+                }
+            }
+            else
+            {
+                result = IdentityResult.Failed(ModelState.Values.SelectMany(x =&gt; x.Errors).Select(x =&gt; new IdentityError { Description = x.ErrorMessage }).ToArray());
+            }
+
+            return Json(result);
+        }
+
+        // POST: storefrontapi/account/user
+        [HttpPost]
+        [Authorize(SecurityConstants.Permissions.CanCreateUsers)]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; RegisterUser([FromBody] OrganizationUserRegistration registration)
+        {
+            var result = IdentityResult.Success;
+
+            TryValidateModel(registration);
+
+            if (ModelState.IsValid)
+            {
+                //Allow to register new users only within own organization
+                var authorizationResult = await _authorizationService.AuthorizeAsync(User, new Organization { Id = registration.OrganizationId }, CanEditOrganizationResourceAuthorizeRequirement.PolicyName);
+                if (!authorizationResult.Succeeded)
+                {
+                    return Unauthorized();
+                }
+
+                var contact = registration.ToContact();
+                contact.OrganizationId = registration.OrganizationId;
+
+                var user = registration.ToUser();
+                user.Contact = contact;
+                user.StoreId = WorkContext.CurrentStore.Id;
+
+                result = await _userManager.CreateAsync(user, registration.Password);
+                if (result.Succeeded)
+                {
+                    user = await _userManager.FindByNameAsync(user.UserName);
+                    await _publisher.Publish(new UserRegisteredEvent(WorkContext, user, registration));
+                }
+            }
+            else
+            {
+                result = IdentityResult.Failed(ModelState.Values.SelectMany(x =&gt; x.Errors).Select(x =&gt; new IdentityError { Description = x.ErrorMessage }).ToArray());
+            }
+            return Json(result);
+        }
+
+        // POST: storefrontapi/account/invitation
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; CreateUserInvitation([FromBody] UsersInvitation invitation)
+        {
+            var result = IdentityResult.Success;
+            TryValidateModel(invitation);
+
+            if (ModelState.IsValid)
+            {
+                var organizationId = WorkContext.CurrentUser?.Contact?.Organization?.Id;
+                //If it is organization invitation need to check authorization for this action
+                if (!string.IsNullOrEmpty(organizationId))
+                {
+                    var authorizationResult = await _authorizationService.AuthorizeAsync(User, null, SecurityConstants.Permissions.CanInviteUsers);
+                    if (!authorizationResult.Succeeded)
+                    {
+                        return Unauthorized();
+                    }
+                }
+
+                foreach (var email in invitation.Emails)
+                {
+                    var user = await _userManager.FindByEmailAsync(email);
+                    if (user == null)
+                    {
+                        user = new User
+                        {
+                            UserName = email,
+                            StoreId = WorkContext.CurrentStore.Id,
+                            Email = email,
+                        };
+                        var roles = invitation.Roles?.Select(x =&gt; new Model.Security.Role { Id = x }).ToList();
+                        //Add default role for organization member invitation
+                        if (roles.IsNullOrEmpty() &amp;&amp; !string.IsNullOrEmpty(organizationId))
+                        {
+                            roles = new[] { SecurityConstants.Roles.OrganizationEmployee }.ToList();
+                        }
+                        user.Roles = roles;
+                        result = await _userManager.CreateAsync(user);
+                    }
+
+                    if (result.Succeeded)
+                    {
+                        user = await _userManager.FindByNameAsync(user.UserName);
+                        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                        var callbackUrl = Url.Action(&quot;ConfirmInvitation&quot;, &quot;Account&quot;, new { OrganizationId = organizationId, user.Email, Token = token }, Request.Scheme);
+                        var inviteNotification = new RegistrationInvitationNotification(WorkContext.CurrentStore.Id, WorkContext.CurrentLanguage)
+                        {
+                            InviteUrl = callbackUrl,
+                            Sender = WorkContext.CurrentStore.Email,
+                            Recipient = user.Email
+                        };
+                        var sendingResult = await _platformNotificationApi.SendNotificationAsync(inviteNotification.ToNotificationDto());
+                        if (sendingResult.IsSuccess != true)
+                        {
+                            var errors = result.Errors.Concat(new IdentityError[] { new IdentityError() { Description = sendingResult.ErrorMessage } }).ToArray();
+                            result = IdentityResult.Failed(errors);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                result = IdentityResult.Failed(ModelState.Values.SelectMany(x =&gt; x.Errors).Select(x =&gt; new IdentityError { Description = x.ErrorMessage }).ToArray());
+            }
+            return Json(result);
+        }
+
+        // PUT: storefrontapi/account/organization
+        [HttpPut]
+        [Authorize(SecurityConstants.Permissions.CanEditOrganization)]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; UpdateOrganization([FromBody] Organization organization)
+        {
+            //Allow to register new users only within own organization
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, organization, CanEditOrganizationResourceAuthorizeRequirement.PolicyName);
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
+            await _memberService.UpdateOrganizationAsync(organization);
+
+            return Ok();
+        }
+
+        // GET: storefrontapi/account/organization/current
+        [HttpGet]
+        public ActionResult GetCustomerOrganization()
+        {
+            var result = WorkContext.CurrentUser?.Contact?.Organization;
+            return Json(result);
+        }
+
+        // POST: storefrontapi/account/organization/users/search
+        [HttpPost]
+        [Authorize(SecurityConstants.Permissions.CanViewUsers)]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; SearchOrganizationUsersAsync([FromBody] OrganizationContactsSearchCriteria searchCriteria)
+        {
+            searchCriteria.OrganizationId = searchCriteria.OrganizationId ?? WorkContext.CurrentUser?.Contact?.Organization?.Id;
+            //Allow to register new users only within own organization
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, new Organization { Id = searchCriteria.OrganizationId }, CanEditOrganizationResourceAuthorizeRequirement.PolicyName);
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
+            if (searchCriteria.OrganizationId != null)
+            {
+                var contactsSearchResult = await _memberService.SearchOrganizationContactsAsync(searchCriteria);
+                var userIds = contactsSearchResult.Select(x =&gt; x.SecurityAccounts?.FirstOrDefault()).OfType&lt;SecurityAccount&gt;().Select(x =&gt; x.Id);
+                var users = new List&lt;User&gt;();
+                foreach (var userId in userIds)
+                {
+                    var user = await _userManager.FindByIdAsync(userId);
+                    if (user != null)
+                    {
+                        users.Add(user);
+                    }
+                }
+                return Json(new { TotalCount = contactsSearchResult.TotalItemCount, Results = users });
+            }
+            return Ok();
+        }
+
+        // POST: storefrontapi/account/{userId}/lock
+        [HttpPost]
+        [Authorize(SecurityConstants.Permissions.CanEditUsers)]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; LockUser([FromRoute]string userId)
+        {
+            //TODO: Add authorization checks
+            var result = IdentityResult.Success;
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                //Allow to register new users only within own organization
+                var authorizationResult = await _authorizationService.AuthorizeAsync(User, user?.Contact?.Organization, CanEditOrganizationResourceAuthorizeRequirement.PolicyName);
+                if (!authorizationResult.Succeeded)
+                {
+                    return Unauthorized();
+                }
+
+                await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+            }
+            return Json(result);
+        }
+
+        // POST: storefrontapi/account/{userId}/unlock
+        [HttpPost]
+        [Authorize(SecurityConstants.Permissions.CanEditUsers)]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; UnlockUser([FromRoute] string userId)
+        {
+            //TODO: Add authorization checks
+            var result = IdentityResult.Success;
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                //Allow to register new users only within own organization
+                var authorizationResult = await _authorizationService.AuthorizeAsync(User, user?.Contact?.Organization, CanEditOrganizationResourceAuthorizeRequirement.PolicyName);
+                if (!authorizationResult.Succeeded)
+                {
+                    return Unauthorized();
+                }
+                await _userManager.ResetAccessFailedCountAsync(user);
+                await _userManager.SetLockoutEndDateAsync(user, null);
+            }
+            return Json(result);
+        }
+
+        // POST: storefrontapi/account
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; UpdateAccount([FromBody] UserUpdateInfo userUpdateInfo)
+        {
+            //TODO:Check authorization
+            if (string.IsNullOrEmpty(userUpdateInfo.Id))
+            {
+                userUpdateInfo.Id = WorkContext.CurrentUser.Id;
+            }
+            var isSelfEditing = userUpdateInfo.Id == WorkContext.CurrentUser.Id;
+
+
+            if (!string.IsNullOrEmpty(userUpdateInfo.Id))
+            {
+                var user = await _userManager.FindByIdAsync(userUpdateInfo.Id);
+                if (user != null)
+                {
+                    if (!isSelfEditing)
+                    {
+                        var authorizationResult = await _authorizationService.AuthorizeAsync(User, null, SecurityConstants.Permissions.CanEditUsers);
+                        if (authorizationResult.Succeeded)
+                        {
+                            authorizationResult = await _authorizationService.AuthorizeAsync(User, user?.Contact?.Organization, CanEditOrganizationResourceAuthorizeRequirement.PolicyName);
+                        }
+                        if (!authorizationResult.Succeeded)
+                        {
+                            return Unauthorized();
+                        }
+                        //Doesn&#39;t allow change self roles
+                        user.Roles = userUpdateInfo.Roles?.Select(x =&gt; new Model.Security.Role { Id = x });
+                    }
+
+                    if (user.Contact != null)
+                    {
+                        user.Contact.FirstName = userUpdateInfo.FirstName;
+                        user.Contact.LastName = userUpdateInfo.LastName;
+                        user.Contact.Phones = userUpdateInfo.Phones;
+                    }
+
+                    user.Email = userUpdateInfo.Email;
+
+                    await _userManager.UpdateAsync(user);
+                }
+            }
+            return Ok();
+        }
+
+        // POST: storefrontapi/account/password
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; ChangePassword([FromBody] ChangePassword formModel)
+        {
+            var changePassword = new ChangePasswordInfo
+            {
+                OldPassword = formModel.OldPassword,
+                NewPassword = formModel.NewPassword,
+            };
+
+            var result = await _userManager.ChangePasswordAsync(WorkContext.CurrentUser, formModel.OldPassword, formModel.NewPassword);
+
+            return Json(new { result.Succeeded, Errors = result.Errors.Select(x =&gt; x.Description) });
+        }
+
+        // POST: storefrontapi/account/addresses
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; UpdateAddresses([FromBody] IList&lt;Address&gt; addresses)
+        {
+            await _memberService.UpdateContactAddressesAsync(WorkContext.CurrentUser.ContactId, addresses);
+
+            return Ok();
+        }
+
+        // POST: storefrontapi/account/settings?newLanguage=value
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; ChangeLanguage(string newLanguage)
+        {
+            var user = WorkContext.CurrentUser;
+
+            if (user.Contact != null)
+            {
+                var language = WorkContext.CurrentStore.Languages.Any(x =&gt; x.CultureName.EqualsInvariant(newLanguage)) ? newLanguage : null;
+                user.Contact.DefaultLanguage = language;
+                await _signInManager.UserManager.UpdateAsync(user);
+            }
+
+            return Ok();
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[37,15,37,52,0],[38,9,38,10,0],[39,13,39,40,0],[40,13,40,44,0],[41,13,41,36,0],[42,13,42,48,0],[43,13,43,64,0],[44,13,44,58,0],[45,13,45,44,0],[46,9,46,10,0],[52,9,52,10,0],[53,13,53,50,0],[54,9,54,10,0],[64,9,64,10,0],[65,13,65,65,0],[66,13,66,71,0],[67,13,67,14,0],[68,17,68,181,0],[69,17,69,52,0],[70,17,70,18,0],[71,21,71,43,0],[73,13,73,14,0],[74,13,74,31,0],[75,9,75,10,0],[82,9,82,10,0],[84,13,84,49,0],[85,13,85,65,0],[86,13,86,30,0],[87,13,87,14,0],[88,17,88,181,0],[89,17,89,52,0],[90,17,90,18,0],[91,21,91,43,0],[94,17,94,63,0],[95,17,95,38,0],[96,17,96,18,0],[97,21,97,87,0],[98,17,98,18,0],[99,13,99,14,0],[100,13,100,33,0],[101,9,101,10,0],[107,9,107,10,0],[108,13,108,49,0],[110,13,110,47,0],[112,13,112,36,0],[113,13,113,14,0],[114,17,114,69,0],[115,17,115,91,0],[116,17,116,59,0],[117,17,117,58,0],[119,17,119,53,0],[120,17,120,40,0],[121,17,121,60,0],[122,17,122,87,0],[124,17,124,89,0],[125,17,125,38,0],[126,17,126,18,0],[127,21,127,78,0],[128,21,128,107,0],[129,21,129,80,0],[130,21,130,85,0],[131,17,131,18,0],[132,13,132,14,0],[134,13,134,14,0],[135,17,135,167,0],[135,82,135,90,0],[135,104,135,154,0],[136,13,136,14,0],[138,13,138,33,0],[139,9,139,10,0],[146,9,146,10,0],[147,13,147,49,0],[149,13,149,44,0],[151,13,151,36,0],[152,13,152,14,0],[154,17,154,207,0],[155,17,155,52,0],[156,17,156,18,0],[157,21,157,43,0],[160,17,160,56,0],[161,17,161,70,0],[163,17,163,50,0],[164,17,164,40,0],[165,17,165,60,0],[167,17,167,86,0],[168,17,168,38,0],[169,17,169,18,0],[170,21,170,78,0],[171,21,171,104,0],[172,17,172,18,0],[173,13,173,14,0],[175,13,175,14,0],[176,17,176,167,0],[176,82,176,90,0],[176,104,176,154,0],[177,13,177,14,0],[178,13,178,33,0],[179,9,179,10,0],[185,9,185,10,0],[186,13,186,49,0],[187,13,187,42,0],[189,13,189,36,0],[190,13,190,14,0],[191,17,191,89,0],[193,17,193,59,0],[194,17,194,18,0],[195,21,195,148,0],[196,21,196,56,0],[197,21,197,22,0],[198,25,198,47,0],[200,17,200,18,0],[202,17,202,24,0],[202,26,202,35,0],[202,36,202,38,0],[202,39,202,56,0],[203,17,203,18,0],[204,21,204,75,0],[205,21,205,38,0],[206,21,206,22,0],[207,25,212,27,0],[213,25,213,112,0],[213,67,213,101,0],[215,25,215,92,0],[216,25,216,26,0],[217,29,217,101,0],[218,25,218,26,0],[219,25,219,44,0],[220,25,220,71,0],[221,21,221,22,0],[223,21,223,42,0],[224,21,224,22,0],[225,25,225,82,0],[226,25,226,94,0],[227,25,227,170,0],[228,25,233,27,0],[234,25,234,138,0],[235,25,235,61,0],[236,25,236,26,0],[237,29,237,163,0],[238,29,238,68,0],[239,25,239,26,0],[240,21,240,22,0],[241,17,241,18,0],[242,13,242,14,0],[244,13,244,14,0],[245,17,245,167,0],[245,82,245,90,0],[245,104,245,154,0],[246,13,246,14,0],[247,13,247,33,0],[248,9,248,10,0],[255,9,255,10,0],[257,13,257,162,0],[258,13,258,48,0],[259,13,259,14,0],[260,17,260,39,0],[262,13,262,72,0],[264,13,264,25,0],[265,9,265,10,0],[270,9,270,10,0],[271,13,271,73,0],[272,13,272,33,0],[273,9,273,10,0],[280,9,280,10,0],[281,13,281,129,0],[283,13,283,205,0],[284,13,284,48,0],[285,13,285,14,0],[286,17,286,39,0],[288,13,288,55,0],[289,13,289,14,0],[290,17,290,113,0],[291,17,291,146,0],[291,64,291,100,0],[291,140,291,144,0],[292,17,292,46,0],[293,17,293,24,0],[293,26,293,36,0],[293,37,293,39,0],[293,40,293,47,0],[294,17,294,18,0],[295,21,295,73,0],[296,21,296,38,0],[297,21,297,22,0],[298,25,298,41,0],[299,21,299,22,0],[300,17,300,18,0],[301,17,301,104,0],[303,13,303,25,0],[304,9,304,10,0],[311,9,311,10,0],[313,13,313,49,0],[314,13,314,65,0],[315,13,315,30,0],[316,13,316,14,0],[318,17,318,181,0],[319,17,319,52,0],[320,17,320,18,0],[321,21,321,43,0],[324,17,324,90,0],[325,13,325,14,0],[326,13,326,33,0],[327,9,327,10,0],[334,9,334,10,0],[336,13,336,49,0],[337,13,337,65,0],[338,13,338,30,0],[339,13,339,14,0],[341,17,341,181,0],[342,17,342,52,0],[343,17,343,18,0],[344,21,344,43,0],[346,17,346,70,0],[347,17,347,71,0],[348,13,348,14,0],[349,13,349,33,0],[350,9,350,10,0],[356,9,356,10,0],[358,13,358,57,0],[359,13,359,14,0],[360,17,360,64,0],[361,13,361,14,0],[362,13,362,81,0],[365,13,365,58,0],[366,13,366,14,0],[367,17,367,80,0],[368,17,368,34,0],[369,17,369,18,0],[370,21,370,40,0],[371,21,371,22,0],[372,25,372,150,0],[373,25,373,59,0],[374,25,374,26,0],[375,29,375,189,0],[376,25,376,26,0],[377,25,377,60,0],[378,25,378,26,0],[379,29,379,51,0],[382,25,382,108,0],[382,72,382,106,0],[383,21,383,22,0],[385,21,385,46,0],[386,21,386,22,0],[387,25,387,75,0],[388,25,388,73,0],[389,25,389,69,0],[390,21,390,22,0],[392,21,392,55,0],[394,21,394,58,0],[395,17,395,18,0],[396,13,396,14,0],[397,13,397,25,0],[398,9,398,10,0],[404,9,404,10,0],[405,13,409,15,0],[411,13,411,136,0],[413,13,413,102,0],[413,84,413,97,0],[414,9,414,10,0],[420,9,420,10,0],[421,13,421,108,0],[423,13,423,25,0],[424,9,424,10,0],[430,9,430,10,0],[431,13,431,48,0],[433,13,433,38,0],[434,13,434,14,0],[435,17,435,141,0],[435,76,435,118,0],[436,17,436,57,0],[437,17,437,68,0],[438,13,438,14,0],[440,13,440,25,0],[441,9,441,10,0]]);
+    </script>
+  </body>
+</html>

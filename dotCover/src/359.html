@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\extensions\stringextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+
+namespace VirtoCommerce.Storefront.Extensions
+{
+    public static class StringExtensions
+    {
+        /// &lt;summary&gt;
+        /// convert UNIX time in milliseconds (new Date().getTime) to DateTime 
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;unixTimeString&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        /// &lt;exception cref=&quot;InvalidCastException&quot;&gt;&lt;/exception&gt;
+        public static DateTime ParseMillisecondsToDate(this string unixTimeString)
+        {
+            if (double.TryParse(unixTimeString, out double milliseconds))
+            {
+                return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                    .AddMilliseconds(milliseconds)
+                    .ToLocalTime();
+            }
+            throw new InvalidCastException();
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,14,10,0],[15,13,15,74,0],[16,13,16,14,0],[17,17,19,36,0],[21,13,21,46,0],[22,9,22,10,0]]);
+    </script>
+  </body>
+</html>

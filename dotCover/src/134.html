@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\linklist\menulink.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model
+{
+    /// &lt;summary&gt;
+    /// Represents site navigation menu link object
+    /// &lt;/summary&gt;
+    public class MenuLink : Entity
+    {
+        /// &lt;summary&gt;
+        /// Gets or sets the title of site navigation menu link
+        /// &lt;/summary&gt;
+        public string Title { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the URL of site navigation menu link
+        /// &lt;/summary&gt;
+        public string Url { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the priority of site navigation menu link
+        /// &lt;/summary&gt;
+        public int Priority { get; set; }
+
+        /// &lt;summary&gt;
+        /// Each link element can has a associated object like a Product, Category, Promotion etc.
+        /// Is a primary key for associated object
+        /// &lt;/summary&gt;
+        public string AssociatedObjectId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Associated object type
+        /// &lt;/summary&gt;
+        public string AssociatedObjectType { get; set; }
+
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,31,15,35,0],[15,36,15,40,0],[20,29,20,33,0],[20,34,20,38,0],[25,31,25,35,0],[25,36,25,40,0],[31,44,31,48,0],[31,49,31,53,0],[36,46,36,50,0],[36,51,36,55,0]]);
+    </script>
+  </body>
+</html>

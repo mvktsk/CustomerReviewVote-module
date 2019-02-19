@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\customer\handlers\ordereventshandler.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.Model.Customer.Services;
+using VirtoCommerce.Storefront.Model.Order.Events;
+
+namespace VirtoCommerce.Storefront.Domain.Customer.Handlers
+{
+    public class OrderEventsHandler //: IEventHandler&lt;OrderPlacedEvent&gt; // HAP: Don&#39;t add order address to a customer
+    {
+        private readonly IMemberService _memberService;
+
+        public OrderEventsHandler(IMemberService memberService)
+        {
+            _memberService = memberService;
+        }
+
+        public virtual async Task Handle(OrderPlacedEvent @event)
+        {
+            if (@event.Order != null)
+            {
+                //Add addresses to contact profile
+                var contact = @event.WorkContext.CurrentUser?.Contact;
+                if (contact != null)
+                {
+                    var addresses = contact.Addresses
+                        .Concat(@event.Order.Addresses)
+                        .Concat(@event.Order.Shipments.Select(shipment =&gt; shipment.DeliveryAddress))
+                        .Where(address =&gt; address != null)
+                        .Distinct()
+                        .ToList();
+
+                    if (!addresses.SequenceEqual(contact.Addresses))
+                    {
+                        foreach (var address in addresses)
+                        {
+                            address.Name = address.ToString();
+                            address.Name = address.Name.Substring(0, Math.Min(1800, address.Name.Length));
+                        }
+                        await _memberService.UpdateContactAddressesAsync(contact.Id, addresses);
+                    }
+                }
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,64,0],[14,9,14,10,0],[15,13,15,44,0],[16,9,16,10,0],[19,9,19,10,0],[20,13,20,38,0],[21,13,21,14,0],[23,17,23,71,0],[24,17,24,37,0],[25,17,25,18,0],[26,21,31,35,0],[28,75,28,99,0],[29,43,29,58,0],[33,21,33,69,0],[34,21,34,22,0],[35,25,35,32,0],[35,34,35,45,0],[35,46,35,48,0],[35,49,35,58,0],[36,25,36,26,0],[37,29,37,63,0],[38,29,38,107,0],[39,25,39,26,0],[40,25,40,97,0],[41,21,41,22,0],[42,17,42,18,0],[43,13,43,14,0],[44,9,44,10,0]]);
+    </script>
+  </body>
+</html>

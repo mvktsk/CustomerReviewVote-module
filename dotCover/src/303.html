@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\program.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.IO;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+
+namespace VirtoCommerce.Storefront
+{
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            CreateWebHostBuilder(args).Build().Run();
+        }
+
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =&gt;
+           WebHost.CreateDefaultBuilder(args)
+              .UseApplicationInsights()
+              .UseContentRoot(Directory.GetCurrentDirectory())
+              .UseIISIntegration()
+              .ConfigureLogging((hostingContext, logging) =&gt;
+              {
+                  logging.AddConfiguration(hostingContext.Configuration.GetSection(&quot;Logging&quot;));
+                  logging.AddConsole();
+                  logging.AddDebug();
+              })
+              .UseStartup&lt;Startup&gt;();
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,10,0],[13,13,13,54,0],[14,9,14,10,0],[17,12,27,37,0],[22,15,22,16,0],[23,19,23,96,0],[24,19,24,40,0],[25,19,25,38,0],[26,15,26,16,0]]);
+    </script>
+  </body>
+</html>

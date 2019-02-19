@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\subscriptions\subscriptioncacheregion.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Primitives;
+using VirtoCommerce.Storefront.Model.Common.Caching;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public class SubscriptionCacheRegion : CancellableCacheRegion&lt;SubscriptionCacheRegion&gt;
+    {
+        private static readonly ConcurrentDictionary&lt;string, CancellationTokenSource&gt; _customerSubscriptionRegionTokenLookup =
+        new ConcurrentDictionary&lt;string, CancellationTokenSource&gt;();
+
+        public static IChangeToken CreateCustomerSubscriptionChangeToken(string customerId)
+        {
+            if (customerId == null)
+            {
+                throw new ArgumentNullException(nameof(customerId));
+            }
+            var cancellationTokenSource = _customerSubscriptionRegionTokenLookup.GetOrAdd(customerId, new CancellationTokenSource());
+            return new CompositeChangeToken(new[] { CreateChangeToken(), new CancellationChangeToken(cancellationTokenSource.Token) });
+        }
+
+        public static void ExpireCustomerSubscription(string customerId)
+        {
+            if (!string.IsNullOrEmpty(customerId) &amp;&amp; _customerSubscriptionRegionTokenLookup.TryRemove(customerId, out var token))
+            {
+                token.Cancel();
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,15,69,0],[18,9,18,10,0],[19,13,19,36,0],[20,13,20,14,0],[21,17,21,69,0],[23,13,23,134,0],[24,13,24,136,0],[25,9,25,10,0],[28,9,28,10,0],[29,13,29,130,0],[30,13,30,14,0],[31,17,31,32,0],[32,13,32,14,0],[33,9,33,10,0]]);
+    </script>
+  </body>
+</html>

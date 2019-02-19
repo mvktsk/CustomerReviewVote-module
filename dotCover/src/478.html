@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\bulkordercontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.BulkOrder;
+using VirtoCommerce.Storefront.Model.Cart.Services;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Common.Exceptions;
+using VirtoCommerce.Storefront.Model.Services;
+
+namespace VirtoCommerce.Storefront.Controllers
+{
+    public class BulkOrderController : StorefrontControllerBase
+    {
+        private readonly ICartBuilder _cartBuilder;
+        private readonly ICatalogService _catalogService;
+
+        public BulkOrderController(IWorkContextAccessor workContext, IStorefrontUrlBuilder urlBuilder, ICartBuilder cartBuilder, ICatalogService catalogSearchService)
+            : base(workContext, urlBuilder)
+        {
+            _cartBuilder = cartBuilder;
+            _catalogService = catalogSearchService;
+        }
+
+        // GET: /bulkorder
+        [HttpGet]
+        public ActionResult Index()
+        {
+            return View(&quot;bulk-order&quot;, WorkContext);
+        }
+
+        // POST: /bulkorder/addfielditems
+        [HttpPost]
+        public async Task&lt;ActionResult&gt; AddFieldItems(BulkOrderItem[] items)
+        {
+            await EnsureThatCartExistsAsync();
+
+            using (await AsyncLock.GetLockByKey(WorkContext.CurrentCart.Value.GetCacheKey()).LockAsync())
+            {
+                items = items.Where(i =&gt; !string.IsNullOrEmpty(i.Sku)).ToArray();
+                if (items.Length == 0)
+                {
+                    return StoreFrontRedirect(&quot;~/bulkorder&quot;);
+                }
+
+                var notFoundedSkus = await TryAddItemsToCartAsync(items);
+                foreach (var notFoundedSku in notFoundedSkus)
+                {
+                    ModelState.AddModelError(notFoundedSku, notFoundedSku);
+                }
+
+                if (ModelState.IsValid)
+                {
+                    return StoreFrontRedirect(&quot;~/cart&quot;);
+                }
+                else
+                {
+                    return View(&quot;bulk-order&quot;, WorkContext);
+                }
+            }
+        }
+
+        // POST: /bulkorder/addcsvitems
+        [HttpPost]
+        public async Task&lt;ActionResult&gt; AddCsvItems(string csv)
+        {
+            if (string.IsNullOrEmpty(csv))
+            {
+                return StoreFrontRedirect(&quot;~/bulkorder&quot;);
+            }
+
+            await EnsureThatCartExistsAsync();
+
+            using (await AsyncLock.GetLockByKey(WorkContext.CurrentCart.Value.GetCacheKey()).LockAsync())
+            {
+                var items = csv.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)
+                               .Select(csvRecord =&gt; GetBulkOrderItemFromCsvRecord(csvRecord)).ToArray();
+                if (items.Length == 0)
+                {
+                    return StoreFrontRedirect(&quot;~/bulkorder&quot;);
+                }
+
+                var notFoundedSkus = await TryAddItemsToCartAsync(items);
+                foreach (var notFoundedSku in notFoundedSkus)
+                {
+                    ModelState.AddModelError(notFoundedSku, notFoundedSku);
+                }
+
+                if (ModelState.IsValid)
+                {
+                    return StoreFrontRedirect(&quot;~/cart&quot;);
+                }
+                else
+                {
+                    return View(&quot;bulk-order&quot;, WorkContext);
+                }
+            }
+        }
+
+        private async Task EnsureThatCartExistsAsync()
+        {
+            if (WorkContext.CurrentCart == null)
+            {
+                throw new StorefrontException(&quot;Cart not found&quot;);
+            }
+
+            await _cartBuilder.TakeCartAsync(WorkContext.CurrentCart.Value);
+        }
+
+
+        private async Task&lt;string[]&gt; TryAddItemsToCartAsync(BulkOrderItem[] bulkOrderItems)
+        {
+            var skus = bulkOrderItems.Select(i =&gt; i.Sku);
+            var productSearchResult = await _catalogService.SearchProductsAsync(new ProductSearchCriteria
+            {
+                PageSize = skus.Count(),
+                Terms = new[] { new Term { Name = &quot;code&quot;, Value = string.Join(&quot;,&quot;, skus) } }
+            });
+
+            foreach (var product in productSearchResult.Products)
+            {
+                var bulkOrderItem = bulkOrderItems.FirstOrDefault(i =&gt; i.Sku == product.Sku);
+                if (bulkOrderItem != null)
+                {
+                    await _cartBuilder.AddItemAsync(product, bulkOrderItem.Quantity);
+                }
+            }
+
+            await _cartBuilder.SaveAsync();
+
+            var notFoundedSkus = bulkOrderItems.Select(x =&gt; x.Sku).Except(productSearchResult.Products.Select(x =&gt; x.Sku))
+                                               .Distinct().ToArray();
+            return notFoundedSkus;
+        }
+
+        private BulkOrderItem GetBulkOrderItemFromCsvRecord(string csvRecord)
+        {
+            BulkOrderItem bulkOrderItem = null;
+
+            var splitted = csvRecord.Split(&#39;,&#39;, &#39;;&#39;, &#39; &#39;, &#39;\t&#39;);
+            if (splitted.Length == 2)
+            {
+                var quantity = 0;
+                int.TryParse(splitted[1], out quantity);
+                if (quantity &gt; 0)
+                {
+                    bulkOrderItem = new BulkOrderItem
+                    {
+                        Quantity = quantity,
+                        Sku = splitted[0]
+                    };
+                }
+            }
+
+            return bulkOrderItem;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[21,15,21,44,0],[22,9,22,10,0],[23,13,23,40,0],[24,13,24,52,0],[25,9,25,10,0],[30,9,30,10,0],[31,13,31,52,0],[32,9,32,10,0],[37,9,37,10,0],[38,13,38,47,0],[40,13,40,106,0],[41,13,41,14,0],[42,17,42,82,0],[42,42,42,70,0],[43,17,43,39,0],[44,17,44,18,0],[45,21,45,62,0],[48,17,48,74,0],[49,17,49,24,0],[49,26,49,43,0],[49,44,49,46,0],[49,47,49,61,0],[50,17,50,18,0],[51,21,51,76,0],[52,17,52,18,0],[54,17,54,40,0],[55,17,55,18,0],[56,21,56,57,0],[59,17,59,18,0],[60,21,60,60,0],[63,9,63,10,0],[68,9,68,10,0],[69,13,69,43,0],[70,13,70,14,0],[71,17,71,58,0],[74,13,74,47,0],[76,13,76,106,0],[77,13,77,14,0],[78,17,79,105,0],[79,53,79,93,0],[80,17,80,39,0],[81,17,81,18,0],[82,21,82,62,0],[85,17,85,74,0],[86,17,86,24,0],[86,26,86,43,0],[86,44,86,46,0],[86,47,86,61,0],[87,17,87,18,0],[88,21,88,76,0],[89,17,89,18,0],[91,17,91,40,0],[92,17,92,18,0],[93,21,93,57,0],[96,17,96,18,0],[97,21,97,60,0],[100,9,100,10,0],[103,9,103,10,0],[104,13,104,49,0],[105,13,105,14,0],[106,17,106,65,0],[109,13,109,77,0],[110,9,110,10,0],[114,9,114,10,0],[115,13,115,58,0],[115,51,115,56,0],[116,13,120,16,0],[122,13,122,20,0],[122,22,122,33,0],[122,34,122,36,0],[122,37,122,65,0],[123,13,123,14,0],[124,17,124,94,0],[124,72,124,92,0],[125,17,125,43,0],[126,17,126,18,0],[127,21,127,86,0],[128,17,128,18,0],[129,13,129,14,0],[131,13,131,44,0],[133,13,134,70,0],[133,61,133,66,0],[133,116,133,121,0],[135,13,135,35,0],[136,9,136,10,0],[139,9,139,10,0],[140,13,140,48,0],[142,13,142,65,0],[143,13,143,38,0],[144,13,144,14,0],[145,17,145,34,0],[146,17,146,57,0],[147,17,147,34,0],[148,17,148,18,0],[149,21,153,23,0],[154,17,154,18,0],[155,13,155,14,0],[157,13,157,34,0],[158,9,158,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\pricing\pricingconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Storefront.Common;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Pricing;
+using pricingDto = VirtoCommerce.Storefront.AutoRestClients.PricingModuleApi.Models;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+
+    public static partial class PricingConverter
+    {
+        public static TierPrice ToTierPrice(this pricingDto.Price priceDto, Currency currency)
+        {
+            var listPrice = new Money(priceDto.List ?? 0, currency);
+
+            return new TierPrice(currency)
+            {
+                Quantity = priceDto.MinQuantity ?? 1,
+                Price = priceDto.Sale.HasValue ? new Money(priceDto.Sale.Value, currency) : listPrice
+            };
+        }
+
+        public static Pricelist ToPricelist(this pricingDto.Pricelist pricelistDto, IEnumerable&lt;Currency&gt; availCurrencies, Language language)
+        {
+            var currency = availCurrencies.FirstOrDefault(x =&gt; x.Equals(pricelistDto.Currency)) ?? new Currency(language, pricelistDto.Currency);
+            var result = new Pricelist(currency);
+            result.Id = pricelistDto.Id;
+            return result;
+        }
+
+        public static ProductPrice ToProductPrice(this pricingDto.Price priceDto, IEnumerable&lt;Currency&gt; availCurrencies, Language language)
+        {
+            var currency = availCurrencies.FirstOrDefault(x =&gt; x.Equals(priceDto.Currency)) ?? new Currency(language, priceDto.Currency);
+            var result = new ProductPrice(currency);
+            result.ProductId = priceDto.ProductId;
+            result.PricelistId = priceDto.PricelistId;
+
+            result.Currency = currency;
+            result.ListPrice = new Money(priceDto.List ?? 0d, currency);
+            result.SalePrice = priceDto.Sale == null ? result.ListPrice : new Money(priceDto.Sale ?? 0d, currency);
+            result.MinQuantity = priceDto.MinQuantity;
+            return result;
+        }
+
+        public static pricingDto.PriceEvaluationContext ToPriceEvaluationContextDto(this PriceEvaluationContext evalContext)
+        {
+            return evalContext.JsonConvert&lt;pricingDto.PriceEvaluationContext&gt;();
+        }
+
+
+        public static PriceEvaluationContext ToPriceEvaluationContext(this WorkContext workContext, IEnumerable&lt;Pricelist&gt; pricelists, IEnumerable&lt;Product&gt; products = null)
+        {
+            if (workContext == null)
+            {
+                throw new ArgumentNullException(nameof(workContext));
+            }
+
+            //Evaluate products prices
+            var result = new PriceEvaluationContext
+            {
+
+                CatalogId = workContext.CurrentStore.Catalog,
+                Language = workContext.CurrentLanguage.CultureName,
+                StoreId = workContext.CurrentStore.Id
+            };
+
+            if (workContext.CurrentUser != null)
+            {
+                result.CustomerId = workContext.CurrentUser.Id;
+                var contact = workContext.CurrentUser?.Contact;
+
+                if (contact != null)
+                {
+                    result.GeoTimeZone = contact.TimeZone;
+                    var address = contact.DefaultShippingAddress ?? contact.DefaultBillingAddress;
+                    if (address != null)
+                    {
+                        result.GeoCity = address.City;
+                        result.GeoCountry = address.CountryCode;
+                        result.GeoState = address.RegionName;
+                        result.GeoZipCode = address.PostalCode;
+                    }
+                    if (contact.UserGroups != null)
+                    {
+                        result.UserGroups = contact.UserGroups;
+                    }
+                }
+            }
+            if (pricelists != null)
+            {
+                result.PricelistIds = pricelists.Select(p =&gt; p.Id).ToList();
+            }
+            if (products != null)
+            {
+                result.ProductIds = products.Select(p =&gt; p.Id).ToList();
+            }
+            return result;
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,9,17,10,0],[18,13,18,69,0],[20,13,24,15,0],[25,9,25,10,0],[28,9,28,10,0],[29,13,29,146,0],[29,64,29,95,0],[30,13,30,50,0],[31,13,31,41,0],[32,13,32,27,0],[33,9,33,10,0],[36,9,36,10,0],[37,13,37,138,0],[37,64,37,91,0],[38,13,38,53,0],[39,13,39,51,0],[40,13,40,55,0],[42,13,42,40,0],[43,13,43,73,0],[44,13,44,116,0],[45,13,45,55,0],[46,13,46,27,0],[47,9,47,10,0],[50,9,50,10,0],[51,13,51,81,0],[52,9,52,10,0],[56,9,56,10,0],[57,13,57,37,0],[58,13,58,14,0],[59,17,59,70,0],[63,13,69,15,0],[71,13,71,49,0],[72,13,72,14,0],[73,17,73,64,0],[74,17,74,64,0],[76,17,76,37,0],[77,17,77,18,0],[78,21,78,59,0],[79,21,79,99,0],[80,21,80,41,0],[81,21,81,22,0],[82,25,82,55,0],[83,25,83,65,0],[84,25,84,62,0],[85,25,85,64,0],[86,21,86,22,0],[87,21,87,52,0],[88,21,88,22,0],[89,25,89,64,0],[90,21,90,22,0],[91,17,91,18,0],[92,13,92,14,0],[93,13,93,36,0],[94,13,94,14,0],[95,17,95,77,0],[95,62,95,66,0],[96,13,96,14,0],[97,13,97,34,0],[98,13,98,14,0],[99,17,99,73,0],[99,58,99,62,0],[100,13,100,14,0],[101,13,101,27,0],[102,9,102,10,0]]);
+    </script>
+  </body>
+</html>

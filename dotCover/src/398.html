@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\pricing\pricingservice.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
+using VirtoCommerce.Storefront.AutoRestClients.PricingModuleApi;
+using VirtoCommerce.Storefront.Extensions;
+using VirtoCommerce.Storefront.Infrastructure;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Caching;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common.Caching;
+using VirtoCommerce.Storefront.Model.Inventory.Services;
+using VirtoCommerce.Storefront.Model.Marketing.Services;
+using VirtoCommerce.Storefront.Model.Pricing;
+using VirtoCommerce.Storefront.Model.Pricing.Services;
+using VirtoCommerce.Storefront.Model.Tax.Services;
+using pricingModel = VirtoCommerce.Storefront.AutoRestClients.PricingModuleApi.Models;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public class PricingService : IPricingService
+    {
+        private readonly IPricingModule _pricingApi;
+        private readonly ITaxEvaluator _taxEvaluator;
+        private readonly IPromotionEvaluator _promotionEvaluator;
+        private readonly IInventoryService _inventoryService;
+        private readonly IStorefrontMemoryCache _memoryCache;
+        private readonly IApiChangesWatcher _apiChangesWatcher;
+
+        public PricingService(IPricingModule pricingApi,
+            ITaxEvaluator taxEvaluator,
+            IPromotionEvaluator promotionEvaluator,
+            IInventoryService inventoryService, IStorefrontMemoryCache memoryCache, IApiChangesWatcher apiChangesWatcher)
+        {
+            _pricingApi = pricingApi;
+            _taxEvaluator = taxEvaluator;
+            _promotionEvaluator = promotionEvaluator;
+            _inventoryService = inventoryService;
+            _memoryCache = memoryCache;
+            _apiChangesWatcher = apiChangesWatcher;
+        }
+
+        #region IPricingService Members
+        public IList&lt;Pricelist&gt; EvaluatePricesLists(PriceEvaluationContext evalContext, WorkContext workContext)
+        {
+            return EvaluatePricesListsAsync(evalContext, workContext).GetAwaiter().GetResult();
+        }
+
+        public virtual async Task&lt;IList&lt;Pricelist&gt;&gt; EvaluatePricesListsAsync(PriceEvaluationContext evalContext, WorkContext workContext)
+        {
+            if (evalContext == null)
+            {
+                throw new ArgumentNullException(nameof(evalContext));
+            }
+            if (workContext == null)
+            {
+                throw new ArgumentNullException(nameof(workContext));
+            }
+            var cacheKey = CacheKey.With(GetType(), &quot;EvaluatePricesLists&quot;, evalContext.GetCacheKey());
+            return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =&gt;
+            {
+                cacheEntry.AddExpirationToken(PricingCacheRegion.CreateChangeToken());
+                cacheEntry.AddExpirationToken(_apiChangesWatcher.CreateChangeToken());
+
+                return (await _pricingApi.EvaluatePriceListsAsync(evalContext.ToPriceEvaluationContextDto())).Select(x =&gt; x.ToPricelist(workContext.AllCurrencies, workContext.CurrentLanguage)).ToList();
+            });
+
+        }
+
+        public virtual async Task EvaluateProductPricesAsync(IEnumerable&lt;Product&gt; products, WorkContext workContext)
+        {
+            if (products == null)
+            {
+                throw new ArgumentNullException(nameof(products));
+            }
+            if (workContext == null)
+            {
+                throw new ArgumentNullException(nameof(workContext));
+            }
+
+            //Evaluate products prices
+            var evalContext = workContext.ToPriceEvaluationContext(workContext.CurrentPricelists, products);
+            var cacheKey = CacheKey.With(GetType(), &quot;EvaluateProductPricesAsync&quot;, evalContext.GetCacheKey());
+            var pricesResponse = await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =&gt;
+            {
+                cacheEntry.AddExpirationToken(PricingCacheRegion.CreateChangeToken());
+                cacheEntry.AddExpirationToken(_apiChangesWatcher.CreateChangeToken());
+
+                return await _pricingApi.EvaluatePricesAsync(evalContext.ToPriceEvaluationContextDto());
+            });
+            ApplyProductPrices(products, pricesResponse, workContext);
+
+            //Evaluate product discounts
+            //Fill product inventories for getting InStockQuantity data for promotion evaluation
+            await _inventoryService.EvaluateProductInventoriesAsync(products.ToList(), workContext);
+            var promoEvalContext = workContext.ToPromotionEvaluationContext(products);
+            await _promotionEvaluator.EvaluateDiscountsAsync(promoEvalContext, products);
+
+            //Evaluate product taxes
+            var taxEvalContext = workContext.ToTaxEvaluationContext(products);
+            await _taxEvaluator.EvaluateTaxesAsync(taxEvalContext, products);
+        }
+
+        #endregion
+
+        protected virtual void ApplyProductPrices(IEnumerable&lt;Product&gt; products, IList&lt;pricingModel.Price&gt; prices, WorkContext workContext)
+        {
+            foreach (var product in products)
+            {
+                var productPrices = prices.Where(x =&gt; x.ProductId == product.Id)
+                                          .Select(x =&gt; x.ToProductPrice(workContext.AllCurrencies, workContext.CurrentLanguage));
+                product.ApplyPrices(productPrices, workContext.CurrentCurrency, workContext.AllCurrencies);
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[31,9,34,122,0],[35,9,35,10,0],[36,13,36,38,0],[37,13,37,42,0],[38,13,38,54,0],[39,13,39,50,0],[40,13,40,40,0],[41,13,41,52,0],[42,9,42,10,0],[46,9,46,10,0],[47,13,47,96,0],[48,9,48,10,0],[51,9,51,10,0],[52,13,52,37,0],[53,13,53,14,0],[54,17,54,70,0],[56,13,56,37,0],[57,13,57,14,0],[58,17,58,70,0],[60,13,60,103,0],[61,13,67,16,0],[62,13,62,14,0],[63,17,63,87,0],[64,17,64,87,0],[66,17,66,203,0],[66,123,66,192,0],[67,13,67,14,0],[69,9,69,10,0],[72,9,72,10,0],[73,13,73,34,0],[74,13,74,14,0],[75,17,75,67,0],[77,13,77,37,0],[78,13,78,14,0],[79,17,79,70,0],[83,13,83,109,0],[84,13,84,110,0],[85,13,91,16,0],[86,13,86,14,0],[87,17,87,87,0],[88,17,88,87,0],[90,17,90,105,0],[91,13,91,14,0],[92,13,92,71,0],[96,13,96,101,0],[97,13,97,87,0],[98,13,98,90,0],[101,13,101,79,0],[102,13,102,78,0],[103,9,103,10,0],[108,9,108,10,0],[109,13,109,20,0],[109,22,109,33,0],[109,34,109,36,0],[109,37,109,45,0],[110,13,110,14,0],[111,17,112,130,0],[111,55,111,80,0],[112,56,112,128,0],[113,17,113,108,0],[114,13,114,14,0],[115,9,115,10,0]]);
+    </script>
+  </body>
+</html>

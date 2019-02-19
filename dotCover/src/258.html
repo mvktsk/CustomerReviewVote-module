@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\valueobject.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Web;
+
+namespace VirtoCommerce.Storefront.Model.Common
+{
+    public abstract class ValueObject : IValueObject, ICacheKey
+    {
+        private static readonly ConcurrentDictionary&lt;Type, IReadOnlyCollection&lt;PropertyInfo&gt;&gt; TypeProperties = new ConcurrentDictionary&lt;Type, IReadOnlyCollection&lt;PropertyInfo&gt;&gt;();
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(this, obj))
+                return true;
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (GetType() != obj.GetType())
+                return false;
+            var other = obj as ValueObject;
+            return other != null &amp;&amp; GetEqualityComponents().SequenceEqual(other.GetEqualityComponents());
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return GetEqualityComponents().Aggregate(17, (current, obj) =&gt; current * 23 + (obj?.GetHashCode() ?? 0));
+            }
+        }
+
+        public static bool operator ==(ValueObject left, ValueObject right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(ValueObject left, ValueObject right)
+        {
+            return !Equals(left, right);
+        }
+
+        public override string ToString()
+        {
+            return $&quot;{{{string.Join(&quot;, &quot;, GetProperties().Select(f =&gt; $&quot;{f.Name}: {f.GetValue(this)}&quot;))}}}&quot;;
+        }
+
+        public virtual string GetCacheKey()
+        {
+            return string.Join(&quot;|&quot;, GetEqualityComponents().Select(x =&gt; x ?? &quot;null&quot;).Select(x =&gt; x is ICacheKey cacheKey ? cacheKey.GetCacheKey() : x.ToString()));
+        }
+
+        protected virtual IEnumerable&lt;object&gt; GetEqualityComponents()
+        {
+            foreach (var property in GetProperties())
+            {
+                var value = property.GetValue(this);
+                if (value == null)
+                {
+                    yield return &quot;null&quot;;
+                }
+                else
+                {
+                    var valueType = value.GetType();
+                    if (valueType.IsAssignableFromGenericList())
+                    {
+                        foreach (var child in ((IEnumerable)value))
+                        {
+                            yield return child ?? &quot;null&quot;;
+                        }
+                    }
+                    else
+                    {
+                        yield return value;
+                    }
+                }
+            }
+        }
+
+        protected virtual IEnumerable&lt;PropertyInfo&gt; GetProperties()
+        {
+            return TypeProperties.GetOrAdd(
+                GetType(),
+                t =&gt; t
+                    .GetTypeInfo()
+                    .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                    .OrderBy(p =&gt; p.Name)
+                    .ToList());
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,180,1],[16,9,16,10,1],[17,13,17,44,1],[18,17,18,29,1],[19,13,19,44,1],[20,17,20,30,0],[21,13,21,44,1],[22,17,22,30,1],[23,13,23,44,1],[24,13,24,106,1],[25,9,25,10,1],[28,9,28,10,1],[30,13,30,14,1],[31,17,31,122,1],[31,80,31,120,1],[33,9,33,10,1],[36,9,36,10,1],[37,13,37,40,1],[38,9,38,10,1],[41,9,41,10,1],[42,13,42,41,1],[43,9,43,10,1],[46,9,46,10,0],[47,13,47,109,0],[47,71,47,102,0],[48,9,48,10,0],[51,9,51,10,0],[52,13,52,164,0],[52,73,52,84,0],[52,98,52,161,0],[53,9,53,10,0],[56,9,56,10,1],[57,13,57,20,1],[57,22,57,34,1],[57,35,57,37,1],[57,38,57,53,1],[58,13,58,14,1],[59,17,59,53,1],[60,17,60,35,1],[61,17,61,18,0],[62,21,62,41,0],[63,17,63,18,0],[65,17,65,18,1],[66,21,66,53,1],[67,21,67,65,1],[68,21,68,22,1],[69,25,69,32,1],[69,34,69,43,1],[69,44,69,46,1],[69,47,69,67,1],[70,25,70,26,1],[71,29,71,58,1],[72,25,72,26,1],[73,21,73,22,1],[75,21,75,22,1],[76,25,76,44,1],[77,21,77,22,1],[78,17,78,18,1],[79,13,79,14,1],[80,9,80,10,1],[83,9,83,10,1],[84,13,90,32,1],[86,22,90,30,1],[89,35,89,41,1],[91,9,91,10,1]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\security\permissionauthorizationhandler.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using VirtoCommerce.Storefront.Model.Security;
+
+namespace VirtoCommerce.Storefront.Domain.Security
+{
+    public class PermissionAuthorizationHandler : AuthorizationHandler&lt;PermissionAuthorizationRequirement&gt;
+    {
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionAuthorizationRequirement requirement)
+        {
+            if (context.User.IsInRole(SecurityConstants.Roles.Administrator))
+            {
+                context.Succeed(requirement);
+            }
+            if (context.User.HasClaim(SecurityConstants.Claims.PermissionClaimType, requirement.Permission))
+            {
+                context.Succeed(requirement);
+            }
+            return Task.CompletedTask;
+        }
+
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,9,10,10,0],[11,13,11,78,0],[12,13,12,14,0],[13,17,13,46,0],[14,13,14,14,0],[15,13,15,109,0],[16,13,16,14,0],[17,17,17,46,0],[18,13,18,14,0],[19,13,19,39,0],[20,9,20,10,0]]);
+    </script>
+  </body>
+</html>

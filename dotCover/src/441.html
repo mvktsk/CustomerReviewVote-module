@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\security\onlydistributorauthorizationhandler.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.AspNetCore.Authorization;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Security;
+
+namespace VirtoCommerce.Storefront.Domain.Security
+{
+    public class OnlyDistributorAuthorizationRequirement : IAuthorizationRequirement
+    {
+        public const string PolicyName = &quot;OnlyDistributor&quot;;
+    }
+
+    public class OnlyDistributorAuthorizationHandler : UserTypeAuthorizationHandlerBase&lt;OnlyDistributorAuthorizationRequirement&gt;
+    {
+        public OnlyDistributorAuthorizationHandler(IWorkContextAccessor workContextAccessor) : base(workContextAccessor)
+        {
+            UserTypeName = UserType.Distributor;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,96,14,121,0],[15,9,15,10,0],[16,13,16,49,0],[17,9,17,10,0]]);
+    </script>
+  </body>
+</html>

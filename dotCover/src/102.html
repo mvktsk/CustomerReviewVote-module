@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\converters\pageconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using VirtoCommerce.LiquidThemeEngine.Objects;
+using StorefrontModel = VirtoCommerce.Storefront.Model;
+
+namespace VirtoCommerce.LiquidThemeEngine.Converters
+{
+    public static class PageConverter
+    {
+        public static Page ToShopifyModel(this StorefrontModel.StaticContent.ContentItem contentItem)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidPage(contentItem);
+        }
+    }
+
+    public partial class ShopifyModelConverter
+    {
+        public virtual Page ToLiquidPage(StorefrontModel.StaticContent.ContentItem contentItem)
+        {
+            var result = new Page
+            {
+                Author = contentItem.Author,
+                Description = contentItem.Description,
+                Priority = contentItem.Priority,
+                Title = contentItem.Title,
+                Type = contentItem.Type,
+                Url = contentItem.Url,
+                Handle = contentItem.Url,
+                Content = contentItem.Content,
+                Layout = contentItem.Layout,
+                MetaInfo = new MetafieldsCollection(&quot;meta_fields&quot;, new Dictionary&lt;string, object&gt;())
+            };
+            foreach (var metaInfoProp in contentItem.MetaInfo)
+            {
+                result.MetaInfo.Add(metaInfoProp.Key, metaInfoProp.Value);
+            }
+            
+            if (contentItem.PublishedDate.HasValue)
+            {
+                result.PublishedAt = contentItem.PublishedDate.Value;
+            }
+            return result;
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,9,10,10,0],[11,13,11,57,0],[12,13,12,56,0],[13,9,13,10,0],[19,9,19,10,0],[20,13,32,15,0],[33,13,33,20,0],[33,22,33,38,0],[33,39,33,41,0],[33,42,33,62,0],[34,13,34,14,0],[35,17,35,75,0],[36,13,36,14,0],[38,13,38,52,0],[39,13,39,14,0],[40,17,40,70,0],[41,13,41,14,0],[42,13,42,27,0],[43,9,43,10,0]]);
+    </script>
+  </body>
+</html>

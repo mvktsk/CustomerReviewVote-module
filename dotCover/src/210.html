@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\marketing\promotion.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model.Marketing
+{
+    /// &lt;summary&gt;
+    /// Represents promotion object
+    /// &lt;/summary&gt;
+    public partial class Promotion : Entity
+    {
+        public IList&lt;string&gt; Coupons { get; set; }
+        public string Description { get; set; }
+        public string Name { get; set; }
+        public bool UsePromoSku { get; set; }
+        public string Type { get; set; }
+
+        public string GetReferenceCode()
+        {
+            string result = null;
+
+            // Return the first line of the description
+            var lines = Description?.Split(&#39;\n&#39;, 2);
+            if (lines?.Length &gt; 0)
+            {
+                result = lines[0].Trim();
+            }
+
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,40,11,44,0],[11,45,11,49,0],[12,37,12,41,1],[12,42,12,46,1],[13,30,13,34,0],[13,35,13,39,0],[14,35,14,39,0],[14,40,14,44,0],[15,30,15,34,0],[15,35,15,39,0],[18,9,18,10,0],[19,13,19,34,0],[22,13,22,53,0],[23,13,23,35,0],[24,13,24,14,0],[25,17,25,42,0],[26,13,26,14,0],[28,13,28,27,0],[29,9,29,10,0]]);
+    </script>
+  </body>
+</html>

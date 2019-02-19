@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\stores\selectcurrentlanguagepolicy.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.AspNetCore.Http;
+using System;
+using System.Linq;
+using System.Text.RegularExpressions;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Stores;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public static class SelectCurrentLanguagePolicy
+    {
+        public static Language GetCurrentLanguage(this HttpContext context, Store store)
+        {
+            if (store == null)
+            {
+                throw new ArgumentNullException(nameof(store));
+            }
+
+            //Try to get language from request
+            return TryGetRequestLanguage(context, store, store.DefaultLanguage);
+        }
+
+        public static Language GetRequestLanguage(this HttpContext context, Store store)
+        {
+            if (store == null)
+            {
+                throw new ArgumentNullException(nameof(store));
+            }
+
+            return TryGetRequestLanguage(context, store);
+        }
+
+        private static Language TryGetRequestLanguage(HttpContext context, Store store, Language defaultValue = null)
+        {
+            var result = defaultValue;
+            var regexpPattern = string.Format(@&quot;\/({0})\/?&quot;, string.Join(&quot;|&quot;, store.Languages.Select(x =&gt; x.CultureName)));
+            var match = Regex.Match(context.Request.Path, regexpPattern, RegexOptions.IgnoreCase);
+            if (match.Success &amp;&amp; match.Groups.Count &gt; 1)
+            {
+                var language = new Language(match.Groups[1].Value);
+                //Get store default language if language not in the supported by stores list
+                result = store.Languages.Contains(language) ? language : result;
+            }
+
+            return result;
+        }
+
+        public static string ReplaceRequestLanguage(this HttpContext context, string oldLanguage, string newLanguage)
+        {
+            string requestUrlPath = context.Request.Path;
+            requestUrlPath = requestUrlPath.TrimStart(&#39;/&#39;);
+            var slugs = requestUrlPath.Split(&#39;/&#39;);
+            if (slugs.Length &gt; 1 &amp;&amp; slugs[1].EqualsInvariant(oldLanguage))
+            {
+                slugs[1] = newLanguage;
+            }
+            requestUrlPath = &#39;/&#39; + string.Join(&#39;/&#39;, slugs);
+            return requestUrlPath + context.Request.QueryString;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,10,0],[16,13,16,31,0],[17,13,17,14,0],[18,17,18,64,0],[22,13,22,81,0],[23,9,23,10,0],[26,9,26,10,0],[27,13,27,31,0],[28,13,28,14,0],[29,17,29,64,0],[32,13,32,58,0],[33,9,33,10,0],[36,9,36,10,0],[37,13,37,39,0],[38,13,38,124,0],[38,107,38,120,0],[39,13,39,99,0],[40,13,40,57,0],[41,13,41,14,0],[42,17,42,68,0],[44,17,44,81,0],[45,13,45,14,0],[47,13,47,27,0],[48,9,48,10,0],[51,9,51,10,0],[52,13,52,58,0],[53,13,53,60,0],[54,13,54,51,0],[55,13,55,75,0],[56,13,56,14,0],[57,17,57,40,0],[58,13,58,14,0],[59,13,59,60,0],[60,13,60,65,0],[61,9,61,10,0]]);
+    </script>
+  </body>
+</html>

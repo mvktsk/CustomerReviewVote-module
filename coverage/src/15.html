@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\customerreviewvote-module\newmanagedmodule.data\services\customerreviewservice.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using CustomerReviewVotes.Core.Model;
+using CustomerReviewVotes.Core.Services;
+using CustomerReviewVotes.Data.Model;
+using CustomerReviewVotes.Data.Repositories;
+using System;
+using System.Linq;
+using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Data.Infrastructure;
+
+namespace CustomerReviewVotes.Data.Services
+{
+    public class CustomerReviewService : ServiceBase, ICustomerReviewService
+    {
+        private readonly Func&lt;ICustomerReviewRepository&gt; _repositoryFactory;
+
+        public CustomerReviewService(Func&lt;ICustomerReviewRepository&gt; repositoryFactory)
+        {
+            _repositoryFactory = repositoryFactory;
+        }
+
+        public void DeleteCustomerRevies(string[] ids)
+        {
+            using (var repository = _repositoryFactory())
+            {
+                repository.DeleteCustomerReviews(ids);
+                CommitChanges(repository);
+            }
+        }
+
+        public CustomerReview[] GetReviewByIds(string[] ids)
+        {
+            using (var repository = _repositoryFactory())
+            {
+                return repository.GetReviewByIds(ids).Select(x =&gt; x.ToModel(AbstractTypeFactory&lt;CustomerReview&gt;.TryCreateInstance())).ToArray();
+            }
+        }
+
+        public void SaveCustomerReviews(CustomerReview[] items)
+        {
+            if (items == null)
+            {
+                throw new ArgumentNullException(nameof(items));
+            }
+
+            var pkMap = new PrimaryKeyResolvingMap();
+            using (var repository = _repositoryFactory())
+            {
+                using (var changeTracker = GetChangeTracker(repository))
+                {
+                    var alreadyExistEntities = repository.GetReviewByIds(items.Where(m =&gt; !m.IsTransient()).Select(x =&gt; x.Id).ToArray());
+                    foreach (var derivativeContract in items)
+                    {
+                        var sourceEntity = AbstractTypeFactory&lt;CustomerReviewEntity&gt;.TryCreateInstance().FromModel(derivativeContract, pkMap);
+                        var targetEntity = alreadyExistEntities.FirstOrDefault(x =&gt; x.Id == sourceEntity.Id);
+                        if (targetEntity != null)
+                        {
+                            changeTracker.Attach(targetEntity);
+                            sourceEntity.Patch(targetEntity);
+                        }
+                        else
+                        {
+                            repository.Add(sourceEntity);
+                        }
+                    }
+                    CommitChanges(repository);
+                    pkMap.ResolvePrimaryKeys();
+                }
+            }
+        }
+        public void DeleteCustomerReviews(string[] ids)
+        {
+            using (var repository = _repositoryFactory())
+            {
+                repository.DeleteCustomerReviews(ids);
+                CommitChanges(repository);
+            }
+        }
+        public CustomerReviewVote[] GetVoteByIds(string[] ids)
+        {
+            using (var repository = _repositoryFactory())
+            {
+                return repository.GetVoteByIds(ids).Select(x =&gt; x.ToModel(AbstractTypeFactory&lt;CustomerReviewVote&gt;.TryCreateInstance())).ToArray();
+            }
+        }
+
+        public void SaveCustomerReviewVotes(CustomerReviewVote[] items)
+        {
+            if (items == null)
+            {
+                throw new ArgumentNullException(nameof(items));
+            }
+
+            var pkMap = new PrimaryKeyResolvingMap();
+            int i = 0;
+            int r = 0;
+            using (var repository = _repositoryFactory())
+            {
+                using (var changeTracker = GetChangeTracker(repository))
+                {
+                    var alreadyExistEntities = repository.GetVoteByIds(items.Where(m =&gt; !m.IsTransient()).Select(x =&gt; x.Id).ToArray());
+                    foreach (var derivativeContract in items)
+                    {
+                        var sourceEntity = AbstractTypeFactory&lt;CustomerReviewVoteEntity&gt;.TryCreateInstance().FromModel(derivativeContract, pkMap);
+                        var targetEntity = alreadyExistEntities.FirstOrDefault(x =&gt; x.Id == sourceEntity.Id);
+                        if (targetEntity != null)
+                        {
+                            changeTracker.Attach(targetEntity);
+                            sourceEntity.Patch(targetEntity);
+                        }
+                        else
+                        {
+                            repository.Add(sourceEntity);
+                        }
+                    }
+
+                    var reviewIds = items.Select(x =&gt; x.CustomerReviewId).ToArray();
+                    UpdateCustomerReviewVotesCount(repository, reviewIds);
+
+                    CommitChanges(repository);
+                    pkMap.ResolvePrimaryKeys();
+                }
+            }
+
+        }
+
+        public void UpdateCustomerReviewVotesCount(ICustomerReviewRepository repository, string[] reviewIds)
+        {
+
+            if (repository == null)
+            {
+                throw new ArgumentNullException(nameof(repository));
+            }
+            var query = repository.GetReviewByIds(reviewIds);
+
+            foreach (var item in query)
+            {
+                item.HelpfullVotesCount = item.CustomerReviewVotes.Count(x =&gt; (x.ReviewRate == VoteRate.Helpfull) &amp;&amp; (x.CustomerReviewId == item.Id));
+                item.UselessVotesCount = item.CustomerReviewVotes.Count(x =&gt; (x.ReviewRate == VoteRate.Useless) &amp;&amp; (x.CustomerReviewId == item.Id));
+                item.TotalVotesCount = item.CustomerReviewVotes.Count(x =&gt; x.CustomerReviewId == item.Id);
+            }
+        }
+
+        public void DeleteCustomerReviewVotes(string[] ids)
+        {
+            using (var repository = _repositoryFactory())
+            {
+
+                var reviewIds = repository.GetVoteByIds(ids).Select(x =&gt; x.CustomerReviewId).ToArray();
+
+                repository.DeleteCustomerReviewVotes(ids);
+                UpdateCustomerReviewVotesCount(repository, reviewIds);
+                CommitChanges(repository);
+            }
+        }
+
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,9,16,88,1],[17,9,17,10,1],[18,13,18,52,1],[19,9,19,10,1],[22,9,22,10,0],[23,20,23,57,0],[24,13,24,14,0],[25,17,25,55,0],[26,17,26,43,0],[27,13,27,14,0],[28,9,28,10,0],[31,9,31,10,1],[32,20,32,57,1],[33,13,33,14,1],[34,17,34,145,1],[34,67,34,133,1],[36,9,36,10,1],[39,9,39,10,1],[40,13,40,31,1],[41,13,41,14,0],[42,17,42,64,0],[45,13,45,54,1],[46,20,46,57,1],[47,13,47,14,1],[48,24,48,72,1],[49,17,49,18,1],[50,21,50,138,1],[50,91,50,107,1],[50,121,50,125,1],[51,21,51,28,1],[51,30,51,52,1],[51,53,51,55,1],[51,56,51,61,1],[52,21,52,22,1],[53,25,53,143,1],[54,25,54,110,1],[54,85,54,108,1],[55,25,55,50,1],[56,25,56,26,1],[57,29,57,64,1],[58,29,58,62,1],[59,25,59,26,1],[61,25,61,26,1],[62,29,62,58,1],[63,25,63,26,1],[64,21,64,22,1],[65,21,65,47,1],[66,21,66,48,1],[67,17,67,18,1],[68,13,68,14,1],[69,9,69,10,1],[71,9,71,10,1],[72,20,72,57,1],[73,13,73,14,1],[74,17,74,55,1],[75,17,75,43,1],[76,13,76,14,1],[77,9,77,10,1],[79,9,79,10,1],[80,20,80,57,1],[81,13,81,14,1],[82,17,82,147,1],[82,65,82,135,1],[84,9,84,10,1],[87,9,87,10,1],[88,13,88,31,1],[89,13,89,14,0],[90,17,90,64,0],[93,13,93,54,1],[94,13,94,23,1],[95,13,95,23,1],[96,20,96,57,1],[97,13,97,14,1],[98,24,98,72,1],[99,17,99,18,1],[100,21,100,136,1],[100,89,100,105,1],[100,119,100,123,1],[101,21,101,28,1],[101,30,101,52,1],[101,53,101,55,1],[101,56,101,61,1],[102,21,102,22,1],[103,25,103,147,1],[104,25,104,110,1],[104,85,104,108,1],[105,25,105,50,1],[106,25,106,26,1],[107,29,107,64,1],[108,29,108,62,1],[109,25,109,26,1],[111,25,111,26,1],[112,29,112,58,1],[113,25,113,26,1],[114,21,114,22,1],[116,21,116,85,1],[116,55,116,73,1],[117,21,117,75,1],[119,21,119,47,1],[120,21,120,48,1],[121,17,121,18,1],[122,13,122,14,1],[124,9,124,10,1],[127,9,127,10,1],[129,13,129,36,1],[130,13,130,14,0],[131,17,131,69,0],[133,13,133,62,1],[135,13,135,20,1],[135,22,135,30,1],[135,31,135,33,1],[135,34,135,39,1],[136,13,136,14,1],[137,17,137,151,1],[137,79,137,149,1],[138,17,138,149,1],[138,78,138,147,1],[139,17,139,107,1],[139,76,139,105,1],[140,13,140,14,1],[141,9,141,10,1],[144,9,144,10,1],[145,20,145,57,1],[146,13,146,14,1],[148,17,148,104,1],[148,74,148,92,1],[150,17,150,59,1],[151,17,151,71,1],[152,17,152,43,1],[153,13,153,14,1],[154,9,154,10,1]]);
+    </script>
+  </body>
+</html>

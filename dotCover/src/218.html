@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\inventory\productinventory.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model.Inventory
+{
+    public partial class ProductInventory : ValueObject
+    {
+        /// &lt;summary&gt;
+        /// Gets or Sets PreorderAvailabilityDate
+        /// &lt;/summary&gt;
+        public DateTime? PreorderAvailabilityDate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets BackorderAvailabilityDate
+        /// &lt;/summary&gt;
+        public DateTime? BackorderAvailabilityDate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets AllowPreorder
+        /// &lt;/summary&gt;
+        public bool? AllowPreorder { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets AllowBackorder
+        /// &lt;/summary&gt;
+        public bool? AllowBackorder { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets Status
+        /// &lt;/summary&gt;
+        public InventoryStatus Status { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets FulfillmentCenterId
+        /// &lt;/summary&gt;
+        public string FulfillmentCenterId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets InStockQuantity
+        /// &lt;/summary&gt;
+        public long? InStockQuantity { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets ReservedQuantity
+        /// &lt;/summary&gt;
+        public long? ReservedQuantity { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets ProductId
+        /// &lt;/summary&gt;
+        public string ProductId { get; set; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,53,11,57,0],[11,58,11,62,0],[16,54,16,58,0],[16,59,16,63,0],[21,38,21,42,0],[21,43,21,47,0],[26,39,26,43,0],[26,44,26,48,0],[31,41,31,45,0],[31,46,31,50,0],[36,45,36,49,0],[36,50,36,54,0],[41,40,41,44,0],[41,45,41,49,0],[46,41,46,45,0],[46,46,46,50,0],[51,35,51,39,0],[51,40,51,44,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.tests\valueobjecttests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using VirtoCommerce.Storefront.Model.Common;
+using Xunit;
+
+namespace VirtoCommerce.Storefront.Tests
+{
+    public class ValueObjectTests
+    {
+        public class ComplexObject : ValueObject
+        {
+            public List&lt;string&gt; ListProperty { get; set; }
+            public string SimpleProperty { get; set; }         
+        }
+      
+        [Fact]
+        public void SameObjectHashCodeAreSame()
+        {
+            var value1 = new ComplexObject
+            {
+                SimpleProperty = &quot;A&quot;,
+                ListProperty = new List&lt;string&gt; { &quot;A&quot;, &quot;B&quot;, &quot;C&quot; }
+            };
+            var value2 = new ComplexObject
+            {
+                SimpleProperty = &quot;A&quot;,
+                ListProperty = new List&lt;string&gt; { &quot;A&quot;, &quot;B&quot;, &quot;C&quot; }
+            };
+            var code1 = value1.GetHashCode();
+            var code2 = value2.GetHashCode();
+            Assert.Equal(code1, code2);
+            Assert.Equal(value1, value2);
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,48,11,52,1],[11,53,11,57,1],[12,44,12,48,1],[12,49,12,53,1],[17,9,17,10,1],[18,13,22,15,1],[23,13,27,15,1],[28,13,28,46,1],[29,13,29,46,1],[30,13,30,40,1],[31,13,31,42,1],[32,9,32,10,1]]);
+    </script>
+  </body>
+</html>

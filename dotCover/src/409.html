@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\staticcontent\linklistconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Linq;
+using VirtoCommerce.Storefront.Model;
+using contentDto = VirtoCommerce.Storefront.AutoRestClients.ContentModuleApi.Models;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+   
+
+    public static partial class LinkListConverter
+    {
+        public static MenuLinkList ToMenuLinkList(this contentDto.MenuLinkList menuLinkListDto)
+        {
+            var result = new MenuLinkList
+            {
+                Id = menuLinkListDto.Id,
+                Name = menuLinkListDto.Name,
+                StoreId = menuLinkListDto.StoreId,
+
+
+                Language = string.IsNullOrEmpty(menuLinkListDto.Language) ? Language.InvariantLanguage : new Language(menuLinkListDto.Language)
+            };
+
+            if (menuLinkListDto.MenuLinks != null)
+            {
+                result.MenuLinks = menuLinkListDto.MenuLinks.Select(ToMenuLink).ToList();
+            }
+
+            return result;
+        }
+
+        public static MenuLink ToMenuLink(this contentDto.MenuLink menuLinkDto)
+        {
+            var result = new MenuLink();
+            if (menuLinkDto.AssociatedObjectType != null)
+            {
+                if (&quot;product&quot; == menuLinkDto.AssociatedObjectType.ToLowerInvariant())
+                {
+                    result = new ProductMenuLink();
+                }
+                else if (&quot;category&quot; == menuLinkDto.AssociatedObjectType.ToLowerInvariant())
+                {
+                    result = new CategoryMenuLink();
+                }
+            }         
+            result.Id = menuLinkDto.Id;
+            result.AssociatedObjectId = menuLinkDto.AssociatedObjectId;
+            result.AssociatedObjectType = menuLinkDto.AssociatedObjectType;
+            result.Priority = menuLinkDto.Priority ?? 0;
+            result.Title = menuLinkDto.Title;
+            result.Url = menuLinkDto.Url;
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,10,0],[13,13,21,15,0],[23,13,23,51,0],[24,13,24,14,0],[25,17,25,90,0],[26,13,26,14,0],[28,13,28,27,0],[29,9,29,10,0],[32,9,32,10,0],[33,13,33,41,0],[34,13,34,58,0],[35,13,35,14,0],[36,17,36,86,0],[37,17,37,18,0],[38,21,38,52,0],[39,17,39,18,0],[40,22,40,92,0],[41,17,41,18,0],[42,21,42,53,0],[43,17,43,18,0],[44,13,44,14,0],[45,13,45,40,0],[46,13,46,72,0],[47,13,47,76,0],[48,13,48,57,0],[49,13,49,46,0],[50,13,50,42,0],[51,13,51,27,0],[52,9,52,10,0]]);
+    </script>
+  </body>
+</html>

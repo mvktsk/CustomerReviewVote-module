@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\routing\storefrontroute.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Routing;
+
+namespace VirtoCommerce.Storefront.Routing
+{
+    public class StorefrontRoute : Route
+    {
+        private const string _regexp = &quot;{store}/{language:regex([a-zA-Z]{{2}}-[a-zA-Z]{{2}})}/&quot;;
+        public StorefrontRoute(IRouter target, string routeTemplate, IInlineConstraintResolver inlineConstraintResolver)
+            : this(target, routeTemplate, null, null, null, inlineConstraintResolver)
+        {
+        }
+
+        public StorefrontRoute(IRouter target, string routeTemplate, RouteValueDictionary defaults, IDictionary&lt;string, object&gt; constraints, RouteValueDictionary dataTokens, IInlineConstraintResolver inlineConstraintResolver)
+            : this(target, null, routeTemplate, defaults, constraints, dataTokens, inlineConstraintResolver)
+        {
+        }
+
+        public StorefrontRoute(IRouter target, string routeName, string routeTemplate, RouteValueDictionary defaults, IDictionary&lt;string, object&gt; constraints, RouteValueDictionary dataTokens, IInlineConstraintResolver inlineConstraintResolver)
+            : base(target, routeName, _regexp + routeTemplate, defaults, constraints, dataTokens, inlineConstraintResolver)
+        {          
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,15,13,86,0],[14,9,14,10,0],[15,9,15,10,0],[18,15,18,109,0],[19,9,19,10,0],[20,9,20,10,0],[23,15,23,124,0],[24,9,24,10,0],[25,9,25,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\shopifythemeworkcontext.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Reflection;
+using DotLiquid;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/objects
+    /// &lt;/summary&gt;
+    public partial class ShopifyThemeWorkContext : ILiquidizable
+    {
+        #region Aliases for shopify theme compliance
+        /// &lt;summary&gt;
+        /// Layout which will be used for rendering current view
+        /// &lt;/summary&gt;
+        public string Layout { get; set; }
+        /// &lt;summary&gt;
+        /// Merchants can specify a page_description.
+        /// &lt;/summary&gt;
+        public string PageDescription { get; set; }
+
+        /// &lt;summary&gt;
+        /// The liquid object page_title returns the title of the current page.
+        /// &lt;/summary&gt;
+        public string PageTitle { get; set; }
+
+        public string PageImageUrl { get; set; }
+
+        /// &lt;summary&gt;
+        /// The liquid object shop returns information about your shop
+        /// &lt;/summary&gt;
+        public Shop Shop { get; set; }
+
+        /// &lt;summary&gt;
+        /// The liquid object cart returns information about customer shopping cart
+        /// &lt;/summary&gt;
+        public Cart Cart { get; set; }
+
+        /// &lt;summary&gt;
+        /// Current single form value  created in DotLiquidThemedView with ModelState errors
+        /// The form object is used within the form tag. It contains attributes of its parent form.
+        /// &lt;/summary&gt;
+        public Form Form { get; set; }
+
+        public ResetPassword ResetPassword { get; set; }
+
+        /// &lt;summary&gt;
+        /// Contains a collection of all of the links in your shop.
+        /// You can access a linklist by calling its handle on linklists
+        /// &lt;/summary&gt;
+        public Linklists Linklists { get; set; }
+        /// &lt;summary&gt;
+        /// Contains a collection of all pages
+        /// &lt;/summary&gt;
+        public Pages Pages { get; set; }
+
+        /// &lt;summary&gt;
+        /// Contains blog search options
+        /// &lt;/summary&gt;
+        public BlogSearch BlogSearch { get; set; }
+        /// &lt;summary&gt;
+        /// Contains collection of all blogs
+        /// &lt;/summary&gt;
+        public Blogs Blogs { get; set; }
+
+        public Product Product { get; set; }
+
+        public Vendor Vendor { get; set; }
+
+        public Page Page { get; set; }
+
+        public Blog Blog { get; set; }
+
+        /// &lt;summary&gt;
+        /// Current blog article
+        /// &lt;/summary&gt;
+        public Article Article { get; set; }
+
+        /// &lt;summary&gt;
+        /// HTML code for payment method prepared form
+        /// &lt;/summary&gt;
+        public string PaymentFormHtml { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns logged in customer or null.
+        /// &lt;/summary&gt;
+        public Customer Customer { get; set; }
+
+        public string CountryOptionTags { get; set; }
+
+        /// &lt;summary&gt;
+        /// The collection https://docs.shopify.com/themes/liquid-documentation/objects/collection
+        /// &lt;/summary&gt;
+        public Collection Collection { get; set; }
+
+        public Collections Collections { get; set; }
+
+        public IMutablePagedList&lt;Product&gt; Products { get; set; }
+
+        public int CurrentPage { get; set; }
+
+        public int PageSize { get; set; }
+
+        public TagCollection CurrentTags { get; set; }
+
+        public string PoweredByLink { get; set; }
+
+        #region Custom properties
+        public Language CurrentLanguage { get; set; }
+
+        public Currency CurrentCurrency { get; set; }
+
+        public Shop[] AllStores { get; set; }
+
+        public Role[] AvailableRoles { get; set; }
+
+        public IMutablePagedList&lt;Vendor&gt; Vendors { get; set; }
+
+        public IMutablePagedList&lt;FulfillmentCenter&gt; FulfillmentCenters { get; set; }
+        public FulfillmentCenter FulfillmentCenter { get; set; }
+
+        /// &lt;summary&gt;
+        /// Current request url
+        /// &lt;/summary&gt;
+        public string RequestUrl { get; set; }
+
+        /// &lt;summary&gt;
+        /// The canonical_url object returns the canonical URL for the current page. The canonical URL is the page&#39;s &quot;default&quot; URL with any URL parameters removed.
+        /// &lt;/summary&gt;
+        public string CanonicalUrl { get; set; }
+
+        /// &lt;summary&gt;
+        /// Search result (products, articles, blogs)
+        /// &lt;/summary&gt;
+        public Search Search { get; set; }
+
+        #endregion
+
+        /// &lt;summary&gt;
+        /// template returns the name of the template used to render the current page, with the .liquid extension omitted.
+        /// &lt;/summary&gt;
+        public string Template { get; set; }
+
+        public Notification Notification { get; set; }
+
+        public Order Order { get; set; }
+
+        public QuoteRequest QuoteRequest { get; set; }
+
+        public IList&lt;LoginProvider&gt; ExternalLoginProviders { get; set; }
+
+        public MetafieldsCollection ApplicationSettings { get; set; }
+
+        #region GDPR consent
+        public bool CanTrack { get; set; }
+        public string ConsentCookie { get; set; }
+        #endregion
+
+        public TagCollection AllTags { get; set; }
+
+        public ProductSearchCriteria ProductSearchCriteria { get; set; }
+
+        public IMutablePagedList&lt;string&gt; Brands { get; set; }
+
+        public TagCollection Types { get; set; }
+
+        #endregion
+
+        #region ILiquidizable members
+
+        public object ToLiquid()
+        {
+            var retVal = new Dictionary&lt;string, object&gt;();
+            foreach (var propertyInfo in GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                retVal.Add(propertyInfo.Name.Decamelize(), propertyInfo.GetValue(this));
+            }
+
+            return retVal;
+        }
+
+        #endregion
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,32,17,36,0],[17,37,17,41,0],[21,41,21,45,0],[21,46,21,50,0],[26,35,26,39,0],[26,40,26,44,0],[28,38,28,42,0],[28,43,28,47,0],[33,28,33,32,0],[33,33,33,37,0],[38,28,38,32,0],[38,33,38,37,0],[44,28,44,32,0],[44,33,44,37,0],[46,46,46,50,0],[46,51,46,55,0],[52,38,52,42,0],[52,43,52,47,0],[56,30,56,34,0],[56,35,56,39,0],[61,40,61,44,0],[61,45,61,49,0],[65,30,65,34,0],[65,35,65,39,0],[67,34,67,38,0],[67,39,67,43,0],[69,32,69,36,0],[69,37,69,41,0],[71,28,71,32,0],[71,33,71,37,0],[73,28,73,32,0],[73,33,73,37,0],[78,34,78,38,0],[78,39,78,43,0],[83,41,83,45,0],[83,46,83,50,0],[88,36,88,40,0],[88,41,88,45,0],[90,43,90,47,0],[90,48,90,52,0],[95,40,95,44,0],[95,45,95,49,0],[97,42,97,46,0],[97,47,97,51,0],[99,54,99,58,0],[99,59,99,63,0],[101,34,101,38,0],[101,39,101,43,0],[103,31,103,35,0],[103,36,103,40,0],[105,44,105,48,0],[105,49,105,53,0],[107,39,107,43,0],[107,44,107,48,0],[110,43,110,47,0],[110,48,110,52,0],[112,43,112,47,0],[112,48,112,52,0],[114,35,114,39,0],[114,40,114,44,0],[116,40,116,44,0],[116,45,116,49,0],[118,52,118,56,0],[118,57,118,61,0],[120,74,120,78,0],[120,79,120,83,0],[121,54,121,58,0],[121,59,121,63,0],[126,36,126,40,0],[126,41,126,45,0],[131,38,131,42,0],[131,43,131,47,0],[136,32,136,36,0],[136,37,136,41,0],[143,34,143,38,0],[143,39,143,43,0],[145,44,145,48,0],[145,49,145,53,0],[147,30,147,34,0],[147,35,147,39,0],[149,44,149,48,0],[149,49,149,53,0],[151,62,151,66,0],[151,67,151,71,0],[153,59,153,63,0],[153,64,153,68,0],[156,32,156,36,0],[156,37,156,41,0],[157,39,157,43,0],[157,44,157,48,0],[160,40,160,44,0],[160,45,160,49,0],[162,62,162,66,0],[162,67,162,71,0],[164,51,164,55,0],[164,56,164,60,0],[166,38,166,42,0],[166,43,166,47,0],[173,9,173,10,0],[174,13,174,59,0],[175,13,175,20,0],[175,22,175,38,0],[175,39,175,41,0],[175,42,175,110,0],[176,13,176,14,0],[177,17,177,89,0],[178,13,178,14,0],[180,13,180,27,0],[181,9,181,10,0]]);
+    </script>
+  </body>
+</html>

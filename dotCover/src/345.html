@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\infrastructure\autorest\virtocommerceapirequesthandler.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.Extensions.Options;
+using Microsoft.Rest;
+using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.Model;
+
+namespace VirtoCommerce.Storefront.Infrastructure.Autorest
+{
+    public class VirtoCommerceApiRequestHandler : ServiceClientCredentials
+    {
+        private readonly IWorkContextAccessor _workContextAccessor;
+        private readonly PlatformEndpointOptions _options;
+
+        public VirtoCommerceApiRequestHandler(IOptions&lt;PlatformEndpointOptions&gt; options, IWorkContextAccessor workContextAccessor)
+        {
+            _options = options.Value;
+            _workContextAccessor = workContextAccessor;
+        }
+
+        public override Task ProcessHttpRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            AddAuthorization(request);
+            AddCurrentUser(request);
+
+            return base.ProcessHttpRequestAsync(request, cancellationToken);
+        }
+
+
+        private void AddAuthorization(HttpRequestMessage request)
+        {
+            if (_options != null)
+            {
+                var signature = new ApiRequestSignature { AppId = _options.AppId };
+
+                var parameters = new[]
+                {
+                    new NameValuePair(null, _options.AppId),
+                    new NameValuePair(null, signature.TimestampString)
+                };
+
+                signature.Hash = HmacUtility.GetHashString(key =&gt; new HMACSHA256(key), _options.SecretKey, parameters);
+
+                request.Headers.Authorization = new AuthenticationHeaderValue(&quot;HMACSHA256&quot;, signature.ToString());
+            }
+        }
+
+        private void AddCurrentUser(HttpRequestMessage request)
+        {
+            var worContex = _workContextAccessor.WorkContext;
+            if (worContex != null)
+            {
+                var currentUser = worContex.CurrentUser;
+
+                //Add special header with user name to each API request for future audit and logging
+                if (currentUser != null &amp;&amp; currentUser.IsRegisteredUser)
+                {
+                    var userName = currentUser.OperatorUserName;
+
+                    if (string.IsNullOrEmpty(userName))
+                    {
+                        userName = currentUser.UserName;
+                    }
+
+                    if (!string.IsNullOrEmpty(userName))
+                    {
+                        request.Headers.Add(&quot;VirtoCommerce-User-Name&quot;, userName);
+                    }
+                }
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,9,18,131,0],[19,9,19,10,0],[20,13,20,38,0],[21,13,21,56,0],[22,9,22,10,0],[25,9,25,10,0],[26,13,26,39,0],[27,13,27,37,0],[29,13,29,77,0],[30,9,30,10,0],[34,9,34,10,0],[35,13,35,34,0],[36,13,36,14,0],[37,17,37,84,0],[39,17,43,19,0],[45,17,45,120,0],[45,67,45,86,0],[47,17,47,115,0],[48,13,48,14,0],[49,9,49,10,0],[52,9,52,10,0],[53,13,53,62,0],[54,13,54,35,0],[55,13,55,14,0],[56,17,56,57,0],[59,17,59,73,0],[60,17,60,18,0],[61,21,61,65,0],[63,21,63,56,0],[64,21,64,22,0],[65,25,65,57,0],[66,21,66,22,0],[68,21,68,57,0],[69,21,69,22,0],[70,25,70,82,0],[71,21,71,22,0],[72,17,72,18,0],[73,13,73,14,0],[74,9,74,10,0]]);
+    </script>
+  </body>
+</html>

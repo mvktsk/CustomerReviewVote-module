@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\streamextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace VirtoCommerce.Storefront.Model.Common
+{
+    public static class StreamExtensions
+    {
+        public static void CopyTo(this Stream fromStream, Stream toStream)
+        {
+            if (fromStream == null)
+                throw new ArgumentNullException(&quot;fromStream&quot;);
+            if (toStream == null)
+                throw new ArgumentNullException(&quot;toStream&quot;);
+
+            var bytes = new byte[8092];
+            int dataRead;
+            while ((dataRead = fromStream.Read(bytes, 0, bytes.Length)) &gt; 0)
+                toStream.Write(bytes, 0, dataRead);
+        }
+
+        public static byte[] ReadFully(this Stream stream)
+        {
+            byte[] buffer = new byte[16 * 1024];
+            using (MemoryStream ms = new MemoryStream())
+            {
+                int read;
+                while ((read = stream.Read(buffer, 0, buffer.Length)) &gt; 0)
+                {
+                    ms.Write(buffer, 0, read);
+                }
+                return ms.ToArray();
+            }
+        }
+
+        public static string ReadToString(this Stream stream)
+        {
+            // convert stream to string
+            StreamReader reader = new StreamReader(stream);
+            return reader.ReadToEnd();
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,10,0],[14,13,14,36,0],[15,17,15,63,0],[16,13,16,34,0],[17,17,17,61,0],[19,13,19,40,0],[21,13,21,77,0],[22,17,22,52,0],[23,9,23,10,0],[26,9,26,10,0],[27,13,27,49,0],[28,20,28,56,0],[29,13,29,14,0],[31,17,31,75,0],[32,17,32,18,0],[33,21,33,47,0],[34,17,34,18,0],[35,17,35,37,0],[37,9,37,10,0],[40,9,40,10,0],[42,13,42,60,0],[43,13,43,39,0],[44,9,44,10,0]]);
+    </script>
+  </body>
+</html>

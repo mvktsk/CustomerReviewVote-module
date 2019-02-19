@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\routing\slugroute.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.AspNetCore.Routing;
+using System;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using VirtoCommerce.Storefront.Common;
+using VirtoCommerce.Storefront.Extensions;
+
+namespace VirtoCommerce.Storefront.Routing
+{
+    /// &lt;summary&gt;
+    /// Reads the slug from request path and tried to find object and controller best matched to it
+    /// &lt;/summary&gt;
+    public class SlugRoute : Route
+    {
+        public SlugRoute(IRouter target, string template, RouteValueDictionary defaults, IInlineConstraintResolver inlineConstraintResolver)
+            : base(target, template, defaults, null, null, inlineConstraintResolver)
+        {
+        }
+      
+        protected override async Task OnRouteMatched(RouteContext context)
+        {
+            var seoRouteService = context.HttpContext.RequestServices.GetRequiredService&lt;ISlugRouteService&gt;();
+            var storefrontUrlBuilder = context.HttpContext.RequestServices.GetRequiredService&lt;IStorefrontUrlBuilder&gt;();
+            var workContext = context.HttpContext.RequestServices.GetRequiredService&lt;IWorkContextAccessor&gt;().WorkContext;
+
+            var path = context.HttpContext.Request.Path.TrimStoreAndLangSegment(workContext.CurrentStore, workContext.CurrentLanguage).ToString().TrimStart(&#39;/&#39;);
+
+            if (!string.IsNullOrEmpty(path))
+            {
+                var seoRouteResponse = await seoRouteService.HandleSlugRequestAsync(path, workContext);
+                if (seoRouteResponse != null)
+                {
+                    if (seoRouteResponse.Redirect)
+                    {
+                        //Redirect via call specific controller method (because usage of Response.Redirect leads to the rendering the main page)
+                        context.RouteData.Values[&quot;action&quot;] = &quot;InternalRedirect&quot;;
+                        context.RouteData.Values[&quot;controller&quot;] = &quot;Common&quot;;
+                        context.RouteData.Values[&quot;url&quot;] = storefrontUrlBuilder.ToAppAbsolute(seoRouteResponse.RedirectLocation);
+                    }
+                    else if (seoRouteResponse.RouteData != null)
+                    {
+                        foreach (var kvp in seoRouteResponse.RouteData)
+                        {
+                            context.RouteData.Values[kvp.Key] = kvp.Value;
+                        }
+                    }
+                }
+            }
+            await base.OnRouteMatched(context);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[19,15,19,85,0],[20,9,20,10,0],[21,9,21,10,0],[24,9,24,10,0],[25,13,25,111,0],[26,13,26,120,0],[27,13,27,122,0],[29,13,29,162,0],[31,13,31,45,0],[32,13,32,14,0],[33,17,33,104,0],[34,17,34,46,0],[35,17,35,18,0],[36,21,36,51,0],[37,21,37,22,0],[39,25,39,81,0],[40,25,40,75,0],[41,25,41,129,0],[42,21,42,22,0],[43,26,43,65,0],[44,21,44,22,0],[45,25,45,32,0],[45,34,45,41,0],[45,42,45,44,0],[45,45,45,71,0],[46,25,46,26,0],[47,29,47,75,0],[48,25,48,26,0],[49,21,49,22,0],[50,17,50,18,0],[51,13,51,14,0],[52,13,52,48,0],[53,9,53,10,0]]);
+    </script>
+  </body>
+</html>

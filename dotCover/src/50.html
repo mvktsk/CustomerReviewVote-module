@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\page.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using DotLiquid;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/objects/page
+    /// &lt;/summary&gt;
+    public partial class Page : Drop
+    {
+        /// &lt;summary&gt;
+        /// Returns the author of a page.
+        /// &lt;/summary&gt;
+        public string Author { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the content of a page.
+        /// &lt;/summary&gt;
+        public string Content { get; set; }
+
+        public string Handle { get; set; }
+        /// &lt;summary&gt;
+        /// Layout name for this page
+        /// &lt;/summary&gt;
+        public string Layout { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the id of the page.
+        /// &lt;/summary&gt;
+        public string Id { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the timestamp of when the page was created. Use the date filter to format the timestamp.
+        /// &lt;/summary&gt;
+        public DateTime PublishedAt { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the name of the custom page template assigned to the page, without the page. prefix nor the .liquid suffix. Returns nil if a custom template is not assigned to the page.
+        /// &lt;/summary&gt;
+        public string TemplateSuffix { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the title of a page.
+        /// &lt;/summary&gt;
+        public string Title { get; set; }
+
+        public string Description { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the relative URL of the page.
+        /// &lt;/summary&gt;
+        public string Url { get; set; }
+
+        public string Type { get; set; }
+
+        public int Priority { get; set; }
+
+        public MetafieldsCollection MetaInfo { get; set; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,32,18,36,0],[18,37,18,41,0],[23,33,23,37,0],[23,38,23,42,0],[25,32,25,36,0],[25,37,25,41,0],[29,32,29,36,0],[29,37,29,41,0],[34,28,34,32,0],[34,33,34,37,0],[39,39,39,43,0],[39,44,39,48,0],[44,40,44,44,0],[44,45,44,49,0],[49,31,49,35,0],[49,36,49,40,0],[51,37,51,41,0],[51,42,51,46,0],[56,29,56,33,0],[56,34,56,38,0],[58,30,58,34,0],[58,35,58,39,0],[60,31,60,35,0],[60,36,60,40,0],[62,48,62,52,0],[62,53,62,57,0]]);
+    </script>
+  </body>
+</html>

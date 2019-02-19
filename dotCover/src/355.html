@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\extensions\hostingenviromentextension.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
+
+namespace VirtoCommerce.Storefront.Extensions
+{
+    public static class HostingEnviromentExtension
+    {
+        public static string MapPath(this IHostingEnvironment hostEnv, string path)
+        {
+            var result = hostEnv.WebRootPath;
+
+            if (path.StartsWith(&quot;~/&quot;))
+            {
+                result = System.IO.Path.Combine(result, path.Replace(&quot;~/&quot;, string.Empty));
+            }
+            else if (Path.IsPathRooted(path))
+            {
+                result = path;
+            }        
+
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,9,9,10,0],[10,13,10,46,0],[12,13,12,39,0],[13,13,13,14,0],[14,17,14,91,0],[15,13,15,14,0],[16,18,16,46,0],[17,13,17,14,0],[18,17,18,31,0],[19,13,19,14,0],[21,13,21,27,0],[22,9,22,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\extensions\serviceclientextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using Microsoft.Rest;
+
+namespace VirtoCommerce.Storefront.Common
+{
+    public static class ServiceClientExtensions
+    {
+        public static T DisableRetries&lt;T&gt;(this T client)
+            where T : ServiceClient&lt;T&gt;
+        {
+            client.SetRetryPolicy(null);
+            return client;
+        }
+
+        public static T WithTimeout&lt;T&gt;(this T client, TimeSpan timeout)
+            where T : ServiceClient&lt;T&gt;
+        {
+            client.HttpClient.Timeout = timeout;
+            return client;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,9,10,10,0],[11,13,11,41,0],[12,13,12,27,0],[13,9,13,10,0],[17,9,17,10,0],[18,13,18,49,0],[19,13,19,27,0],[20,9,20,10,0]]);
+    </script>
+  </body>
+</html>

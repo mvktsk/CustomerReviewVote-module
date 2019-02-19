@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\subscriptions\subscriptionworkcontextbuilderextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using PagedList.Core;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Subscriptions;
+using VirtoCommerce.Storefront.Model.Subscriptions.Services;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public static class SubscriptionWorkContextBuilderExtensions
+    {
+        public static Task WithUserSubscriptionsAsync(this IWorkContextBuilder builder, IMutablePagedList&lt;Subscription&gt; subscriptions)
+        {
+            builder.WorkContext.CurrentUser.Subscriptions = subscriptions;
+            return Task.CompletedTask;
+        }
+
+        public static Task WithUserSubscriptionsAsync(this IWorkContextBuilder builder)
+        {
+            if (builder.WorkContext.CurrentUser != null)
+            {
+                var serviceProvider = builder.HttpContext.RequestServices;
+                var subscriptionService = serviceProvider.GetRequiredService&lt;ISubscriptionService&gt;();
+
+                Func&lt;int, int, IEnumerable&lt;SortInfo&gt;, IPagedList&lt;Subscription&gt;&gt; factory = (pageNumber, pageSize, sortInfos) =&gt;
+                {
+                    var subscriptionSearchCriteria = new SubscriptionSearchCriteria
+                    {
+                        PageNumber = pageNumber,
+                        PageSize = pageSize,
+                        Sort = sortInfos?.ToString(),
+                        CustomerId = builder.WorkContext.CurrentUser.Id
+                    };
+                    return subscriptionService.SearchSubscription(subscriptionSearchCriteria);
+                };
+                return builder.WithUserSubscriptionsAsync(new MutablePagedList&lt;Subscription&gt;(factory, 1, SubscriptionSearchCriteria.DefaultPageSize));
+            }
+            return Task.CompletedTask;
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,10,0],[16,13,16,75,0],[17,13,17,39,0],[18,9,18,10,0],[21,9,21,10,0],[22,13,22,57,0],[23,13,23,14,0],[24,17,24,75,0],[25,17,25,102,0],[27,17,37,19,0],[28,17,28,18,0],[29,21,35,23,0],[36,21,36,95,0],[37,17,37,18,0],[38,17,38,151,0],[40,13,40,39,0],[41,9,41,10,0]]);
+    </script>
+  </body>
+</html>

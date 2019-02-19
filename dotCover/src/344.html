@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\infrastructure\autorest\passwordaccesstokenhandler.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading;
+using System.Threading.Tasks;
+using IdentityModel.Client;
+using Microsoft.Extensions.Options;
+
+namespace VirtoCommerce.Storefront.Infrastructure.Autorest
+{
+    /// &lt;summary&gt;
+    /// HTTP message delegating handler that encapsulates access token handling and renewment
+    /// &lt;/summary&gt;
+    public class PasswordAccessTokenHandler : DelegatingHandler
+    {
+        private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
+        private string _accessToken;
+        private bool _disposed;
+
+        private readonly PlatformEndpointOptions _options;
+        private readonly IHttpClientFactory _clientFactory;
+        /// &lt;summary&gt;
+        /// Gets or sets the timeout
+        /// &lt;/summary&gt;
+        public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(5);
+
+        /// &lt;summary&gt;
+        /// Gets the current access token
+        /// &lt;/summary&gt;
+        public string AccessToken
+        {
+            get
+            {
+                if (_lock.Wait(Timeout))
+                {
+                    try
+                    {
+                        return _accessToken;
+                    }
+                    finally
+                    {
+                        _lock.Release();
+                    }
+                }
+
+                return null;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Initializes a new instance of the &lt;see cref=&quot;AccessTokenDelegatingHandler&quot;/&gt; class.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;client&quot;&gt;The client.&lt;/param&gt;
+        /// &lt;param name=&quot;scope&quot;&gt;The scope.&lt;/param&gt;
+        public PasswordAccessTokenHandler(IOptions&lt;PlatformEndpointOptions&gt; options, IHttpClientFactory clientFactory)
+        {
+            _options = options.Value;
+            _clientFactory = clientFactory;
+        }
+
+        /// &lt;summary&gt;
+        /// Sends an HTTP request to the inner handler to send to the server as an asynchronous operation.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;request&quot;&gt;The HTTP request message to send to the server.&lt;/param&gt;
+        /// &lt;param name=&quot;cancellationToken&quot;&gt;A cancellation token to cancel operation.&lt;/param&gt;
+        /// &lt;returns&gt;
+        /// Returns &lt;see cref=&quot;T:System.Threading.Tasks.Task`1&quot; /&gt;. The task object representing the asynchronous operation.
+        /// &lt;/returns&gt;
+        protected override async Task&lt;HttpResponseMessage&gt; SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var accessToken = await GetAccessTokenAsync(cancellationToken);
+            if (string.IsNullOrWhiteSpace(accessToken))
+            {
+                if (await RenewTokensAsync(cancellationToken) == false)
+                {
+                    return new HttpResponseMessage(HttpStatusCode.Unauthorized) { RequestMessage = request };
+                }
+            }
+
+            request.Headers.Authorization = new AuthenticationHeaderValue(&quot;Bearer&quot;, AccessToken);
+            var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+            if (response.StatusCode != HttpStatusCode.Unauthorized)
+            {
+                return response;
+            }
+
+            if (await RenewTokensAsync(cancellationToken) == false)
+            {
+                return response;
+            }
+
+            response.Dispose(); // This 401 response will not be used for anything so is disposed to unblock the socket.
+
+            request.Headers.Authorization = new AuthenticationHeaderValue(&quot;Bearer&quot;, AccessToken);
+            return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        }
+
+        /// &lt;summary&gt;
+        /// Releases the unmanaged resources used by the &lt;see cref=&quot;T:System.Net.Http.DelegatingHandler&quot; /&gt;, and optionally disposes of the managed resources.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;disposing&quot;&gt;true to release both managed and unmanaged resources; false to releases only unmanaged resources.&lt;/param&gt;
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing &amp;&amp; !_disposed)
+            {
+                _disposed = true;
+                _lock.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
+
+        private async Task&lt;bool&gt; RenewTokensAsync(CancellationToken cancellationToken)
+        {
+            if (await _lock.WaitAsync(Timeout, cancellationToken).ConfigureAwait(false))
+            {
+                try
+                {
+                    //TODO: Replace to IHttpClientFactory in the new IdentityModel version                    
+                    var client = new TokenClient(_options.Url + &quot;connect/token&quot;);
+                    var response = await client.RequestResourceOwnerPasswordAsync(_options.UserName, _options.Password);
+
+                    if (!response.IsError)
+                    {
+                        _accessToken = response.AccessToken;
+                        return true;
+                    }
+                }
+                finally
+                {
+                    _lock.Release();
+                }
+            }
+
+            return false;
+        }
+
+        private async Task&lt;string&gt; GetAccessTokenAsync(CancellationToken cancellationToken)
+        {
+            if (await _lock.WaitAsync(Timeout, cancellationToken).ConfigureAwait(false))
+            {
+                try
+                {
+                    return _accessToken;
+                }
+                finally
+                {
+                    _lock.Release();
+                }
+            }
+
+            return null;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,9,17,72,0],[26,35,26,39,0],[26,40,26,44,0],[26,49,26,72,0],[34,13,34,14,0],[35,17,35,41,0],[36,17,36,18,0],[38,21,38,22,0],[39,25,39,45,0],[42,21,42,22,0],[43,25,43,41,0],[44,21,44,22,0],[47,17,47,29,0],[48,13,48,14,0],[56,9,56,119,0],[57,9,57,10,0],[58,13,58,38,0],[59,13,59,44,0],[60,9,60,10,0],[71,9,71,10,0],[72,13,72,76,0],[73,13,73,56,0],[74,13,74,14,0],[75,17,75,72,0],[76,17,76,18,0],[77,21,77,110,0],[79,13,79,14,0],[81,13,81,98,0],[82,13,82,99,0],[84,13,84,68,0],[85,13,85,14,0],[86,17,86,33,0],[89,13,89,68,0],[90,13,90,14,0],[91,17,91,33,0],[94,13,94,32,0],[96,13,96,98,0],[97,13,97,91,0],[98,9,98,10,0],[105,9,105,10,0],[106,13,106,41,0],[107,13,107,14,0],[108,17,108,34,0],[109,17,109,33,0],[110,13,110,14,0],[112,13,112,37,0],[113,9,113,10,0],[116,9,116,10,0],[117,13,117,89,0],[118,13,118,14,0],[120,17,120,18,0],[122,21,122,82,0],[123,21,123,121,0],[125,21,125,43,0],[126,21,126,22,0],[127,25,127,61,0],[128,25,128,37,0],[130,17,130,18,0],[132,17,132,18,0],[133,21,133,37,0],[134,17,134,18,0],[135,13,135,14,0],[137,13,137,26,0],[138,9,138,10,0],[141,9,141,10,0],[142,13,142,89,0],[143,13,143,14,0],[145,17,145,18,0],[146,21,146,41,0],[149,17,149,18,0],[150,21,150,37,0],[151,17,151,18,0],[154,13,154,25,0],[155,9,155,10,0]]);
+    </script>
+  </body>
+</html>

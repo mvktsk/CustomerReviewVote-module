@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\customerreviewvote-module\newmanagedmodule.data\model\customerreviewentity.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Linq;
+using System.ComponentModel.DataAnnotations;
+using System.Collections.ObjectModel;
+using CustomerReviewVotes.Core.Model;
+using VirtoCommerce.Platform.Core.Common;
+
+namespace CustomerReviewVotes.Data.Model
+{
+    public class CustomerReviewEntity: AuditableEntity
+    {
+        public CustomerReviewEntity ()
+        {
+            CustomerReviewVotes = new NullCollection&lt;CustomerReviewVoteEntity&gt;();
+        }
+        
+        [StringLength(128)]
+        public string AuthorNickname { get; set; }
+
+        [Required]
+        [StringLength(1024)]
+        public string Content { get; set; }
+
+        public bool IsActive { get; set; }
+
+        [Required]
+        [StringLength(128)]
+        public string ProductId { get; set; }
+
+        public int HelpfullVotesCount { get; set; }
+        public int UselessVotesCount { get; set; }
+        public int TotalVotesCount { get; set; }
+
+        #region Navigation Properties
+        public virtual ObservableCollection&lt;CustomerReviewVoteEntity&gt; CustomerReviewVotes { get; set; }
+        #endregion
+
+        public virtual CustomerReview ToModel(CustomerReview customerReview)
+        {
+            if (customerReview == null)
+                throw new ArgumentNullException(nameof(customerReview));
+
+            customerReview.Id = Id;
+            customerReview.CreatedBy = CreatedBy;
+            customerReview.CreatedDate = CreatedDate;
+            customerReview.ModifiedBy = ModifiedBy;
+            customerReview.ModifiedDate = ModifiedDate;
+
+            customerReview.AuthorNickname = AuthorNickname;
+            customerReview.Content = Content;
+            customerReview.IsActive = IsActive;
+            customerReview.ProductId = ProductId;
+
+            customerReview.HelpfullVotesCount = HelpfullVotesCount;
+            customerReview.UselessVotesCount = UselessVotesCount; 
+            customerReview.TotalVotesCount = TotalVotesCount;
+
+            return customerReview;
+        }
+
+        public virtual CustomerReviewEntity FromModel (CustomerReview customerReview, PrimaryKeyResolvingMap pkMap)
+        {
+            if (customerReview == null)
+                throw new ArgumentNullException(nameof(customerReview));
+
+            pkMap.AddPair(customerReview, this);
+
+            Id = customerReview.Id;
+            CreatedBy = customerReview.CreatedBy;
+            CreatedDate = customerReview.CreatedDate;
+            ModifiedBy = customerReview.ModifiedBy;
+            ModifiedDate = customerReview.ModifiedDate;
+
+            AuthorNickname = customerReview.AuthorNickname;
+            Content = customerReview.Content;
+            IsActive = customerReview.IsActive;
+            ProductId = customerReview.ProductId;
+
+            //CustomerReviewVotes.CollectionChanged
+
+            return this;
+        }
+
+        public virtual void Patch(CustomerReviewEntity target)
+        {
+            if (target == null)
+                throw new ArgumentNullException(nameof(target));
+
+            target.AuthorNickname = AuthorNickname;
+            target.Content = Content;
+            target.IsActive = IsActive;
+            target.ProductId = ProductId;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,39,1],[13,9,13,10,1],[14,13,14,82,1],[15,9,15,10,1],[18,40,18,44,1],[18,45,18,49,1],[22,33,22,37,1],[22,38,22,42,1],[24,32,24,36,1],[24,37,24,41,1],[28,35,28,39,1],[28,40,28,44,1],[30,41,30,45,1],[30,46,30,50,1],[31,40,31,44,1],[31,45,31,49,1],[32,38,32,42,1],[32,43,32,47,1],[35,93,35,97,1],[35,98,35,102,1],[39,9,39,10,1],[40,13,40,40,1],[41,17,41,73,0],[43,13,43,36,1],[44,13,44,50,1],[45,13,45,54,1],[46,13,46,52,1],[47,13,47,56,1],[49,13,49,60,1],[50,13,50,46,1],[51,13,51,48,1],[52,13,52,50,1],[54,13,54,68,1],[55,13,55,66,1],[56,13,56,62,1],[58,13,58,35,1],[59,9,59,10,1],[62,9,62,10,1],[63,13,63,40,1],[64,17,64,73,0],[66,13,66,49,1],[68,13,68,36,1],[69,13,69,50,1],[70,13,70,54,1],[71,13,71,52,1],[72,13,72,56,1],[74,13,74,60,1],[75,13,75,46,1],[76,13,76,48,1],[77,13,77,50,1],[81,13,81,25,1],[82,9,82,10,1],[85,9,85,10,1],[86,13,86,32,1],[87,17,87,65,0],[89,13,89,52,1],[90,13,90,38,1],[91,13,91,40,1],[92,13,92,42,1],[93,9,93,10,1]]);
+    </script>
+  </body>
+</html>

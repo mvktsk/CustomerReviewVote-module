@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\filters\htmlfilters.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace VirtoCommerce.LiquidThemeEngine.Filters
+{
+    /// &lt;summary&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/filters/html-filters
+    /// &lt;/summary&gt;
+    public class HtmlFilters
+    {
+        /// &lt;summary&gt;
+        /// Generates a script tag.
+        /// {{ &#39;shop.js&#39; | asset_url | script_tag }}
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string ScriptTag(string input)
+        {
+            return string.Format(&quot;&lt;script type=\&quot;text/javascript\&quot; src=\&quot;{0}\&quot;&gt;&lt;/script&gt;&quot;, input);
+        }
+
+        /// &lt;summary&gt;
+        /// Generates a stylesheet tag.
+        /// {{ &#39;shop.css&#39; | asset_url | stylesheet_tag }}
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string StylesheetTag(string input)
+        {
+            return string.Format(&quot;&lt;link type=\&quot;text/css\&quot; rel=\&quot;stylesheet\&quot; media=\&quot;all\&quot; href=\&quot;{0}\&quot; /&gt;&quot;, input);
+        }
+
+        /// &lt;summary&gt;
+        /// Generates an image tag
+        /// {{ &#39;smirking_gnome.gif&#39; | asset_url | img_tag }}
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;alt&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;css&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string ImgTag(string input, string alt = &quot;&quot;, string css = &quot;&quot;)
+        {
+            return input == null ? null : GetImageTag(input, alt, css);
+        }
+
+
+        private static string GetImageTag(string src, string alt, string css)
+        {
+            return string.Format(&quot;&lt;img alt=\&quot;{0}\&quot; src=\&quot;{1}\&quot; class=\&quot;{2}\&quot; /&gt;&quot;, alt, src, css);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,10,0],[16,13,16,99,0],[17,9,17,10,0],[26,9,26,10,0],[27,13,27,117,0],[28,9,28,10,0],[39,9,39,10,0],[40,13,40,72,0],[41,9,41,10,0],[45,9,45,10,0],[46,13,46,98,0],[47,9,47,10,0]]);
+    </script>
+  </body>
+</html>

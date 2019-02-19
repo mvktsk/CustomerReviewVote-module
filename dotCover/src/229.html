@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\customer\vendorsearchcriteria.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Specialized;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model.Customer
+{
+    public partial class VendorSearchCriteria : PagedSearchCriteria
+    {
+        private static int _defaultPageSize = 20;
+
+        public static int DefaultPageSize
+        {
+            get { return _defaultPageSize; }
+            set { _defaultPageSize = value; }
+        }
+
+        public VendorSearchCriteria(NameValueCollection queryString)
+            : base(queryString, DefaultPageSize)
+        {
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,9,8,50,0],[12,17,12,18,0],[12,19,12,43,0],[12,44,12,45,0],[13,17,13,18,0],[13,19,13,44,0],[13,45,13,46,0],[17,15,17,49,0],[18,9,18,10,0],[19,9,19,10,0]]);
+    </script>
+  </body>
+</html>

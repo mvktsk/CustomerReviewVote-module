@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\extensions\outlineextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Tools;
+using catalogDto = VirtoCommerce.Storefront.AutoRestClients.CatalogModuleApi.Models;
+using toolsDto = VirtoCommerce.Tools.Models;
+
+namespace VirtoCommerce.Storefront.Common
+{
+    public static class OutlineExtensions
+    {
+        /// &lt;summary&gt;
+        /// Returns best matching outline path for the given catalog: CategoryId/CategoryId2.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;outlines&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;catalogId&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string GetOutlinePath(this IEnumerable&lt;catalogDto.Outline&gt; outlines, string catalogId)
+        {
+            return outlines?.Select(o =&gt; o.JsonConvert&lt;toolsDto.Outline&gt;()).GetOutlinePath(catalogId);
+        }
+
+        /// &lt;summary&gt;
+        /// Returns product&#39;s category outline.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;product&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string GetCategoryOutline(this Product product)
+        {
+            var result = string.Empty;
+
+            if (product != null &amp;&amp; !string.IsNullOrEmpty(product.Outline))
+            {
+                var i = product.Outline.LastIndexOf(&#39;/&#39;);
+                if (i &gt;= 0)
+                {
+                    result = product.Outline.Substring(0, i);
+                }
+            }
+
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[19,9,19,10,0],[20,13,20,103,0],[20,42,20,75,0],[21,9,21,10,0],[29,9,29,10,0],[30,13,30,39,0],[32,13,32,75,0],[33,13,33,14,0],[34,17,34,58,0],[35,17,35,28,0],[36,17,36,18,0],[37,21,37,62,0],[38,17,38,18,0],[39,13,39,14,0],[41,13,41,27,0],[42,9,42,10,0]]);
+    </script>
+  </body>
+</html>

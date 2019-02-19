@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\image.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using DotLiquid;
+using Newtonsoft.Json;
+using System.Runtime.Serialization;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// Represents image objects
+    /// &lt;/summary&gt;
+    /// &lt;remarks&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/objects/product#product-image
+    /// &lt;/remarks&gt;
+    [DataContract]
+    public partial class Image : Drop
+    {
+        /// &lt;summary&gt;
+        /// Returns the alt tag of the image
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Alt { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns true if the image has been associated with a variant. Returns false otherwise.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public bool? AttachedToVariant { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the value of product id.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string ProductId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the position of the image, starting at 1.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public int Position { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the relative path of the product image. This is the same as outputting {{ image }}.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Src { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the value of image name
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Name { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the variant object(s) that the image is associated with.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public Variant[] Variants { get; set; }
+
+        public override string ToString()
+        {
+            return Src;
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[20,29,20,33,0],[20,34,20,38,0],[26,42,26,46,0],[26,47,26,51,0],[32,35,32,39,0],[32,40,32,44,0],[38,31,38,35,0],[38,36,38,40,0],[44,29,44,33,0],[44,34,44,38,0],[50,30,50,34,0],[50,35,50,39,0],[56,37,56,41,0],[56,42,56,46,0],[59,9,59,10,0],[60,13,60,24,0],[61,9,61,10,0]]);
+    </script>
+  </body>
+</html>

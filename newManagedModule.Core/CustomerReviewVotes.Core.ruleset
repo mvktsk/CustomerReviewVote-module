@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RuleSet Name="SonarQube - CustomerReviewVote &quot;Sonar way&quot; - C# extend" ToolsVersion="15.0">
-  <Include Path="D:\Data\Sources\CustomerReviewVote-module\.sonarlint\customerreviewvotecsharp.ruleset" Action="Default" />
-  <Include Path="D:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\customerreviewvotes.core.ruleset" Action="Default" />
+  <Include Path="..\.sonarlint\customerreveiwvotecsharp.ruleset" Action="Default" />
+  <Include Path="d:\data\sources\customerreviewvote-module\newmanagedmodule.core\customerreviewvotes.core.ruleset" Action="Default" />
   <Rules AnalyzerId="SonarAnalyzer.CSharp" RuleNamespace="SonarAnalyzer.CSharp">
     <Rule Id="S100" Action="Warning" />
     <Rule Id="S103" Action="Warning" />

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\order\operation.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model.Order
+{
+    /// &lt;summary&gt;
+    /// Represents operation
+    /// &lt;/summary&gt;
+    public partial class Operation
+    {
+        public Operation()
+        {
+            ChildrenOperations = new List&lt;Operation&gt;();
+            DynamicProperties = new List&lt;DynamicProperty&gt;();
+        }
+
+        /// &lt;summary&gt;
+        /// Operation type string representation (CustomerOrder, Shipment etc)
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Operation type string representation (CustomerOrder, Shipment etc)&lt;/value&gt;
+        public string OperationType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Unique user friendly document number (generate automatically based on special algorithm realization)
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Unique user friendly document number (generate automatically based on special algorithm realization)&lt;/value&gt;
+        public string Number { get; set; }
+
+        /// &lt;summary&gt;
+        /// Flag can be used to refer to a specific order status in a variety of user scenarios with combination of Status
+        /// (Order completion, Shipment send etc)
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;
+        /// Flag can be used to refer to a specific order status in a variety of user scenarios with combination of Status
+        /// (Order completion, Shipment send etc)
+        /// &lt;/value&gt;
+        public bool? IsApproved { get; set; }
+
+        /// &lt;summary&gt;
+        /// Current operation status may have any values defined by concrete business process
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Current operation status may have any values defined by concrete business process&lt;/value&gt;
+        public string Status { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets Comment
+        /// &lt;/summary&gt;
+        public string Comment { get; set; }
+
+        /// &lt;summary&gt;
+        /// Currecy code
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Currecy code&lt;/value&gt;
+        public Currency Currency { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets TaxIncluded
+        /// &lt;/summary&gt;
+        public bool? TaxIncluded { get; set; }
+
+        /// &lt;summary&gt;
+        /// Money amount without tax
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Money amount without tax&lt;/value&gt;
+        public Money Sum { get; set; }
+
+        /// &lt;summary&gt;
+        /// Tax total
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Tax total&lt;/value&gt;
+        public Money Tax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets IsCancelled
+        /// &lt;/summary&gt;
+        public bool? IsCancelled { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets CancelledDate
+        /// &lt;/summary&gt;
+        public DateTime? CancelledDate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets CancelReason
+        /// &lt;/summary&gt;
+        public string CancelReason { get; set; }
+
+        /// &lt;summary&gt;
+        /// Used for construct hierarchy of operation and represent parent operation id
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Used for construct hierarchy of operation and represent parent operation id&lt;/value&gt;
+        public string ParentOperationId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets ChildrenOperations
+        /// &lt;/summary&gt;
+        public IList&lt;Operation&gt; ChildrenOperations { get; set; }
+
+        /// &lt;summary&gt;
+        /// Used for dynamic properties management, contains object type string
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Used for dynamic properties management, contains object type string&lt;/value&gt;
+        public string ObjectType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Dynamic properties collections
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Dynamic properties collections&lt;/value&gt;
+        public IList&lt;DynamicProperty&gt; DynamicProperties { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets CreatedDate
+        /// &lt;/summary&gt;
+        public DateTime? CreatedDate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets ModifiedDate
+        /// &lt;/summary&gt;
+        public DateTime? ModifiedDate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets CreatedBy
+        /// &lt;/summary&gt;
+        public string CreatedBy { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets ModifiedBy
+        /// &lt;/summary&gt;
+        public string ModifiedBy { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets Id
+        /// &lt;/summary&gt;
+        public string Id { get; set; }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,27,0],[13,9,13,10,0],[14,13,14,56,0],[15,13,15,61,0],[16,9,16,10,0],[22,39,22,43,0],[22,44,22,48,0],[28,32,28,36,0],[28,37,28,41,0],[38,35,38,39,0],[38,40,38,44,0],[44,32,44,36,0],[44,37,44,41,0],[49,33,49,37,0],[49,38,49,42,0],[55,36,55,40,0],[55,41,55,45,0],[60,36,60,40,0],[60,41,60,45,0],[66,28,66,32,0],[66,33,66,37,0],[72,28,72,32,0],[72,33,72,37,0],[77,36,77,40,0],[77,41,77,45,0],[82,42,82,46,0],[82,47,82,51,0],[87,38,87,42,0],[87,43,87,47,0],[93,43,93,47,0],[93,48,93,52,0],[98,54,98,58,0],[98,59,98,63,0],[104,36,104,40,0],[104,41,104,45,0],[110,59,110,63,0],[110,64,110,68,0],[115,40,115,44,0],[115,45,115,49,0],[120,41,120,45,0],[120,46,120,50,0],[125,35,125,39,0],[125,40,125,44,0],[130,36,130,40,0],[130,41,130,45,0],[135,28,135,32,0],[135,33,135,37,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\customer\handlers\securityeventshandler.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.Model.Common.Events;
+using VirtoCommerce.Storefront.Model.Customer.Services;
+using VirtoCommerce.Storefront.Model.Security.Events;
+
+namespace VirtoCommerce.Storefront.Domain.Customer.Handlers
+{
+    public  class SecurityEventsHandler : IEventHandler&lt;UserDeletedEvent&gt;
+    {
+        private readonly IMemberService _memberService;
+        public SecurityEventsHandler(IMemberService memberService)
+        {
+            _memberService = memberService;
+        }
+
+        #region IEventHandler&lt;UserRegisteredEvent&gt; members
+      
+        public async Task Handle(UserDeletedEvent message)
+        {
+            if(message.User.ContactId != null)
+            {
+                await _memberService.DeleteContactAsync(message.User.ContactId);
+            }
+        }
+        #endregion
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,9,11,67,0],[12,9,12,10,0],[13,13,13,44,0],[14,9,14,10,0],[19,9,19,10,0],[20,13,20,47,0],[21,13,21,14,0],[22,17,22,81,0],[23,13,23,14,0],[24,9,24,10,0]]);
+    </script>
+  </body>
+</html>

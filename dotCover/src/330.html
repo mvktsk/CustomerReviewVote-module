@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\infrastructure\blobchangetoken.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Primitives;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
+using VirtoCommerce.Storefront.Domain;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Infrastructure
+{
+    /// &lt;summary&gt;
+    /// Based on PollingFileChangeToken 
+    /// &lt;/summary&gt;
+    public class BlobChangeToken : IChangeToken
+    {
+        private static ConcurrentDictionary&lt;string, DateTime&gt; _previousChangeTimeUtcTokenLookup = new ConcurrentDictionary&lt;string, DateTime&gt;(StringComparer.OrdinalIgnoreCase);
+
+        public string BlobName { get; set; }
+        private bool _hasChanged;
+        private readonly CloudBlobContainer _container;
+        private readonly AzureBlobContentOptions _options;
+        private DateTime _lastModifiedUtc;
+        private DateTime _prevModifiedUtc;
+        private static DateTime _lastCheckedTimeUtcStatic;
+        private static object _lock = new object();
+
+        public BlobChangeToken(string blobName, CloudBlobContainer container, AzureBlobContentOptions options)
+        {
+            BlobName = blobName;
+
+            _container = container;
+            _options = options;
+
+            _lastModifiedUtc = _prevModifiedUtc = DateTime.UtcNow;
+        }
+
+        public bool HasChanged
+        {
+            get
+            {
+                //get last modified dt
+                _lastModifiedUtc = _previousChangeTimeUtcTokenLookup.GetOrAdd(BlobName, _lastModifiedUtc);
+
+                var hasChanged = _lastModifiedUtc &gt; _prevModifiedUtc;
+                if (hasChanged)
+                {
+                    _prevModifiedUtc = _lastModifiedUtc;
+                    _hasChanged = true;
+                }
+
+                //check pooling interval
+                var currentTime = DateTime.UtcNow;
+                if (currentTime - _lastCheckedTimeUtcStatic &lt; _options.ChangesPoolingInterval)
+                {
+                    return _hasChanged;
+                }
+
+                bool lockTaken = Monitor.TryEnter(_lock);
+                try
+                {
+                    if (lockTaken)
+                    {
+                        Task.Run(() =&gt; EvaluateBlobsModifiedDate());
+                        _lastCheckedTimeUtcStatic = currentTime;
+                    }
+                }
+                finally
+                {
+                    if (lockTaken)
+                        Monitor.Exit(_lock);
+                }
+
+                return _hasChanged;
+            }
+        }
+
+        private void EvaluateBlobsModifiedDate(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var files = ListBlobs().GetAwaiter().GetResult();
+            foreach (var file in files)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                    break;
+
+                var lastModifiedUtc = file.Properties.LastModified.HasValue ? file.Properties.LastModified.Value.UtcDateTime : DateTime.MinValue;
+
+                if (!_previousChangeTimeUtcTokenLookup.TryGetValue(file.Name, out DateTime dt))
+                {
+                    _previousChangeTimeUtcTokenLookup.GetOrAdd(file.Name, lastModifiedUtc);
+                }
+                else
+                {
+                    _previousChangeTimeUtcTokenLookup[file.Name] = lastModifiedUtc;
+                }
+            }
+        }
+
+        private async Task&lt;IEnumerable&lt;CloudBlob&gt;&gt; ListBlobs()
+        {            
+            var blobItems = new List&lt;IListBlobItem&gt;();
+            BlobContinuationToken token = null;
+            var operationContext = new OperationContext();
+            do
+            {
+                var resultSegment = await _container.ListBlobsSegmentedAsync(null, true, BlobListingDetails.Metadata, null, token, _options.BlobRequestOptions, operationContext);
+                token = resultSegment.ContinuationToken;
+                blobItems.AddRange(resultSegment.Results);
+            } while (token != null);
+
+            var result = blobItems.OfType&lt;CloudBlob&gt;().ToList();
+            return result;
+        }
+
+        /// &lt;summary&gt;
+        /// Don&#39;t know what to do with this one, so false
+        /// &lt;/summary&gt;
+        public bool ActiveChangeCallbacks =&gt; false;
+
+        /// &lt;summary&gt;
+        /// Don&#39;t know  what to do with this either
+        /// &lt;/summary&gt;
+        public IDisposable RegisterChangeCallback(Action&lt;object&gt; callback, object state) =&gt; EmptyDisposable.Instance;
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[20,9,20,176,0],[22,34,22,38,0],[22,39,22,43,0],[29,9,29,52,0],[31,9,31,111,0],[32,9,32,10,0],[33,13,33,33,0],[35,13,35,36,0],[36,13,36,32,0],[38,13,38,67,0],[39,9,39,10,0],[44,13,44,14,0],[46,17,46,107,0],[48,17,48,70,0],[49,17,49,32,0],[50,17,50,18,0],[51,21,51,57,0],[52,21,52,40,0],[53,17,53,18,0],[56,17,56,51,0],[57,17,57,95,0],[58,17,58,18,0],[59,21,59,40,0],[62,17,62,58,0],[64,17,64,18,0],[65,21,65,35,0],[66,21,66,22,0],[67,25,67,69,0],[67,40,67,67,0],[68,25,68,65,0],[69,21,69,22,0],[70,17,70,18,0],[72,17,72,18,0],[73,21,73,35,0],[74,25,74,45,0],[75,17,75,18,0],[77,17,77,36,0],[78,13,78,14,0],[82,9,82,10,0],[83,13,83,62,0],[84,13,84,20,0],[84,22,84,30,0],[84,31,84,33,0],[84,34,84,39,0],[85,13,85,14,0],[86,17,86,63,0],[87,21,87,27,0],[89,17,89,146,0],[91,17,91,96,0],[92,17,92,18,0],[93,21,93,92,0],[94,17,94,18,0],[96,17,96,18,0],[97,21,97,84,0],[98,17,98,18,0],[99,13,99,14,0],[100,9,100,10,0],[103,9,103,10,0],[104,13,104,55,0],[105,13,105,48,0],[106,13,106,59,0],[108,13,108,14,0],[109,17,109,179,0],[110,17,110,57,0],[111,17,111,59,0],[112,13,112,14,0],[112,15,112,37,0],[114,13,114,65,0],[115,13,115,27,0],[116,9,116,10,0],[121,46,121,51,0],[126,93,126,117,0]]);
+    </script>
+  </body>
+</html>

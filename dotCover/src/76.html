@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\filters\commonfilters.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+using DotLiquid;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+
+namespace VirtoCommerce.LiquidThemeEngine.Filters
+{
+    public class CommonFilters
+    {
+        #region Public Methods and Operators
+        public static object Default(object input, object value)
+        {
+            return input ?? value;
+        }
+ 
+        public static string Json(object input)
+        {
+            if (input == null)
+            {
+                return null;
+            }
+
+            var contents = Hash.FromAnonymousObject(new { input });
+            var serializedString = JsonConvert.SerializeObject(
+                contents[&quot;input&quot;],
+                new JsonSerializerSettings()
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                    ContractResolver = new RubyContractResolver(),
+                });
+
+            return serializedString;
+        }
+
+        public static string Render(Context context, string input)
+        {
+            if (input == null)
+            {
+                return null;
+            }
+            var themeEngine = (ShopifyLiquidThemeEngine)Template.FileSystem;
+            var renderParams = context.Environments[0].ToDictionary(x =&gt; x.Key, x =&gt; x.Value);
+            var result = themeEngine.RenderTemplate(input.ToString(), renderParams);
+            return result;
+        }
+
+        #endregion
+
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,9,17,10,0],[18,13,18,35,0],[19,9,19,10,0],[22,9,22,10,0],[23,13,23,31,0],[24,13,24,14,0],[25,17,25,29,0],[28,13,28,68,0],[29,13,35,20,0],[37,13,37,37,0],[38,9,38,10,0],[41,9,41,10,0],[42,13,42,31,0],[43,13,43,14,0],[44,17,44,29,0],[46,13,46,77,0],[47,13,47,95,0],[47,74,47,79,0],[47,86,47,93,0],[48,13,48,85,0],[49,13,49,27,0],[50,9,50,10,0]]);
+    </script>
+  </body>
+</html>

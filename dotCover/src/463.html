@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\inventory\happroductinventoryservice.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Catalog.Specifications;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Inventory.Services;
+
+namespace VirtoCommerce.Storefront.Domain.Inventory
+{
+    public class HapProductInventoryService : IHapProductInventoryService
+    {
+        private readonly IInventoryService _inventoryService;
+        private readonly IWorkContextAccessor _workContextAccessor;
+
+        public HapProductInventoryService(IInventoryService inventoryService, IWorkContextAccessor workContextAccessor)
+        {
+            _inventoryService = inventoryService;
+            _workContextAccessor = workContextAccessor;
+        }
+
+        public async Task EvaluateProductInventories(IList&lt;IProductIsInStock&gt; lineItems)
+        {
+            if (!_workContextAccessor.WorkContext.CurrentStore.CheckAvailability)
+            {
+                foreach (var lineItem in lineItems)
+                {
+                    lineItem.ProductIsInStock = true;
+                }
+            }
+            else
+            {
+                var lookup = lineItems.ToLookup(x =&gt; x.ProductId, x =&gt; x);
+                var proxyProducts = lookup.Select(x =&gt; new Product { Id = x.Key }).ToList();
+
+                await _inventoryService.EvaluateProductInventoriesAsync(proxyProducts, _workContextAccessor.WorkContext);
+                foreach (var product in proxyProducts)
+                {
+                    var productInStock = new HapProductIsInStockSpecification().IsSatisfiedBy(product);
+                    foreach (var lineItem in lookup[product.Id])
+                    {
+                        lineItem.ProductIsInStock = productInStock;
+                    }
+                }
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,9,17,120,0],[18,9,18,10,0],[19,13,19,50,0],[20,13,20,56,0],[21,9,21,10,0],[24,9,24,10,0],[25,13,25,82,0],[26,13,26,14,0],[27,17,27,24,0],[27,26,27,38,0],[27,39,27,41,0],[27,42,27,51,0],[28,17,28,18,0],[29,21,29,54,0],[30,17,30,18,0],[31,13,31,14,0],[33,13,33,14,0],[34,17,34,75,0],[34,54,34,65,0],[34,72,34,73,0],[35,17,35,93,0],[35,56,35,82,0],[37,17,37,122,0],[38,17,38,24,0],[38,26,38,37,0],[38,38,38,40,0],[38,41,38,54,0],[39,17,39,18,0],[40,21,40,104,0],[41,21,41,28,0],[41,30,41,42,0],[41,43,41,45,0],[41,46,41,64,0],[42,21,42,22,0],[43,25,43,68,0],[44,21,44,22,0],[45,17,45,18,0],[46,13,46,14,0],[47,9,47,10,0]]);
+    </script>
+  </body>
+</html>

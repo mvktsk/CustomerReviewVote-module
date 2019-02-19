@@ -1,11 +1,11 @@
 {
   "ServerUri": "http://localhost:9000",
   "Organization": null,
-  "ProjectKey": "CustomerReviewVote",
+  "ProjectKey": "CustomerReveiwVote",
   "Profiles": {
     "CSharp": {
-      "ProfileKey": "AWjawXbKpBzXQxX-Q2aa",
-      "ProfileTimestamp": "2019-02-11T11:12:18+07:00"
+      "ProfileKey": "AWjlNeBwPpdlDhzzGpah",
+      "ProfileTimestamp": "2019-02-13T11:55:39+07:00"
     }
   }
 }

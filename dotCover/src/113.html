@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\converters\tierpriceconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using VirtoCommerce.LiquidThemeEngine.Objects;
+
+namespace VirtoCommerce.LiquidThemeEngine.Converters
+{
+    public static class TierPriceConverter
+    {
+        public static TierPrice ToShopifyModel(this Storefront.Model.TierPrice tierPrice)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidTierPrice(tierPrice);
+        }
+    }
+
+    public partial class ShopifyModelConverter
+    {
+        public virtual TierPrice ToLiquidTierPrice(Storefront.Model.TierPrice tierPrice)
+        {
+            var result = new TierPrice();
+            result.Price = tierPrice.Price.Amount * 100;
+            result.Quantity = tierPrice.Quantity;
+            return result;
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,9,8,10,0],[9,13,9,57,0],[10,13,10,59,0],[11,9,11,10,0],[17,9,17,10,0],[18,13,18,42,0],[19,13,19,57,0],[20,13,20,50,0],[21,13,21,27,0],[22,9,22,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\distributorcontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Storefront.Domain.Security;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Order;
+
+namespace VirtoCommerce.Storefront.Controllers
+{
+    [Authorize(OnlyDistributorAuthorizationRequirement.PolicyName)]
+    public class DistributorController : StorefrontControllerBase
+    {
+        public DistributorController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder)
+            : base(workContextAccessor, urlBuilder)
+        {
+        }
+
+        [HttpGet]
+        public ActionResult NewOrders()
+        {
+            WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Distributor New Orders&quot; };
+
+            return View(&quot;distributors/new-orders&quot;, WorkContext);
+        }
+
+        [HttpGet]
+        public ActionResult PreviousOrders()
+        {
+            WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Distributor Previous Orders&quot; };
+
+            return View(&quot;distributors/previous-orders&quot;, WorkContext);
+        }
+
+        [HttpGet]
+        [Authorize(FullDistributorAuthorizationRequirement.PolicyName)]
+        public ActionResult Products()
+        {
+            WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Distributor My Catalogue&quot; };
+
+            return View(&quot;distributors/products&quot;, WorkContext);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult GetOrderDetails(string orderNumber, string key)
+        {
+            WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Distributor Order&quot; };
+
+            WorkContext.CurrentOrder = new CustomerOrder(WorkContext.CurrentCurrency)
+            {
+                Number = orderNumber,
+                CancelReason = key,
+            };
+
+            return View(&quot;distributors/order&quot;, WorkContext);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,15,14,52,0],[15,9,15,10,0],[16,9,16,10,0],[20,9,20,10,0],[21,13,21,91,0],[23,13,23,65,0],[24,9,24,10,0],[28,9,28,10,0],[29,13,29,96,0],[31,13,31,70,0],[32,9,32,10,0],[37,9,37,10,0],[38,13,38,93,0],[40,13,40,63,0],[41,9,41,10,0],[46,9,46,10,0],[47,13,47,86,0],[49,13,53,15,0],[55,13,55,60,0],[56,9,56,10,0]]);
+    </script>
+  </body>
+</html>

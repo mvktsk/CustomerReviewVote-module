@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\stores\selectcurrentstorepolicy.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.ApplicationInsights.AspNetCore.Extensions;
+using Microsoft.AspNetCore.Http;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Stores;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public static class SelectCurrentStorePolicy
+    {
+        public static Store GetCurrentStore(this HttpContext context, IEnumerable&lt;Store&gt; stores, string defaultStoreId)
+        {      
+            if(stores == null)
+            {
+                throw new ArgumentNullException(nameof(stores));
+            }
+
+            //Try first find by store url (if it defined)
+            var result = stores.FirstOrDefault(x =&gt; context.Request.Path.StartsWithSegments(new PathString(&quot;/&quot; + x.Id)));
+            if (result == null)
+            {
+                result = stores.Where(x =&gt; x.IsStoreUrl(context.Request.GetUri())).FirstOrDefault();
+            }
+            if (result == null &amp;&amp; defaultStoreId != null)
+            {
+                result = stores.FirstOrDefault(x =&gt; x.Id.EqualsInvariant(defaultStoreId));
+            }
+            if(result == null)
+            {
+                result = stores.FirstOrDefault();
+            }
+
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,14,10,0],[15,13,15,31,0],[16,13,16,14,0],[17,17,17,65,0],[21,13,21,122,0],[21,53,21,120,0],[22,13,22,32,0],[23,13,23,14,0],[24,17,24,101,0],[24,44,24,82,0],[25,13,25,14,0],[26,13,26,58,0],[27,13,27,14,0],[28,17,28,91,0],[28,53,28,89,0],[29,13,29,14,0],[30,13,30,31,0],[31,13,31,14,0],[32,17,32,50,0],[33,13,33,14,0],[35,13,35,27,0],[36,9,36,10,0]]);
+    </script>
+  </body>
+</html>

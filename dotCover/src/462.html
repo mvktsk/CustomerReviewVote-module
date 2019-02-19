@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\invoices\hruinvoicesservice.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.AutoRestClients.HruInvoicesModuleApi;
+using VirtoCommerce.Storefront.Model.Invoices;
+using VirtoCommerce.Storefront.Model.Invoices.Services;
+
+namespace VirtoCommerce.Storefront.Domain.Invoices
+{
+    public class HruInvoicesService : IHruInvoicesService
+    {
+        private readonly IInvoice _invoiceApi;
+
+        public HruInvoicesService(IInvoice invoiceApi)
+        {
+            _invoiceApi = invoiceApi;
+        }
+
+        public async Task&lt;IList&lt;HruInvoicesItem&gt;&gt; GetInvoices(string salePointId, DateTime beginDate, DateTime endDate)
+        {
+            var InvoicesDto = await _invoiceApi.GetInvoicesAsync(salePointId, beginDate, endDate).ConfigureAwait(false);
+
+            var invoicesItems = new List&lt;HruInvoicesItem&gt;();
+
+            foreach (var invoiceItem in InvoicesDto)
+            {
+                var item = new HruInvoicesItem()
+                {
+                    SalePointId = invoiceItem.SalePointId,
+                    PaymentDays = (int?)invoiceItem.PaymentDays ?? 0,
+                    InvoiceNo = invoiceItem.InvoiceNo,
+                    JeansOrderId = invoiceItem.JeansOrderId,
+                    ShipmentDate = invoiceItem.ShipmentDate ?? DateTime.Now,
+                    PaymentDate = invoiceItem.PaymentDate ?? DateTime.Now,
+                    InvoiceDate = invoiceItem.InvoiceDate ?? DateTime.Now,
+                    InvoiceDebt = (decimal?)invoiceItem.InvoiceDebt ?? 0,
+                    DistrInvoiceNo = invoiceItem.DistrInvoiceNo,
+                    InvoiceAmount = (decimal?)invoiceItem.InvoiceAmount ?? 0,
+                    OrderNumber = invoiceItem.OrderNumber
+                };
+                invoicesItems.Add(item);
+            }
+
+            return invoicesItems;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,14,55,0],[15,9,15,10,0],[16,13,16,38,0],[17,9,17,10,0],[20,9,20,10,0],[21,13,21,121,0],[23,13,23,61,0],[25,13,25,20,0],[25,22,25,37,0],[25,38,25,40,0],[25,41,25,52,0],[26,13,26,14,0],[27,17,40,19,0],[41,17,41,41,0],[42,13,42,14,0],[44,13,44,34,0],[45,9,45,10,0]]);
+    </script>
+  </body>
+</html>

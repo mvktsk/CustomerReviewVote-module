@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\dependencyinjection\servicecollectionextension.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using VirtoCommerce.LiquidThemeEngine;
+using VirtoCommerce.Storefront.AutoRestClients.CacheModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.CartModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.CatalogModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.ContentModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.CoreModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.CustomerModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.HruMarketingModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.HruCustomersModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.HruOrdersModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.InventoryModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.MarketingModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.OrdersModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.PlatformModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.PricingModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.ProductRecommendationsModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.QuoteModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.SitemapsModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.StoreModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.SubscriptionModuleApi;
+using VirtoCommerce.Storefront.Common;
+using VirtoCommerce.Storefront.Domain;
+using VirtoCommerce.Storefront.Infrastructure;
+using VirtoCommerce.Storefront.Infrastructure.Autorest;
+using VirtoCommerce.Storefront.Model.Common.Bus;
+using VirtoCommerce.Storefront.Model.Common.Events;
+using VirtoCommerce.Storefront.Model.Common.Messages;
+using VirtoCommerce.Storefront.Model.StaticContent;
+using VirtoCommerce.Storefront.AutoRestClients.HeiHolidaysModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.HruInvoicesModuleApi;
+
+namespace VirtoCommerce.Storefront.DependencyInjection
+{
+    public static class ServiceCollectionExtension
+    {
+        public static void AddPlatformEndpoint(this IServiceCollection services, Action&lt;PlatformEndpointOptions&gt; setupAction = null)
+        {
+            ServicePointManager.UseNagleAlgorithm = false;
+            services.AddSingleton&lt;VirtoCommerceApiRequestHandler&gt;();
+
+            var httpHandlerWithCompression = new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            };
+
+            services.AddHttpClient&lt;IStoreModule, StoreModule&gt;();
+
+            //TODO: Switch AutoRest clients to use IHttpClientFactory with Polly transient error handling
+            //http://michaco.net/blog/IntegratingAutorestWithHttpClientFactoryAndDI
+            //TODO: Switch all Autorest API clients to access token authentication OAuth2 (resource owner password credentials  grand flow)
+            //it is required for 3.0 platform version
+            //Examples:
+            //services.AddSingleton&lt;PasswordAccessTokenHandler&gt;();
+            //services.AddSingleton&lt;IStoreModule&gt;(provider =&gt; new StoreModule(new VirtoCommerceStoreRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, new EmptyServiceClientCredentials(), provider.GetService&lt;Infrastructure.PasswordAccessTokenHandler&gt;())));
+
+            services.AddSingleton&lt;IStoreModule&gt;(provider =&gt; new StoreModule(new VirtoCommerceStoreRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;ICommerce&gt;(provider =&gt; new Commerce(new VirtoCommerceCoreRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;ICatalogModuleCategories&gt;(provider =&gt; new CatalogModuleCategories(new VirtoCommerceCatalogRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;ICatalogModuleProducts&gt;(provider =&gt; new CatalogModuleProducts(new VirtoCommerceCatalogRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;ICatalogModuleSearch&gt;(provider =&gt; new CatalogModuleSearch(new VirtoCommerceCatalogRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;ISecurity&gt;(provider =&gt; new Security(new VirtoCommercePlatformRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;IStorefrontSecurity&gt;(provider =&gt; new StorefrontSecurity(new VirtoCommerceCoreRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;ICustomerModule&gt;(provider =&gt; new CustomerModule(new VirtoCommerceCustomerRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;IOrderModule&gt;(provider =&gt; new OrderModule(new VirtoCommerceOrdersRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;IQuoteModule&gt;(provider =&gt; new QuoteModule(new VirtoCommerceQuoteRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;ISubscriptionModule&gt;(provider =&gt; new SubscriptionModule(new VirtoCommerceSubscriptionRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;IInventoryModule&gt;(provider =&gt; new InventoryModule(new VirtoCommerceInventoryRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;IMarketingModulePromotion&gt;(provider =&gt; new MarketingModulePromotion(new VirtoCommerceMarketingRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;IMarketingModuleDynamicContent&gt;(provider =&gt; new MarketingModuleDynamicContent(new VirtoCommerceMarketingRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;IPricingModule&gt;(provider =&gt; new PricingModule(new VirtoCommercePricingRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;ICartModule&gt;(provider =&gt; new CartModule(new VirtoCommerceCartRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;IMenu&gt;(provider =&gt; new Menu(new VirtoCommerceContentRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;IContent&gt;(provider =&gt; new Content(new VirtoCommerceContentRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;IRecommendations&gt;(provider =&gt; new Recommendations(new VirtoCommerceProductRecommendationsRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;ISitemapsModuleApiOperations&gt;(provider =&gt; new SitemapsModuleApiOperations(new VirtoCommerceSitemapsRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;ICacheModule&gt;(provider =&gt; new CacheModule(new VirtoCommerceCacheRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;INotifications&gt;(provider =&gt; new Notifications(new VirtoCommercePlatformRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;ITrends&gt;(provider =&gt; new Trends(new HruMarketingRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;ICarouselBanners&gt;(provider =&gt; new CarouselBanners(new HruMarketingRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;IHruInvitations&gt;(provider =&gt; new HruInvitations(new HruCustomersRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;IHruOrganizations&gt;(provider =&gt; new HruOrganizations(new HruCustomersRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;IHruOrganizationsBalance&gt;(provider =&gt; new HruOrganizationsBalance(new HruCustomersRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;IHruOrders&gt;(provider =&gt; new HruOrders(new HruOrdersRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;IHeiHolidays&gt;(provider =&gt; new HeiHolidays(new HeinekenHolidaysRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;IInvoice&gt;(provider =&gt; new Invoice(new HruInvoicesRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+            services.AddSingleton&lt;IHruPromotions&gt;(provider =&gt; new HruPromotions(new HruMarketingRESTAPIdocumentation(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.Url, provider.GetService&lt;VirtoCommerceApiRequestHandler&gt;(), httpHandlerWithCompression).DisableRetries().WithTimeout(provider.GetService&lt;IOptions&lt;PlatformEndpointOptions&gt;&gt;().Value.RequestTimeout)));
+
+            if (setupAction != null)
+            {
+                services.Configure(setupAction);
+            }
+        }
+
+        public static void AddFileSystemBlobContent(this IServiceCollection services, Action&lt;FileSystemBlobContentOptions&gt; setupAction = null)
+        {
+            services.AddSingleton&lt;IContentBlobProvider, FileSystemContentBlobProvider&gt;();
+            if (setupAction != null)
+            {
+                services.Configure(setupAction);
+            }
+        }
+
+        public static void AddAzureBlobContent(this IServiceCollection services, Action&lt;AzureBlobContentOptions&gt; setupAction = null)
+        {
+            services.AddSingleton&lt;IContentBlobProvider, AzureBlobContentProvider&gt;();
+            if (setupAction != null)
+            {
+                services.Configure(setupAction);
+            }
+        }
+
+        public static void AddLiquidViewEngine(this IServiceCollection services, Action&lt;LiquidThemeEngineOptions&gt; setupAction = null)
+        {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+
+            services.AddSingleton&lt;ILiquidThemeEngine, ShopifyLiquidThemeEngine&gt;();
+            services.AddSingleton&lt;ILiquidViewEngine, DotLiquidThemedViewEngine&gt;();
+            if (setupAction != null)
+            {
+                services.Configure(setupAction);
+            }
+        }
+
+        //Register event handlers through reflection
+        public static void RegisterAssembliesEventHandlers(this IServiceCollection services, params Type[] typesFromAssemblyContainingMessages)
+        {
+            //Scan for event handlers
+            services.Scan(scan =&gt; scan
+                .FromAssemblies(typesFromAssemblyContainingMessages.Select(x =&gt; x.Assembly))
+                    .AddClasses(classes =&gt; classes.Where(x =&gt;
+                    {
+                        var allInterfaces = x.GetInterfaces();
+                        return
+                            allInterfaces.Any(y =&gt; y.GetTypeInfo().IsGenericType &amp;&amp; y.GetTypeInfo().GetGenericTypeDefinition() == typeof(IHandler&lt;&gt;)) ||
+                            allInterfaces.Any(y =&gt; y.GetTypeInfo().IsGenericType &amp;&amp; y.GetTypeInfo().GetGenericTypeDefinition() == typeof(ICancellableHandler&lt;&gt;));
+                    }))
+                    .AsSelf()
+                    .WithTransientLifetime()
+            );
+
+            var serviceProvider = services.BuildServiceProvider();
+            var handlerRegistrar = serviceProvider.GetService&lt;IHandlerRegistrar&gt;();
+
+            foreach (var typesFromAssemblyContainingMessage in typesFromAssemblyContainingMessages)
+            {
+                var executorsAssembly = typesFromAssemblyContainingMessage.GetTypeInfo().Assembly;
+                var executorTypes = executorsAssembly
+                    .GetTypes()
+                    .Select(t =&gt; new { Type = t, Interfaces = ResolveMessageHandlerInterface(t) })
+                    .Where(e =&gt; e.Interfaces != null &amp;&amp; e.Interfaces.Any());
+
+                foreach (var executorType in executorTypes)
+                {
+                    foreach (var @interface in executorType.Interfaces)
+                    {
+                        InvokeHandler(@interface, handlerRegistrar, executorType.Type, serviceProvider);
+                    }
+                }
+            }
+        }
+
+        private static void InvokeHandler(Type @interface, IHandlerRegistrar registrar, Type executorType, ServiceProvider serviceProvider)
+        {
+            var commandType = @interface.GetGenericArguments()[0];
+
+            var registerExecutorMethod = registrar
+                .GetType()
+                .GetMethods(BindingFlags.Instance | BindingFlags.Public)
+                .Where(mi =&gt; mi.Name == &quot;RegisterHandler&quot;)
+                .Where(mi =&gt; mi.IsGenericMethod)
+                .Where(mi =&gt; mi.GetGenericArguments().Length == 1)
+                .Single(mi =&gt; mi.GetParameters().Length == 1)
+                .MakeGenericMethod(commandType);
+
+            Func&lt;dynamic, CancellationToken, Task&gt; del;
+            if (IsCancellable(@interface))
+            {
+                del = (x, token) =&gt;
+                {
+                    dynamic handler = serviceProvider.GetService(executorType);
+                    return handler.Handle(x, token);
+                };
+            }
+            else
+            {
+                del = (x, token) =&gt;
+                {
+                    dynamic handler = serviceProvider.GetService(executorType);
+                    return handler.Handle(x);
+                };
+            }
+
+            registerExecutorMethod.Invoke(registrar, new object[] { del });
+        }
+
+        private static bool IsCancellable(Type @interface)
+        {
+            return @interface.GetGenericTypeDefinition() == typeof(ICancellableEventHandler&lt;&gt;);
+        }
+
+        private static IEnumerable&lt;Type&gt; ResolveMessageHandlerInterface(Type type)
+        {
+            return type
+                .GetInterfaces()
+                .Where(i =&gt; i.GetTypeInfo().IsGenericType &amp;&amp; (i.GetGenericTypeDefinition() == typeof(IEventHandler&lt;&gt;)
+                             || i.GetGenericTypeDefinition() == typeof(ICancellableEventHandler&lt;&gt;)));
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[47,9,47,10,0],[48,13,48,59,0],[49,13,49,69,0],[51,13,54,15,0],[56,13,56,65,0],[66,13,66,381,0],[66,61,66,379,0],[67,13,67,374,0],[67,58,67,372,0],[68,13,68,407,0],[68,73,68,405,0],[69,13,69,403,0],[69,71,69,401,0],[70,13,70,399,0],[70,69,70,397,0],[71,13,71,378,0],[71,58,71,376,0],[72,13,72,394,0],[72,68,72,392,0],[73,13,73,390,0],[73,64,73,388,0],[74,13,74,382,0],[74,61,74,380,0],[75,13,75,381,0],[75,61,75,379,0],[76,13,76,402,0],[76,68,76,400,0],[77,13,77,393,0],[77,65,77,391,0],[78,13,78,411,0],[78,74,78,409,0],[79,13,79,421,0],[79,79,79,419,0],[80,13,80,387,0],[80,63,80,385,0],[81,13,81,378,0],[81,60,81,376,0],[82,13,82,369,0],[82,54,82,367,0],[83,13,83,375,0],[83,57,83,373,0],[84,13,84,406,0],[84,65,84,404,0],[85,13,85,416,0],[85,77,85,414,0],[86,13,86,381,0],[86,61,86,379,0],[87,13,87,388,0],[87,63,87,386,0],[88,13,88,365,0],[88,56,88,363,0],[89,13,89,383,0],[89,65,89,381,0],[90,13,90,381,0],[90,64,90,379,0],[91,13,91,385,0],[91,66,91,383,0],[92,13,92,399,0],[92,73,92,397,0],[93,13,93,368,0],[93,59,93,366,0],[94,13,94,379,0],[94,61,94,377,0],[95,13,95,366,0],[95,57,95,364,0],[96,13,96,379,0],[96,63,96,377,0],[98,13,98,37,0],[99,13,99,14,0],[100,17,100,49,0],[101,13,101,14,0],[102,9,102,10,0],[105,9,105,10,0],[106,13,106,90,0],[107,13,107,37,0],[108,13,108,14,0],[109,17,109,49,0],[110,13,110,14,0],[111,9,111,10,0],[114,9,114,10,0],[115,13,115,85,0],[116,13,116,37,0],[117,13,117,14,0],[118,17,118,49,0],[119,13,119,14,0],[120,9,120,10,0],[123,9,123,10,0],[124,13,124,34,0],[125,13,125,14,0],[126,17,126,67,0],[129,13,129,83,0],[130,13,130,83,0],[131,13,131,37,0],[132,13,132,14,0],[133,17,133,49,0],[134,13,134,14,0],[135,9,135,10,0],[139,9,139,10,0],[141,13,152,15,0],[141,35,151,45,0],[142,81,142,91,0],[143,44,149,23,0],[144,21,144,22,0],[145,25,145,63,0],[146,25,148,162,0],[147,52,147,149,0],[148,52,148,160,0],[149,21,149,22,0],[154,13,154,67,0],[155,13,155,84,0],[157,13,157,20,0],[157,22,157,60,0],[157,61,157,63,0],[157,64,157,99,0],[158,13,158,14,0],[159,17,159,99,0],[160,17,163,77,0],[162,34,162,98,0],[163,33,163,75,0],[165,17,165,24,0],[165,26,165,42,0],[165,43,165,45,0],[165,46,165,59,0],[166,17,166,18,0],[167,21,167,28,0],[167,30,167,44,0],[167,45,167,47,0],[167,48,167,71,0],[168,21,168,22,0],[169,25,169,105,0],[170,21,170,22,0],[171,17,171,18,0],[172,13,172,14,0],[173,9,173,10,0],[176,9,176,10,0],[177,13,177,67,0],[179,13,186,49,0],[182,30,182,58,0],[183,30,183,48,0],[184,30,184,66,0],[185,31,185,61,0],[189,13,189,43,0],[190,13,190,14,0],[191,17,195,19,0],[192,17,192,18,0],[193,21,193,80,0],[194,21,194,53,0],[195,17,195,18,0],[196,13,196,14,0],[198,13,198,14,0],[199,17,203,19,0],[200,17,200,18,0],[201,21,201,80,0],[202,21,202,46,0],[203,17,203,18,0],[204,13,204,14,0],[206,13,206,76,0],[207,9,207,10,0],[210,9,210,10,0],[211,13,211,96,0],[212,9,212,10,0],[215,9,215,10,0],[216,13,219,102,0],[218,29,219,100,0],[220,9,220,10,0]]);
+    </script>
+  </body>
+</html>

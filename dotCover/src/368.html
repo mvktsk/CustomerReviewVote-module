@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\common\addressconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Linq;
+using VirtoCommerce.Storefront.Model;
+using coreDto = VirtoCommerce.Storefront.AutoRestClients.CoreModuleApi.Models;
+using shopifyModel = VirtoCommerce.LiquidThemeEngine.Objects;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public static class AddressConverter
+    {
+        public static Address ToAddress(this coreDto.Address addressDto)
+        {
+            var retVal = new Address
+            {
+                Key = addressDto.Key,
+                City = addressDto.City,
+                CountryCode = addressDto.CountryCode,
+                CountryName = addressDto.CountryName,
+                Email = addressDto.Email,
+                FirstName = addressDto.FirstName,
+                LastName = addressDto.LastName,
+                Line1 = addressDto.Line1,
+                Line2 = addressDto.Line2,
+                MiddleName = addressDto.MiddleName,
+                Name = addressDto.Name,
+                Organization = addressDto.Organization,
+                Phone = addressDto.Phone,
+                PostalCode = addressDto.PostalCode,
+                RegionId = addressDto.RegionId,
+                RegionName = addressDto.RegionName,
+                Zip = addressDto.Zip,
+
+                Type = (AddressType)Enum.Parse(typeof(AddressType), addressDto.AddressType, true)
+            };
+            return retVal;
+        }
+
+        public static coreDto.Address ToCoreAddressDto(this Address address)
+        {
+            var retVal = new coreDto.Address
+            {
+                Key = address.Key,
+                City = address.City,
+                CountryCode = address.CountryCode,
+                CountryName = address.CountryName,
+                Email = address.Email,
+                FirstName = address.FirstName,
+                LastName = address.LastName,
+                Line1 = address.Line1,
+                Line2 = address.Line2,
+                MiddleName = address.MiddleName,
+                Name = address.Name,
+                Organization = address.Organization,
+                Phone = address.Phone,
+                PostalCode = address.PostalCode,
+                RegionId = address.RegionId,
+                RegionName = address.RegionName,
+                Zip = address.Zip,
+
+                AddressType = address.Type.ToString()
+            };
+
+            return retVal;
+        }
+
+
+        public static Address ToWebModel(this shopifyModel.Address address, Country[] countries)
+        {
+            var result = new Address();
+            result.CopyFrom(address, countries);
+            return result;
+        }
+
+
+        public static Address CopyFrom(this Address result, shopifyModel.Address address, Country[] countries)
+        {
+            result.City = address.City;
+            result.CountryCode = address.CountryCode;
+            result.FirstName = address.FirstName;
+            result.LastName = address.LastName;
+            result.Name = address.Name;
+            result.Phone = address.Phone;
+            result.Zip = address.Zip;
+            result.Organization = address.Company;
+            result.CountryName = address.Country;
+            result.PostalCode = address.Zip;
+            result.Line1 = address.Address1;
+            result.Line2 = address.Address2;
+            result.RegionName = address.Province;
+
+            result.Name = result.ToString();
+
+            var country = countries.FirstOrDefault(c =&gt; string.Equals(c.Name, address.Country, StringComparison.OrdinalIgnoreCase));
+            if (country != null)
+            {
+                result.CountryCode = country.Code3;
+
+                if (address.Province != null &amp;&amp; country.Regions != null)
+                {
+                    var region = country.Regions.FirstOrDefault(r =&gt; string.Equals(r.Name, address.Province, StringComparison.OrdinalIgnoreCase));
+
+                    if (region != null)
+                    {
+                        result.RegionId = region.Code;
+                    }
+                }
+            }
+
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,10,0],[13,13,34,15,0],[35,13,35,27,0],[36,9,36,10,0],[39,9,39,10,0],[40,13,61,15,0],[63,13,63,27,0],[64,9,64,10,0],[68,9,68,10,0],[69,13,69,40,0],[70,13,70,49,0],[71,13,71,27,0],[72,9,72,10,0],[76,9,76,10,0],[77,13,77,40,0],[78,13,78,54,0],[79,13,79,50,0],[80,13,80,48,0],[81,13,81,40,0],[82,13,82,42,0],[83,13,83,38,0],[84,13,84,51,0],[85,13,85,50,0],[86,13,86,45,0],[87,13,87,45,0],[88,13,88,45,0],[89,13,89,50,0],[91,13,91,45,0],[93,13,93,133,0],[93,57,93,131,0],[94,13,94,33,0],[95,13,95,14,0],[96,17,96,52,0],[98,17,98,73,0],[99,17,99,18,0],[100,21,100,147,0],[100,70,100,145,0],[102,21,102,40,0],[103,21,103,22,0],[104,25,104,55,0],[105,21,105,22,0],[106,17,106,18,0],[107,13,107,14,0],[109,13,109,27,0],[110,9,110,10,0]]);
+    </script>
+  </body>
+</html>

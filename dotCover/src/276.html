@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\catalog\productprice.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Marketing;
+
+namespace VirtoCommerce.Storefront.Model.Catalog
+{
+    public partial class ProductPrice : ValueObject, IConvertible&lt;ProductPrice&gt;, ITaxable
+    {
+        public ProductPrice(Currency currency)
+        {
+            Currency = currency;
+            ListPrice = new Money(currency);        
+            SalePrice = new Money(currency);       
+            DiscountAmount = new Money(currency);
+            TierPrices = new List&lt;TierPrice&gt;();
+            Discounts = new List&lt;Discount&gt;();
+        }
+        /// &lt;summary&gt;
+        /// Price list id
+        /// &lt;/summary&gt;
+        public string PricelistId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Currency
+        /// &lt;/summary&gt;
+        public Currency Currency { get; set; }
+
+        /// &lt;summary&gt;
+        /// Product id
+        public string ProductId { get; set; }
+
+      
+        public Money DiscountAmount { get; set; }
+      
+        public Money DiscountAmountWithTax
+        {
+            get
+            {
+                return DiscountAmount + DiscountAmount * TaxPercentRate;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Relative benefit. 30% 
+        /// &lt;/summary&gt;
+        public decimal DiscountPercent
+        {
+            get
+            {
+                if (ListPrice.Amount &gt; 0)
+                {
+                    return Math.Round(DiscountAmount.Amount / ListPrice.Amount, 2);
+                }
+                return 0;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Original product price (old price)
+        /// &lt;/summary&gt;
+        public Money ListPrice { get; set; }
+        /// &lt;summary&gt;
+        /// Original product price (old price) including tax 
+        /// &lt;/summary&gt;
+        public Money ListPriceWithTax
+        {
+            get
+            {
+                return ListPrice + ListPrice * TaxPercentRate;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Sale product price (new price)
+        /// &lt;/summary&gt;
+        public Money SalePrice { get; set; }
+
+        /// &lt;summary&gt;
+        /// Sale product price (new price) including tax 
+        /// &lt;/summary&gt;
+        public Money SalePriceWithTax
+        {
+            get
+            {
+                return SalePrice + SalePrice * TaxPercentRate;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Actual price includes all kind of discounts
+        /// &lt;/summary&gt;
+        public Money ActualPrice
+        {
+            get
+            {
+                return ListPrice - DiscountAmount;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Actual price includes all kind of discounts including tax
+        /// &lt;/summary&gt;
+        public Money ActualPriceWithTax
+        {
+            get
+            {
+                return ListPriceWithTax - DiscountAmountWithTax;
+            }
+        }
+
+        public IList&lt;Discount&gt; Discounts { get; set; }
+
+        /// &lt;summary&gt;
+        /// It defines the minimum quantity of products
+        /// &lt;/summary&gt;
+        public int? MinQuantity { get; set; }
+
+        /// &lt;summary&gt;
+        /// Tier prices 
+        /// &lt;/summary&gt;
+        public IList&lt;TierPrice&gt; TierPrices { get; set; }
+                
+        /// &lt;summary&gt;
+        /// Return tire price for passed quantity
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;quantity&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public TierPrice GetTierPrice(int quantity)
+        {
+            var retVal = TierPrices.OrderBy(x =&gt; x.Quantity).LastOrDefault(x =&gt; x.Quantity &lt;= quantity);
+            if(retVal == null)
+            {
+                retVal = new TierPrice(SalePrice, 1);
+            }
+            return retVal;
+        }
+
+        #region ITaxable Members
+        /// &lt;summary&gt;
+        /// Gets or sets the value of total shipping tax amount
+        /// &lt;/summary&gt;
+        public Money TaxTotal
+        {
+            get
+            {
+                return ActualPriceWithTax - ActualPrice;
+            }
+        }
+
+        public decimal TaxPercentRate { get; private set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shipping tax type
+        /// &lt;/summary&gt;
+        public string TaxType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the collection of line item tax details lines
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;
+        /// Collection of TaxDetail objects
+        /// &lt;/value&gt;
+        public IList&lt;TaxDetail&gt; TaxDetails { get; set; }
+
+        public void ApplyTaxRates(IEnumerable&lt;TaxRate&gt; taxRates)
+        {
+            var taxRate = taxRates.FirstOrDefault(x =&gt; x.Line.Quantity == 0);
+            if (taxRate != null &amp;&amp; taxRate.Rate.Amount &gt; 0)
+            {
+                var amount = ActualPrice.Amount &gt; 0 ? ActualPrice.Amount : SalePrice.Amount;
+                if (amount &gt; 0)
+                {
+                    TaxPercentRate = TaxRate.TaxPercentRound(taxRate.Rate.Amount / amount);
+                }
+            }         
+            foreach(var tierPrice in TierPrices)
+            {
+                tierPrice.ApplyTaxRates(taxRates);
+            }
+        }
+        #endregion
+
+        #region IConvertible&lt;ProductPrice&gt; Members
+        /// &lt;summary&gt;
+        /// Convert current product price to other currency using currency exchange rate
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;currency&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public ProductPrice ConvertTo(Currency currency)
+        {
+            var retVal = new ProductPrice(currency);
+            retVal.ListPrice = ListPrice.ConvertTo(currency);
+            retVal.SalePrice = SalePrice.ConvertTo(currency);
+            retVal.DiscountAmount = DiscountAmount.ConvertTo(currency);
+            retVal.ProductId = ProductId;
+           
+            return retVal;
+        }
+        #endregion
+
+        protected override IEnumerable&lt;object&gt; GetEqualityComponents()
+        {
+            yield return ProductId;
+            yield return Currency;
+            yield return MinQuantity;
+            yield return ListPrice;
+            yield return SalePrice;
+            yield return DiscountAmount;
+            yield return PricelistId;
+            yield return TaxPercentRate;
+
+            if (TierPrices != null)
+            {
+                foreach(var tierPrice in TierPrices)
+                {
+                    yield return tierPrice;
+                }
+            }
+
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,14,47,0],[15,9,15,10,0],[16,13,16,33,0],[17,13,17,45,0],[18,13,18,45,0],[19,13,19,50,0],[20,13,20,48,0],[21,13,21,46,0],[22,9,22,10,0],[26,37,26,41,0],[26,42,26,46,0],[31,36,31,40,0],[31,41,31,45,0],[35,35,35,39,0],[35,40,35,44,0],[38,39,38,43,0],[38,44,38,48,0],[43,13,43,14,0],[44,17,44,73,0],[45,13,45,14,0],[54,13,54,14,0],[55,17,55,42,0],[56,17,56,18,0],[57,21,57,84,0],[59,17,59,26,0],[60,13,60,14,0],[66,34,66,38,0],[66,39,66,43,0],[73,13,73,14,0],[74,17,74,63,0],[75,13,75,14,0],[81,34,81,38,0],[81,39,81,43,0],[89,13,89,14,0],[90,17,90,63,0],[91,13,91,14,0],[100,13,100,14,0],[101,17,101,51,0],[102,13,102,14,0],[111,13,111,14,0],[112,17,112,65,0],[113,13,113,14,0],[116,44,116,48,0],[116,49,116,53,0],[121,35,121,39,0],[121,40,121,44,0],[126,46,126,50,0],[126,51,126,55,0],[134,9,134,10,0],[135,13,135,105,0],[135,50,135,60,0],[135,81,135,103,0],[136,13,136,31,0],[137,13,137,14,0],[138,17,138,54,0],[139,13,139,14,0],[140,13,140,27,0],[141,9,141,10,0],[150,13,150,14,0],[151,17,151,57,0],[152,13,152,14,0],[155,41,155,45,0],[155,46,155,58,0],[160,33,160,37,0],[160,38,160,42,0],[168,46,168,50,0],[168,51,168,55,0],[171,9,171,10,0],[172,13,172,78,0],[172,56,172,76,0],[173,13,173,60,0],[174,13,174,14,0],[175,17,175,93,0],[176,17,176,32,0],[177,17,177,18,0],[178,21,178,92,0],[179,17,179,18,0],[180,13,180,14,0],[181,13,181,20,0],[181,21,181,34,0],[181,35,181,37,0],[181,38,181,48,0],[182,13,182,14,0],[183,17,183,51,0],[184,13,184,14,0],[185,9,185,10,0],[195,9,195,10,0],[196,13,196,53,0],[197,13,197,62,0],[198,13,198,62,0],[199,13,199,72,0],[200,13,200,42,0],[202,13,202,27,0],[203,9,203,10,0],[207,9,207,10,0],[208,13,208,36,0],[209,13,209,35,0],[210,13,210,38,0],[211,13,211,36,0],[212,13,212,36,0],[213,13,213,41,0],[214,13,214,38,0],[215,13,215,41,0],[217,13,217,36,0],[218,13,218,14,0],[219,17,219,24,0],[219,25,219,38,0],[219,39,219,41,0],[219,42,219,52,0],[220,17,220,18,0],[221,21,221,44,0],[222,17,222,18,0],[223,13,223,14,0],[225,9,225,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\staticcontent\blogsearchcriteria.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Specialized;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model.StaticContent
+{
+    public partial class BlogSearchCriteria : PagedSearchCriteria
+    {
+        private static int _defaultPageSize = 20;
+
+        public static int DefaultPageSize
+        {
+            get { return _defaultPageSize; }
+            set { _defaultPageSize = value; }
+        }
+
+        public BlogSearchCriteria()
+            : this(new NameValueCollection())
+        {
+        }
+
+        public BlogSearchCriteria(NameValueCollection queryString)
+            : base(queryString, DefaultPageSize)
+        {
+        }
+
+        public string Category { get; set; }
+        public string Tag { get; set; }
+        public string Author { get; set; }
+        public string[] ExcludedArticleHandles { get; set; }
+
+        protected virtual void Parse(NameValueCollection queryString)
+        {
+            Category = queryString.Get(&quot;category&quot;);
+            Tag = queryString.Get(&quot;tag&quot;);
+            Author = queryString.Get(&quot;author&quot;);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,9,8,50,0],[12,17,12,18,0],[12,19,12,43,0],[12,44,12,45,0],[13,17,13,18,0],[13,19,13,44,0],[13,45,13,46,0],[17,15,17,46,0],[18,9,18,10,0],[19,9,19,10,0],[22,15,22,49,0],[23,9,23,10,0],[24,9,24,10,0],[26,34,26,38,0],[26,39,26,43,0],[27,29,27,33,0],[27,34,27,38,0],[28,32,28,36,0],[28,37,28,41,0],[29,50,29,54,0],[29,55,29,59,0],[32,9,32,10,0],[33,13,33,52,0],[34,13,34,42,0],[35,13,35,48,0],[36,9,36,10,0]]);
+    </script>
+  </body>
+</html>

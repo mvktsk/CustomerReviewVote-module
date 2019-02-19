@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\customerreviewvote-module\newmanagedmodule.web\controllers\api\customerreviewvotes.webcontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using CustomerReviewVotes.Core.Model;
+using CustomerReviewVotes.Core.Services;
+using CustomerReviewVotes.Web.Security;
+using System.Net;
+using System.Web.Http;
+using System.Web.Http.Description;
+using VirtoCommerce.Domain.Commerce.Model.Search;
+using VirtoCommerce.Platform.Core.Web.Security;
+
+
+namespace CustomerReviewVotes.Web.Controllers.Api
+{
+    [RoutePrefix(&quot;api/customerReview&quot;)]
+    public class ManagedModuleController : ApiController
+    {
+        private readonly ICustomerReviewSearchService _customerReviewSearchService;
+        private readonly ICustomerReviewService _customerReviewService;
+
+        public ManagedModuleController()
+        {
+        }
+
+        public ManagedModuleController(ICustomerReviewSearchService customerReviewSearchService, ICustomerReviewService customerReviewService)
+        {
+            _customerReviewSearchService = customerReviewSearchService;
+            _customerReviewService = customerReviewService;
+        }
+
+        /// &lt;summary&gt;
+        /// Return product Customer review search results
+        /// &lt;/summary&gt;
+        ///&lt;param name=&quot;criteria&quot;&gt;Search criteria&lt;/param&gt;
+        ///&lt;returns&gt;&lt;/returns&gt;
+        [HttpPost]
+        [Route(&quot;search&quot;)]
+        [ResponseType(typeof(GenericSearchResult&lt;CustomerReview&gt;))]
+        [CheckPermission(Permission = PredefinedPermissions.CustomerReviewRead)]
+        public IHttpActionResult SearchCustomerReviews(CustomerReviewSearchCriteria criteria)
+        {
+            var result = _customerReviewSearchService.SearchCustomerReviews(criteria);
+            return Ok(result);
+        }
+
+        /// &lt;summary&gt;
+        /// Create new or update existing customer review
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;customerRevies&quot;&gt;Customer reviews&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        [HttpPost]
+        [Route(&quot;&quot;)]
+        [ResponseType(typeof(void))]
+        [CheckPermission(Permission = PredefinedPermissions.CustomerReviewUpdate)]
+        public IHttpActionResult Update(CustomerReview[] customerReviews)
+        {
+            _customerReviewService.SaveCustomerReviews(customerReviews);
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        ///&lt;summary&gt;
+        ///Delete Customer Reviews by IDs
+        ///&lt;/summary&gt;
+        ///&lt;param name=&quot;ids&quot;&gt;IDs&lt;/param&gt;
+        ///&lt;returns&gt;&lt;/returns&gt;
+        [HttpDelete]
+        [Route(&quot;&quot;)]
+        [ResponseType(typeof(void))]
+        [CheckPermission(Permission = PredefinedPermissions.CustomerReviewDelete)]
+        public IHttpActionResult Delete([FromUri] string[] ids)
+        {
+            _customerReviewService.DeleteCustomerReviews(ids);
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        /// &lt;summary&gt;
+        /// Return product Customer review votes search results
+        /// &lt;/summary&gt;
+        ///&lt;param name=&quot;criteria&quot;&gt;Search criteria&lt;/param&gt;
+        ///&lt;returns&gt;&lt;/returns&gt;
+        [HttpPost]
+        [Route(&quot;vote/search&quot;)]
+        [ResponseType(typeof(GenericSearchResult&lt;CustomerReviewVote&gt;))]
+        [CheckPermission(Permission = PredefinedPermissions.CustomerReviewRead)]
+        public IHttpActionResult SearchCustomerReviewVotes(CustomerReviewVoteSearchCriteria criteria)
+        {
+            var result = _customerReviewSearchService.SearchCustomerReviewVotes(criteria);
+            return Ok(result);
+        }
+
+        /// &lt;summary&gt;
+        /// Create new or update existing customer review
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;customerRevies&quot;&gt;Customer reviews&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        [HttpPost]
+        [Route(&quot;vote&quot;)]
+        [ResponseType(typeof(void))]
+        [CheckPermission(Permission = PredefinedPermissions.CustomerReviewUpdate)]
+        public IHttpActionResult UpdateVotes(CustomerReviewVote[] customerReviewVotes)
+        {
+            _customerReviewService.SaveCustomerReviewVotes(customerReviewVotes);
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        ///&lt;summary&gt;
+        ///Delete Customer Review Votes by IDs
+        ///&lt;/summary&gt;
+        ///&lt;param name=&quot;ids&quot;&gt;IDs&lt;/param&gt;
+        ///&lt;returns&gt;&lt;/returns&gt;
+        [HttpDelete]
+        [Route(&quot;vote&quot;)]
+        [ResponseType(typeof(void))]
+        [CheckPermission(Permission = PredefinedPermissions.CustomerReviewDelete)]
+        public IHttpActionResult DeleteVotes([FromUri] string[] ids)
+        {
+            _customerReviewService.DeleteCustomerReviewVotes(ids);
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[19,9,19,41,0],[20,9,20,10,0],[21,9,21,10,0],[23,9,23,143,0],[24,9,24,10,0],[25,13,25,72,0],[26,13,26,60,0],[27,9,27,10,0],[39,9,39,10,0],[40,13,40,87,0],[41,13,41,31,0],[42,9,42,10,0],[54,9,54,10,0],[55,13,55,73,0],[56,13,56,57,0],[57,9,57,10,0],[69,9,69,10,0],[70,13,70,63,0],[71,13,71,57,0],[72,9,72,10,0],[84,9,84,10,0],[85,13,85,91,0],[86,13,86,31,0],[87,9,87,10,0],[99,9,99,10,0],[100,13,100,81,0],[101,13,101,57,0],[102,9,102,10,0],[114,9,114,10,0],[115,13,115,67,0],[116,13,116,57,0],[117,9,117,10,0]]);
+    </script>
+  </body>
+</html>

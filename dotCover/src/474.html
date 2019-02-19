@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\cart\handlers\securityeventshandler.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Linq;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.AutoRestClients.CartModuleApi;
+using VirtoCommerce.Storefront.Model.Cart.Services;
+using VirtoCommerce.Storefront.Model.Common.Events;
+using VirtoCommerce.Storefront.Model.Security.Events;
+
+namespace VirtoCommerce.Storefront.Domain.Cart.Handlers
+{
+    public class SecurityEventsHandler : IEventHandler&lt;UserLoginEvent&gt;
+    {
+        private readonly ICartModule _cartApi;
+        private readonly ICartBuilder _cartBuilder;
+        public SecurityEventsHandler(ICartBuilder cartBuilder, ICartModule cartApi)
+        {
+            _cartBuilder = cartBuilder;
+            _cartApi = cartApi;
+        }
+
+        #region IEventHandler&lt;UserLoginEvent&gt;
+
+        /// &lt;summary&gt;
+        /// Merge an anonymous cart into a shopping cart belonging to a registered customer
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;event&quot;&gt;&lt;/param&gt;
+        public virtual async Task Handle(UserLoginEvent @event)
+        {
+            if (@event == null)
+                return;
+
+            var workContext = @event.WorkContext;
+            var prevUser = @event.WorkContext.CurrentUser;
+            var prevUserCart = @event.WorkContext.CurrentCart.Value;
+            var newUser = @event.User;
+
+            //If previous user was anonymous and it has not empty cart need merge anonymous cart to personal
+            if (!prevUser.IsRegisteredUser &amp;&amp; prevUserCart != null &amp;&amp; prevUserCart.Items.Any())
+            {
+                //we load or create cart for new user
+                await _cartBuilder.LoadOrCreateNewTransientCartAsync(prevUserCart.Name, workContext.CurrentStore, newUser, workContext.CurrentLanguage, workContext.CurrentCurrency);
+                await _cartBuilder.MergeWithCartAsync(prevUserCart);
+                await _cartBuilder.SaveAsync();
+                await _cartApi.DeleteCartsAsync(new[] { prevUserCart.Id }.ToList());
+            }
+        }
+
+        #endregion
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,14,84,0],[15,9,15,10,0],[16,13,16,40,0],[17,13,17,32,0],[18,9,18,10,0],[27,9,27,10,0],[28,13,28,32,0],[29,17,29,24,0],[31,13,31,50,0],[32,13,32,59,0],[33,13,33,69,0],[34,13,34,39,0],[37,13,37,96,0],[38,13,38,14,0],[40,17,40,182,0],[41,17,41,69,0],[42,17,42,48,0],[43,17,43,85,0],[44,13,44,14,0],[45,9,45,10,0]]);
+    </script>
+  </body>
+</html>

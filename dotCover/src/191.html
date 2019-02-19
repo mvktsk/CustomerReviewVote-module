@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\pricing\priceevaluationcontext.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Text;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model.Pricing
+{
+    public class PriceEvaluationContext : ValueObject
+    {       
+        public string StoreId { get; set; }
+        public string CatalogId { get; set; }
+        public IList&lt;string&gt; ProductIds { get; set; } = new List&lt;string&gt;();
+        public IList&lt;string&gt; PricelistIds { get; set; } = new List&lt;string&gt;();
+        public double? Quantity { get; set; }
+
+        public string CustomerId { get; set; }
+
+        public string OrganizationId { get; set; }
+
+        public string Currency { get; set; }
+
+        public object ContextObject { get; set; }
+
+        public string GeoCity { get; set; }
+
+        public string GeoState { get; set; }
+
+        public string GeoCountry { get; set; }
+
+        public string GeoContinent { get; set; }
+
+        public string GeoZipCode { get; set; }
+
+        public string GeoConnectionType { get; set; }
+
+        public string GeoTimeZone { get; set; }
+        
+        public string GeoIpRoutingType { get; set; }
+        
+        public string GeoIspSecondLevel { get; set; }
+        
+        public string GeoIspTopLevel { get; set; }
+        
+        public int? ShopperAge { get; set; }
+        
+        public string ShopperGender { get; set; }
+        
+        public string Language { get; set; }
+
+        public IList&lt;string&gt; UserGroups { get; set; } = new List&lt;string&gt;();
+
+        public string ShopperSearchedPhraseInStore { get; set; }
+        
+        public string ShopperSearchedPhraseOnInternet { get; set; }
+        
+        public string CurrentUrl { get; set; }
+        
+        public string ReferredUrl { get; set; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,33,10,37,0],[10,38,10,42,0],[11,35,11,39,0],[11,40,11,44,0],[12,43,12,47,0],[12,48,12,52,0],[12,57,12,75,0],[13,45,13,49,0],[13,50,13,54,0],[13,59,13,77,0],[14,35,14,39,0],[14,40,14,44,0],[16,36,16,40,0],[16,41,16,45,0],[18,40,18,44,0],[18,45,18,49,0],[20,34,20,38,0],[20,39,20,43,0],[22,39,22,43,0],[22,44,22,48,0],[24,33,24,37,0],[24,38,24,42,0],[26,34,26,38,0],[26,39,26,43,0],[28,36,28,40,0],[28,41,28,45,0],[30,38,30,42,0],[30,43,30,47,0],[32,36,32,40,0],[32,41,32,45,0],[34,43,34,47,0],[34,48,34,52,0],[36,37,36,41,0],[36,42,36,46,0],[38,42,38,46,0],[38,47,38,51,0],[40,43,40,47,0],[40,48,40,52,0],[42,40,42,44,0],[42,45,42,49,0],[44,34,44,38,0],[44,39,44,43,0],[46,39,46,43,0],[46,44,46,48,0],[48,34,48,38,0],[48,39,48,43,0],[50,43,50,47,0],[50,48,50,52,0],[50,57,50,75,0],[52,54,52,58,0],[52,59,52,63,0],[54,57,54,61,0],[54,62,54,66,0],[56,36,56,40,0],[56,41,56,45,0],[58,37,58,41,0],[58,42,58,46,0]]);
+    </script>
+  </body>
+</html>

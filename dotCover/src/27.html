@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\collection.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using DotLiquid;
+using System.Runtime.Serialization;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// Represents shopping cart object
+    /// &lt;/summary&gt;
+    /// &lt;remarks&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/objects/collection
+    /// &lt;/remarks&gt;
+    [DataContract]
+    public partial class Collection : Drop
+    {
+        /// &lt;summary&gt;
+        /// Returns collection total products count
+        /// &lt;/summary&gt;
+        [DataMember]
+        public int AllProductsCount { get { return Products.GetTotalCount(); } }
+
+        /// &lt;summary&gt;
+        /// Returns all tags of all products in a collection.
+        /// &lt;/summary&gt;
+        public TagCollection AllTags { get { return Tags; } }
+
+        /// &lt;summary&gt;
+        /// Returns a list of all product types in a collection.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string[] AllTypes { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns a list of all product vendors in a collection.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string[] AllVendors { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the product type on a /collections/types?q=TYPE collection page.
+        /// For example, you may be on the automatic Shirts collection, which lists all
+        /// products of type &#39;Shirts&#39; in the store: myshop.shopify.com/collections/types?q=Shirts.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string CurrentType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the vendor name on a /collections/vendors?q=VENDOR collection page.
+        /// For example, you may be on the automatic Shopify collection, which lists all
+        /// products with vendor &#39;Shopify&#39; in the store: myshop.shopify.com/collections/vendors?q=Shopify.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string CurrentVendor { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the default sort order of the collection.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string DefaultSortBy { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the actual sort order of the collection.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string SortBy { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the description of the collection.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Description { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the handle of a collection.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Handle { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the id of the collection.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Id { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the collection image. Use the img_url filter to link it to the image file
+        /// on the Shopify CDN. Check for the presence of the image first.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public Image Image { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns an array of the category&#39;s images. Use the product_img_url filter to link to the category image.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public Image[] Images { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the URL of the next product in the collection. Returns nil if there is no next product.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string NextProduct { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the URL of the previous product in the collection. Returns nil if there is
+        /// no previous product.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string PreviousProduct { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns paged collection of all parents collections
+        /// &lt;/summary&gt;
+        public Collections Parents { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns paged collection of products
+        /// &lt;/summary&gt;
+        public IMutablePagedList&lt;Product&gt; Products { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns collection total products count
+        /// &lt;/summary&gt;
+        [DataMember]
+        public int ProductsCount { get { return Products.GetTotalCount(); } }
+
+        /// &lt;summary&gt;
+        /// Returns all tags of all products in a collection.
+        /// &lt;/summary&gt;
+        public TagCollection Tags { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the name of the custom collection template assigned to the collection,
+        /// without the collection.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string TemplateSuffix { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the title of the collection.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Title { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the URL of the collection.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Url { get; set; }
+
+        /// &lt;summary&gt;
+        /// Shop metafields
+        /// &lt;/summary&gt;
+        public MetaFieldNamespacesCollection Metafields { get; set; }
+
+        /// &lt;summary&gt;
+        /// Child collections
+        /// &lt;/summary&gt;
+        public Collections Collections { get; set; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[20,43,20,44,0],[20,45,20,77,0],[20,78,20,79,0],[25,44,25,45,0],[25,46,25,58,0],[25,59,25,60,0],[31,36,31,40,0],[31,41,31,45,0],[37,38,37,42,0],[37,43,37,47,0],[45,37,45,41,0],[45,42,45,46,0],[53,39,53,43,0],[53,44,53,48,0],[59,39,59,43,0],[59,44,59,48,0],[65,32,65,36,0],[65,37,65,41,0],[71,37,71,41,0],[71,42,71,46,0],[77,32,77,36,0],[77,37,77,41,0],[83,28,83,32,0],[83,33,83,37,0],[90,30,90,34,0],[90,35,90,39,0],[96,33,96,37,0],[96,38,96,42,0],[102,37,102,41,0],[102,42,102,46,0],[109,41,109,45,0],[109,46,109,50,0],[114,38,114,42,0],[114,43,114,47,0],[119,54,119,58,0],[119,59,119,63,0],[125,40,125,41,0],[125,42,125,74,0],[125,75,125,76,0],[130,37,130,41,0],[130,42,130,46,0],[137,40,137,44,0],[137,45,137,49,0],[143,31,143,35,0],[143,36,143,40,0],[149,29,149,33,0],[149,34,149,38,0],[154,59,154,63,0],[154,64,154,68,0],[159,42,159,46,0],[159,47,159,51,0]]);
+    </script>
+  </body>
+</html>

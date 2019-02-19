@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\filters\urlfilters.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Globalization;
+using System.Linq;
+using System.Web;
+using DotLiquid;
+using VirtoCommerce.LiquidThemeEngine.Extensions;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Stores;
+using shopifyModel = VirtoCommerce.LiquidThemeEngine.Objects;
+using storefrontModel = VirtoCommerce.Storefront.Model;
+
+namespace VirtoCommerce.LiquidThemeEngine.Filters
+{
+    /// &lt;summary&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/filters/url-filters
+    /// &lt;/summary&gt;
+    public class UrlFilters
+    {
+        /// &lt;summary&gt;
+        /// Generates a link to the customer login page.
+        /// {{ &#39;Log in&#39; | customer_login_link }}
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string CustomerLoginLink(string input)
+        {
+            return BuildHtmlLink(&quot;customer_login_link&quot;, &quot;~/account/login&quot;, input);
+        }
+        public static string CustomerRegisterLink(string input)
+        {
+            return BuildHtmlLink(&quot;customer_register_link&quot;, &quot;~/account/register&quot;, input);
+        }
+
+        public static string CustomerLogoutLink(string input)
+        {
+            return BuildHtmlLink(&quot;customer_logout_link&quot;, &quot;~/account/logout&quot;, input);
+        }
+
+        public static string EditCustomerAddressLink(string input, string id)
+        {
+            return BuildOnClickLink(input, &quot;Shopify.CustomerAddress.toggleForm(&#39;{0}&#39;);return false&quot;, id);
+        }
+
+        public static string DeleteCustomerAddressLink(string input, string id)
+        {
+            return BuildOnClickLink(input, &quot;Shopify.CustomerAddress.destroy(&#39;{0}&#39;);return false&quot;, id);
+        }
+
+        /// &lt;summary&gt;
+        /// Returns the URL of an image. Accepts an image size as a parameter. The img_url filter can be used on the following objects:
+        /// product, variant,  line item, collection, image
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;type&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string ImgUrl(object input, string type = null)
+        {
+            if (input == null)
+                return null;
+
+            var retVal = input.ToString();
+
+            if (input is shopifyModel.Product product)
+            {
+                retVal = product.FeaturedImage?.Src;
+            }
+            if (input is shopifyModel.Image image)
+            {
+                retVal = image.Src;
+            }
+            if (input is shopifyModel.Variant variant)
+            {
+                retVal = variant.FeaturedImage?.Src;
+            }
+            if (input is shopifyModel.Collection collection)
+            {
+                retVal = collection.Image?.Src;
+            }
+            if (input is shopifyModel.LineItem lineItem)
+            {
+                retVal = lineItem.Image?.Src;
+            }
+
+            if (!string.IsNullOrEmpty(retVal))
+            {
+                if (!string.IsNullOrEmpty(type))
+                {
+                    retVal = retVal.AddSuffixToFileUrl(string.Format(&quot;_{0}&quot;, type));
+                }
+
+                retVal = retVal.RemoveLeadingUriScheme();
+            }
+
+            return retVal;
+        }
+
+        /// &lt;summary&gt;
+        /// Generates an HTML link. The first parameter is the URL of the link, and the optional second parameter is the title of the link.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;link&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;title&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string LinkTo(object input, string link, string title = &quot;&quot;)
+        {
+            return string.Format(&quot;&lt;a href=\&quot;{0}\&quot; title=\&quot;{1}\&quot;&gt;{2}&lt;/a&gt;&quot;, link, title, input);
+        }
+
+        /// &lt;summary&gt;
+        /// Creates a link to all products in a collection that have a given tag.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;context&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;tag&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string LinkToTag(Context context, object input, object tag)
+        {
+            return BuildTagLink(TagAction.Replace, tag, input);
+        }
+
+        /// &lt;summary&gt;
+        /// Creates a link to all products in a collection that have a given tag as well as any tags that have been already selected.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;context&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;tag&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string LinkToAddTag(Context context, object input, object tag)
+        {
+            return BuildTagLink(TagAction.Add, tag, input);
+        }
+
+        /// &lt;summary&gt;
+        /// Creates a link to filter brands
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;context&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;tag&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string LinkToAddBrand(Context context, object input, object tag)
+        {
+            return BuildBrandLink(TagAction.Add, tag, input);
+        }
+
+        /// &lt;summary&gt;
+        /// Generates a link to all products in a collection that have all the previous tags that might have been added already, excluding the given tag.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;context&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;tag&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string LinkToRemoveTag(Context context, object input, object tag)
+        {
+            return BuildTagLink(TagAction.Remove, tag, input);
+        }
+
+        /// &lt;summary&gt;
+        /// Creates a link to filter brands
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;context&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;tag&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string LinkToRemoveBrand(Context context, object input, object tag)
+        {
+            return BuildBrandLink(TagAction.Remove, tag, input);
+        }
+
+        /// &lt;summary&gt;
+        /// Returns the URL of a file in the &quot;assets&quot; folder of a theme.
+        /// {{ &#39;shop.css&#39; | asset_url }}
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string AssetUrl(string input)
+        {
+            string retVal = null;
+            if (input != null)
+            {
+                var themeAdaptor = (ShopifyLiquidThemeEngine)Template.FileSystem;
+                retVal = themeAdaptor.GetAssetAbsoluteUrl(input);
+            }
+            return retVal;
+        }
+
+        /// &lt;summary&gt;
+        /// Returns the URL of a file in the &quot;assets/static&quot; folder of a theme.
+        /// {{ &#39;shop.css&#39; | static_asset_url }}
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string StaticAssetUrl(string input)
+        {
+            string retVal = null;
+            if (input != null)
+            {
+                var themeAdaptor = (ShopifyLiquidThemeEngine)Template.FileSystem;
+                retVal = themeAdaptor.GetAssetAbsoluteUrl(&quot;static/&quot; + input.TrimStart(&#39;/&#39;));
+            }
+            return retVal;
+        }
+
+        /// &lt;summary&gt;
+        /// Returns the URL of a file.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string FileUrl(string input)
+        {
+            return AssetUrl(input);
+        }
+
+        /// &lt;summary&gt;
+        /// Method for switching between multiple stores
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;storeId&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;languageCode&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string StoreAbsoluteUrl(string input, string storeId = null, string languageCode = null)
+        {
+            var themeAdaptor = (ShopifyLiquidThemeEngine)Template.FileSystem;
+            Store store = null;
+            if (!string.IsNullOrEmpty(storeId))
+            {
+                store = themeAdaptor.WorkContext.AllStores.FirstOrDefault(x =&gt; string.Equals(x.Id, storeId, StringComparison.InvariantCultureIgnoreCase));
+            }
+            store = store ?? themeAdaptor.WorkContext.CurrentStore;
+
+            var retVal = AbsoluteUrl(input, storeId, languageCode);
+
+            var isHttps = themeAdaptor.WorkContext.RequestUrl.Scheme == Uri.UriSchemeHttps;
+            //If store has defined url need redirect to it
+            if (isHttps)
+            {
+                retVal = String.IsNullOrEmpty(store.SecureUrl) ? retVal : store.SecureUrl;
+            }
+            else
+            {
+                retVal = String.IsNullOrEmpty(store.Url) ? retVal : store.Url;
+            }
+            return retVal;
+        }
+
+        public static string FullUrl(string input, string storeId = null, string languageCode = null)
+        {
+            var absoluteUrl = AbsoluteUrl(input, storeId, languageCode);
+
+            var themeEngine = (ShopifyLiquidThemeEngine)Template.FileSystem;
+            var workContext = themeEngine.WorkContext;
+
+            var fullUrl = new Uri(workContext.RequestUrl, absoluteUrl);
+
+            return fullUrl.AbsoluteUri;
+        }
+
+        /// &lt;summary&gt;
+        /// Get app absolute storefront url with specified store and language
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;storeId&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;languageCode&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string AbsoluteUrl(string input, string storeId = null, string languageCode = null)
+        {
+            if (input == null)
+                return string.Empty;
+
+            var themeAdaptor = (ShopifyLiquidThemeEngine)Template.FileSystem;
+            Store store = null;
+            storefrontModel.Language language = null;
+            if (!string.IsNullOrEmpty(storeId))
+            {
+                store = themeAdaptor.WorkContext.AllStores.FirstOrDefault(x =&gt; string.Equals(x.Id, storeId, StringComparison.InvariantCultureIgnoreCase));
+            }
+            store = store ?? themeAdaptor.WorkContext.CurrentStore;
+
+            if (!string.IsNullOrEmpty(languageCode))
+            {
+                language = store.Languages.FirstOrDefault(x =&gt; string.Equals(x.CultureName, languageCode, StringComparison.InvariantCultureIgnoreCase));
+            }
+            language = language ?? themeAdaptor.WorkContext.CurrentLanguage;
+
+            var retVal = themeAdaptor.UrlBuilder.ToAppAbsolute(input, store, language);
+            return retVal;
+        }
+
+        public static string ProductImgUrl(object input, string type = null)
+        {
+            return ImgUrl(input, type);
+        }
+
+        public static string Within(string input, object collection)
+        {
+            return BuildAbsoluteUrl(input);
+        }
+
+        private static readonly string _version = DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);
+        /// &lt;summary&gt;
+        /// Appends hash of file content as file version to invalidate browser cache when file changed.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string AppendVersion(string input)
+        {
+            if (input == null)
+                return string.Empty;
+
+            //var themeEngine = (ShopifyLiquidThemeEngine)Template.FileSystem;
+            //var basePath = themeEngine.GetAssetAbsoluteUrl(&quot;&quot;);
+            //var relativePath = input.StartsWith(basePath) ? input.Remove(0, basePath.Length) : input;
+            //var hash = themeEngine.GetAssetHash(relativePath);
+            //return input.Contains(&#39;?&#39;) ? $&quot;{input}&amp;v={hash}&quot; : $&quot;{input}?v={hash}&quot;;
+
+            // TODO: Temporary workaround
+            return input.Contains(&#39;?&#39;) ? $&quot;{input}&amp;v={_version}&quot; : $&quot;{input}?v={_version}&quot;;
+        }
+
+        private static string BuildOnClickLink(string title, string onclickFormat, params object[] onclickArgs)
+        {
+            var onClick = string.Format(CultureInfo.InvariantCulture, onclickFormat, onclickArgs);
+
+            var result = string.Format(CultureInfo.InvariantCulture, &quot;&lt;a href=\&quot;#\&quot; onclick=\&quot;{0}\&quot;&gt;{1}&lt;/a&gt;&quot;,
+                HttpUtility.HtmlAttributeEncode(onClick),
+                HttpUtility.HtmlEncode(title));
+
+            return result;
+        }
+
+        private static string BuildHtmlLink(string id, string virtualUrl, string title)
+        {
+            var href = BuildAbsoluteUrl(virtualUrl);
+
+            var result = string.Format(CultureInfo.InvariantCulture, &quot;&lt;a href=\&quot;{0}\&quot; id=\&quot;{1}\&quot;&gt;{2}&lt;/a&gt;&quot;,
+                HttpUtility.HtmlAttributeEncode(href),
+                HttpUtility.HtmlAttributeEncode(id),
+                HttpUtility.HtmlEncode(title));
+
+            return result;
+        }
+
+        private enum TagAction
+        {
+            Add,
+            Remove,
+            Replace
+        }
+
+        private static string BuildTagLink(TagAction action, object tagObject, object input)
+        {
+            var href = string.Empty;
+            var title = string.Empty;
+            var label = input.ToString();
+
+            if (tagObject == null)
+            {
+                title = &quot;Remove all tags&quot;;
+                href = GetCurrentUrlWithTags(TagAction.Replace, null, null);
+            }
+            else
+            {
+                var tag = tagObject as shopifyModel.Tag;
+                if (tag != null)
+                {
+                    href = GetCurrentUrlWithTags(action, tag.GroupName, tag.Value);
+                    title = BuildTagActionTitle(action, label);
+
+                    if (tag.Count &gt; 0)
+                    {
+                        label = $&quot;{label} ({tag.Count})&quot;;
+                    }
+                }
+                else
+                {
+                    // TODO: Parse tag string
+                }
+            }
+
+            var result = string.Format(CultureInfo.InvariantCulture, &quot;&lt;a href=\&quot;{0}\&quot; title=\&quot;{1}\&quot;&gt;{2}&lt;/a&gt;&quot;,
+                HttpUtility.HtmlAttributeEncode(href),
+                HttpUtility.HtmlAttributeEncode(title),
+                HttpUtility.HtmlEncode(label));
+
+            return result;
+        }
+
+        private static string BuildBrandLink(TagAction action, object tagObject, object input)
+        {
+            var href = string.Empty;
+            var title = string.Empty;
+            var label = input.ToString();
+
+            if (tagObject == null)
+            {
+                title = &quot;All&quot;;
+                href = GetCurrentUrlWithTags(TagAction.Replace, null, null);
+            }
+            else
+            {
+                var tag = tagObject as shopifyModel.Tag;
+                if (tag != null)
+                {
+                    href = GetCurrentUrlWithTags(action, tag.GroupName, tag.Value);
+                    switch (action)
+                    {
+                        case TagAction.Remove:
+                            title = $&quot;Remove &#39;{label}&#39;&quot;;
+                            break;
+                        default:
+                            title = $&quot;Show brands matching &#39;{label}&#39;&quot;;
+                            break;
+                    }
+                }
+            }
+
+            var result = string.Format(CultureInfo.InvariantCulture, &quot;&lt;a href=\&quot;{0}\&quot; title=\&quot;{1}\&quot;&gt;{2}&lt;/a&gt;&quot;,
+                HttpUtility.HtmlAttributeEncode(href),
+                HttpUtility.HtmlAttributeEncode(title),
+                HttpUtility.HtmlEncode(label));
+
+            return result;
+        }
+
+        private static string BuildTagActionTitle(TagAction action, string tagLabel)
+        {
+            switch (action)
+            {
+                case TagAction.Remove:
+                    return $&quot;Remove tag &#39;{tagLabel}&#39;&quot;;
+                default:
+                    return $&quot;Show products matching tag &#39;{tagLabel}&#39;&quot;;
+            }
+        }
+
+        private static string GetCurrentUrlWithTags(TagAction action, string groupName, string value)
+        {
+            var themeEngine = (ShopifyLiquidThemeEngine)Template.FileSystem;
+            var workContext = themeEngine.WorkContext;
+
+            var terms = workContext.CurrentProductSearchCriteria.Terms
+                .Select(t =&gt; new Term { Name = t.Name, Value = t.Value })
+                .ToList();
+
+            switch (action)
+            {
+                case TagAction.Add:
+                    terms.Add(new Term { Name = groupName, Value = value });
+                    break;
+                case TagAction.Remove:
+                    terms.RemoveAll(t =&gt;
+                        string.Equals(t.Name, groupName, StringComparison.OrdinalIgnoreCase) &amp;&amp;
+                        string.Equals(t.Value, value, StringComparison.OrdinalIgnoreCase));
+                    break;
+                case TagAction.Replace:
+                    terms.Clear();
+
+                    if (!string.IsNullOrEmpty(groupName))
+                    {
+                        terms.Add(new Term { Name = groupName, Value = value });
+                    }
+                    break;
+            }
+
+            var termsString = terms.Any() ? string.Join(&quot;;&quot;, terms.ToStrings()) : null;
+            var url = workContext.RequestUrl.SetQueryParameter(&quot;terms&quot;, termsString);
+
+            return url.AbsoluteUri;
+        }
+
+
+        private static string BuildAbsoluteUrl(string virtualUrl)
+        {
+            var themeEngine = (ShopifyLiquidThemeEngine)Template.FileSystem;
+            var workContext = themeEngine.WorkContext;
+            var result = themeEngine.UrlBuilder.ToAppAbsolute(virtualUrl, workContext.CurrentStore, workContext.CurrentLanguage);
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[27,9,27,10,0],[28,13,28,83,0],[29,9,29,10,0],[31,9,31,10,0],[32,13,32,89,0],[33,9,33,10,0],[36,9,36,10,0],[37,13,37,85,0],[38,9,38,10,0],[41,9,41,10,0],[42,13,42,106,0],[43,9,43,10,0],[46,9,46,10,0],[47,13,47,103,0],[48,9,48,10,0],[58,9,58,10,0],[59,13,59,31,0],[60,17,60,29,0],[62,13,62,43,0],[64,13,64,55,0],[65,13,65,14,0],[66,17,66,53,0],[67,13,67,14,0],[68,13,68,51,0],[69,13,69,14,0],[70,17,70,36,0],[71,13,71,14,0],[72,13,72,55,0],[73,13,73,14,0],[74,17,74,53,0],[75,13,75,14,0],[76,13,76,61,0],[77,13,77,14,0],[78,17,78,48,0],[79,13,79,14,0],[80,13,80,57,0],[81,13,81,14,0],[82,17,82,46,0],[83,13,83,14,0],[85,13,85,47,0],[86,13,86,14,0],[87,17,87,49,0],[88,17,88,18,0],[89,21,89,85,0],[90,17,90,18,0],[92,17,92,58,0],[93,13,93,14,0],[95,13,95,27,0],[96,9,96,10,0],[106,9,106,10,0],[107,13,107,95,0],[108,9,108,10,0],[118,9,118,10,0],[119,13,119,64,0],[120,9,120,10,0],[130,9,130,10,0],[131,13,131,60,0],[132,9,132,10,0],[142,9,142,10,0],[143,13,143,62,0],[144,9,144,10,0],[154,9,154,10,0],[155,13,155,63,0],[156,9,156,10,0],[166,9,166,10,0],[167,13,167,65,0],[168,9,168,10,0],[177,9,177,10,0],[178,13,178,34,0],[179,13,179,31,0],[180,13,180,14,0],[181,17,181,82,0],[182,17,182,66,0],[183,13,183,14,0],[184,13,184,27,0],[185,9,185,10,0],[194,9,194,10,0],[195,13,195,34,0],[196,13,196,31,0],[197,13,197,14,0],[198,17,198,82,0],[199,17,199,93,0],[200,13,200,14,0],[201,13,201,27,0],[202,9,202,10,0],[210,9,210,10,0],[211,13,211,36,0],[212,9,212,10,0],[222,9,222,10,0],[223,13,223,78,0],[224,13,224,32,0],[225,13,225,48,0],[226,13,226,14,0],[227,17,227,155,0],[227,80,227,153,0],[228,13,228,14,0],[229,13,229,68,0],[231,13,231,68,0],[233,13,233,92,0],[235,13,235,25,0],[236,13,236,14,0],[237,17,237,91,0],[238,13,238,14,0],[240,13,240,14,0],[241,17,241,79,0],[242,13,242,14,0],[243,13,243,27,0],[244,9,244,10,0],[247,9,247,10,0],[248,13,248,73,0],[250,13,250,77,0],[251,13,251,55,0],[253,13,253,72,0],[255,13,255,40,0],[256,9,256,10,0],[266,9,266,10,0],[267,13,267,31,0],[268,17,268,37,0],[270,13,270,78,0],[271,13,271,32,0],[272,13,272,54,0],[273,13,273,48,0],[274,13,274,14,0],[275,17,275,155,0],[275,80,275,153,0],[276,13,276,14,0],[277,13,277,68,0],[279,13,279,53,0],[280,13,280,14,0],[281,17,281,153,0],[281,64,281,151,0],[282,13,282,14,0],[283,13,283,77,0],[285,13,285,88,0],[286,13,286,27,0],[287,9,287,10,0],[290,9,290,10,0],[291,13,291,40,0],[292,9,292,10,0],[295,9,295,10,0],[296,13,296,44,0],[297,9,297,10,0],[299,9,299,112,0],[306,9,306,10,0],[307,13,307,31,0],[308,17,308,37,0],[317,13,317,92,0],[318,9,318,10,0],[321,9,321,10,0],[322,13,322,99,0],[324,13,326,48,0],[328,13,328,27,0],[329,9,329,10,0],[332,9,332,10,0],[333,13,333,53,0],[335,13,338,48,0],[340,13,340,27,0],[341,9,341,10,0],[351,9,351,10,0],[352,13,352,37,0],[353,13,353,38,0],[354,13,354,42,0],[356,13,356,35,0],[357,13,357,14,0],[358,17,358,43,0],[359,17,359,77,0],[360,13,360,14,0],[362,13,362,14,0],[363,17,363,57,0],[364,17,364,33,0],[365,17,365,18,0],[366,21,366,84,0],[367,21,367,64,0],[369,21,369,39,0],[370,21,370,22,0],[371,25,371,58,0],[372,21,372,22,0],[373,17,373,18,0],[375,17,375,18,0],[377,17,377,18,0],[378,13,378,14,0],[380,13,383,48,0],[385,13,385,27,0],[386,9,386,10,0],[389,9,389,10,0],[390,13,390,37,0],[391,13,391,38,0],[392,13,392,42,0],[394,13,394,35,0],[395,13,395,14,0],[396,17,396,31,0],[397,17,397,77,0],[398,13,398,14,0],[400,13,400,14,0],[401,17,401,57,0],[402,17,402,33,0],[403,17,403,18,0],[404,21,404,84,0],[405,21,405,36,0],[408,29,408,57,0],[409,29,409,35,0],[411,29,411,71,0],[412,29,412,35,0],[414,17,414,18,0],[415,13,415,14,0],[417,13,420,48,0],[422,13,422,27,0],[423,9,423,10,0],[426,9,426,10,0],[427,13,427,28,0],[430,21,430,55,0],[432,21,432,71,0],[434,9,434,10,0],[437,9,437,10,0],[438,13,438,77,0],[439,13,439,55,0],[441,13,443,27,0],[442,30,442,73,0],[445,13,445,28,0],[448,21,448,77,0],[449,21,449,27,0],[451,21,453,92,0],[452,25,453,90,0],[454,21,454,27,0],[456,21,456,35,0],[458,21,458,58,0],[459,21,459,22,0],[460,25,460,81,0],[461,21,461,22,0],[462,21,462,27,0],[465,13,465,88,0],[466,13,466,86,0],[468,13,468,36,0],[469,9,469,10,0],[473,9,473,10,0],[474,13,474,77,0],[475,13,475,55,0],[476,13,476,130,0],[477,13,477,27,0],[478,9,478,10,0]]);
+    </script>
+  </body>
+</html>

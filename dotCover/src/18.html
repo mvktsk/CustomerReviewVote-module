@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\address.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using DotLiquid;
+using System.Runtime.Serialization;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// Represents address object
+    /// &lt;/summary&gt;
+    [DataContract]
+    public partial class Address : Drop
+    {
+        /// &lt;summary&gt;
+        /// Returns the values of the First Name and Last Name fields of the address.
+        /// &lt;/summary&gt;
+        /// &lt;remarks&gt;
+        /// https://docs.shopify.com/themes/liquid-documentation/objects/address
+        /// &lt;/remarks&gt;
+        [DataMember]
+        public string Name { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the value of the First Name field of the address.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string FirstName { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the value of the Last Name field of the address.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string LastName { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the value of the Address1 field of the address.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Address1 { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the value of the Address2 field of the address.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Address2 { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the combined values of the Address1 and Address2 fields of the address.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Street { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the value of the Company field of the address.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Company { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the value of the City field of the address.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string City { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the value of the Province/State field of the address.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Province { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the abbreviated value of the Province/State field of the address.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string ProvinceCode { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the value of the Postal/Zip field of the address.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Zip { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the value of the Country field of the address.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Country { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the value of the Country field of the address in ISO 3166-2 standard format.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string CountryCode { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the value of the Phone field of the address.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Phone { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the value of address ID
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Id { get; set; }
+
+        public string Method { get; set; }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[19,30,19,34,0],[19,35,19,39,0],[25,35,25,39,0],[25,40,25,44,0],[31,34,31,38,0],[31,39,31,43,0],[37,34,37,38,0],[37,39,37,43,0],[43,34,43,38,0],[43,39,43,43,0],[49,32,49,36,0],[49,37,49,41,0],[55,33,55,37,0],[55,38,55,42,0],[61,30,61,34,0],[61,35,61,39,0],[67,34,67,38,0],[67,39,67,43,0],[73,38,73,42,0],[73,43,73,47,0],[79,29,79,33,0],[79,34,79,38,0],[85,33,85,37,0],[85,38,85,42,0],[91,37,91,41,0],[91,42,91,46,0],[97,31,97,35,0],[97,36,97,40,0],[103,28,103,32,0],[103,33,103,37,0],[105,32,105,36,0],[105,37,105,41,0]]);
+    </script>
+  </body>
+</html>

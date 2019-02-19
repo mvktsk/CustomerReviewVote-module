@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\inventory\fulfillmentcentersearchcriteria.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Specialized;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model.Inventory
+{
+    public partial class FulfillmentCenterSearchCriteria : PagedSearchCriteria
+    {
+        public static int DefaultPageSize { get; set; } = 20;
+
+        public FulfillmentCenterSearchCriteria()
+            : base(new NameValueCollection(), DefaultPageSize)
+        {
+        }
+
+        public FulfillmentCenterSearchCriteria(NameValueCollection queryString)
+            : base(queryString, DefaultPageSize)
+        {
+        }
+       
+        public string Sort { get; set; }
+        public string SearchPhrase { get; set; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,45,8,49,0],[8,50,8,54,0],[8,59,8,61,0],[11,15,11,63,0],[12,9,12,10,0],[13,9,13,10,0],[16,15,16,49,0],[17,9,17,10,0],[18,9,18,10,0],[20,30,20,34,0],[20,35,20,39,0],[21,38,21,42,0],[21,43,21,47,0]]);
+    </script>
+  </body>
+</html>

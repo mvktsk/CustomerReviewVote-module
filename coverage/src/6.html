@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\customerreviewvote-module\newmanagedmodule.web\module.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using CustomerReviewVotes.Core.Services;
+using CustomerReviewVotes.Data.Repositories;
+using CustomerReviewVotes.Data.Services;
+using Microsoft.Practices.Unity;
+using System.Linq;
+using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.Infrastructure;
+using VirtoCommerce.Platform.Data.Infrastructure.Interceptors;
+
+
+namespace CustomerReviewVotes.Web
+{
+    public class Module : ModuleBase
+    {
+        private readonly string _connectionString = ConfigurationHelper.GetConnectionStringValue(&quot;VirtoCommerce.CustomerReviewVotes.Web&quot;) ?? ConfigurationHelper.GetConnectionStringValue(&quot;VirtoCommerce&quot;);
+        private readonly IUnityContainer _container;
+
+        public Module(IUnityContainer container)
+        {
+            _container = container;
+        }
+
+        public override void SetupDatabase()
+        {
+            // Modify database schema with EF migrations
+            using (var db = new CustomerReviewRepository(_connectionString, _container.Resolve&lt;AuditableInterceptor&gt;()))
+            {
+                var initializer = new SetupDatabaseInitializer&lt;CustomerReviewRepository, Data.Migrations.Configuration&gt;();
+                initializer.InitializeDatabase(db);
+            }
+        }
+
+        public override void Initialize()
+        {
+            base.Initialize();
+
+            // This method is called for each installed module on the first stage of initialization.
+
+            // Register implementations:
+            _container.RegisterType&lt;ICustomerReviewRepository&gt;(new InjectionFactory(c =&gt; new CustomerReviewRepository(_connectionString, new EntityPrimaryKeyGeneratorInterceptor(), _container.Resolve&lt;AuditableInterceptor&gt;())));
+            _container.RegisterType&lt;ICustomerReviewService, CustomerReviewService&gt;();
+            _container.RegisterType&lt;ICustomerReviewSearchService, CustomerReviewSearchService&gt;();
+        }
+
+        public override void PostInitialize()
+        {
+            base.PostInitialize();
+
+            //Registering settings to store module allows to use individual values in each store
+            var settingManager = _container.Resolve&lt;ISettingsManager&gt;();
+            var storeSettingsNames = new[] { &quot;CustomerReviewVotes.CustomerReviewsEnabled&quot; };
+            var storeSettings = settingManager.GetModuleSettings(&quot;CustomerReviewVotes.Web&quot;).Where(x =&gt; storeSettingsNames.Contains(x.Name)).ToArray();
+            settingManager.RegisterModuleSettings(&quot;VirtoCommerce.Store&quot;, storeSettings);
+
+
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,9,17,204,0],[20,9,20,49,0],[21,9,21,10,0],[22,13,22,36,0],[23,9,23,10,0],[26,9,26,10,0],[28,20,28,120,0],[29,13,29,14,0],[30,17,30,123,0],[31,17,31,52,0],[32,13,32,14,0],[33,9,33,10,0],[36,9,36,10,0],[37,13,37,31,0],[42,13,42,228,0],[42,90,42,225,0],[43,13,43,86,0],[44,13,44,98,0],[45,9,45,10,0],[48,9,48,10,0],[49,13,49,35,0],[52,13,52,73,0],[53,13,53,93,0],[54,13,54,151,0],[54,104,54,139,0],[55,13,55,89,0],[58,9,58,10,0]]);
+    </script>
+  </body>
+</html>

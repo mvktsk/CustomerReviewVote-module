@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\events\domainevent.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace VirtoCommerce.Storefront.Model.Common.Events
+{
+    public class DomainEvent : IEvent
+    {
+        public DomainEvent()
+        {
+            Id = Guid.NewGuid();
+            TimeStamp = DateTime.UtcNow;
+        }
+        public Guid Id { get; set; }
+        public int Version { get; set; }
+        public DateTimeOffset TimeStamp { get; set; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,9,9,29,0],[10,9,10,10,0],[11,13,11,33,0],[12,13,12,41,0],[13,9,13,10,0],[14,26,14,30,0],[14,31,14,35,0],[15,30,15,34,0],[15,35,15,39,0],[16,43,16,47,0],[16,48,16,52,0]]);
+    </script>
+  </body>
+</html>

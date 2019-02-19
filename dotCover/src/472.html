@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\cart\haptimezoneservice .cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.Extensions.Options;
+using VirtoCommerce.Storefront.Infrastructure;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Cart.Services;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Domain.Cart
+{
+    public class HapTimeZoneService : IHapTimeZoneService
+    {
+        private readonly IWorkContextAccessor _workContextAccessor;
+        private readonly StorefrontOptions _options;
+
+        public HapTimeZoneService(IOptions&lt;StorefrontOptions&gt; options, IWorkContextAccessor workContextAccessor)
+        {
+            _workContextAccessor = workContextAccessor;
+            _options = options.Value;
+        }
+
+        public string GetTimeZoneId()
+        {
+            var result = _options.TimeZoneId;
+
+            if (result.IsNullOrEmpty())
+            {
+                // There should be a string with format like +02:00, -07:00, etc.
+                result = _workContextAccessor.WorkContext.CurrentStore.DynamicProperties.GetDynamicPropertyValue(&quot;Time Zone ID&quot;);
+            }
+
+            if (result.IsNullOrEmpty())
+            {
+                result = &quot;-01:00&quot;;
+            }
+
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,14,113,0],[15,9,15,10,0],[16,13,16,56,0],[17,13,17,38,0],[18,9,18,10,0],[21,9,21,10,0],[22,13,22,46,0],[24,13,24,40,0],[25,13,25,14,0],[27,17,27,130,0],[28,13,28,14,0],[30,13,30,40,0],[31,13,31,14,0],[32,17,32,35,0],[33,13,33,14,0],[35,13,35,27,0],[36,9,36,10,0]]);
+    </script>
+  </body>
+</html>

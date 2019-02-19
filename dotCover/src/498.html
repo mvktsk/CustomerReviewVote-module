@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\vendorcontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.AspNetCore.Mvc;
+using System.Linq;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Customer.Services;
+using VirtoCommerce.Storefront.Model.Services;
+
+namespace VirtoCommerce.Storefront.Controllers
+{
+    public class VendorController : StorefrontControllerBase
+    {
+        private readonly IMemberService _customerService;
+        private readonly ICatalogService _catalogService;
+
+        public VendorController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder, IMemberService customerService, ICatalogService catalogService)
+            : base(workContextAccessor, urlBuilder)
+        {
+            _customerService = customerService;
+            _catalogService = catalogService;
+        }
+
+        /// &lt;summary&gt;
+        /// GET: /vendor/{vendorId}
+        /// This action is used by storefront to get vendor details by vendor ID
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;vendorId&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        [HttpGet]
+        public async Task&lt;ActionResult&gt; VendorDetails(string vendorId)
+        {
+            var vendor = (await _customerService.GetVendorsByIdsAsync(base.WorkContext.CurrentStore, base.WorkContext.CurrentLanguage, vendorId)).FirstOrDefault();
+
+            if (vendor != null)
+            {
+                vendor.Products = new MutablePagedList&lt;Product&gt;((pageNumber, pageSize, sortInfos) =&gt;
+                {
+                    var criteria = new ProductSearchCriteria
+                    {
+                        VendorId = vendorId,
+                        PageNumber = pageNumber,
+                        PageSize = pageSize,
+                        SortBy = SortInfo.ToString(sortInfos),
+                        ResponseGroup = base.WorkContext.CurrentProductSearchCriteria.ResponseGroup
+                    };
+
+                    var searchResult = _catalogService.SearchProducts(criteria);
+                    return searchResult.Products;
+                }, 1, ProductSearchCriteria.DefaultPageSize);
+
+                WorkContext.CurrentPageSeo = vendor.SeoInfo;
+                WorkContext.CurrentVendor = vendor;
+
+                return View(&quot;vendor&quot;, WorkContext);
+            }
+
+            return NotFound();
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,15,18,52,0],[19,9,19,10,0],[20,13,20,48,0],[21,13,21,46,0],[22,9,22,10,0],[32,9,32,10,0],[33,13,33,164,0],[35,13,35,32,0],[36,13,36,14,0],[37,17,50,62,0],[38,17,38,18,0],[39,21,46,23,0],[48,21,48,81,0],[49,21,49,50,0],[50,17,50,18,0],[52,17,52,61,0],[53,17,53,52,0],[55,17,55,52,0],[58,13,58,31,0],[59,9,59,10,0]]);
+    </script>
+  </body>
+</html>

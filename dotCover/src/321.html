@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\rewriterules\storefronturlnormalizerule.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Rewrite;
+using Microsoft.Extensions.DependencyInjection;
+using System.Text.RegularExpressions;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Common;
+using VirtoCommerce.Storefront.Extensions;
+
+namespace VirtoCommerce.Storefront.Middleware
+{
+    public class StorefrontUrlNormalizeRule : IRule
+    {
+        #region IRule Members
+        public void ApplyRule(RewriteContext context)
+        {
+            var workContext = context.HttpContext.RequestServices.GetService&lt;IWorkContextAccessor&gt;().WorkContext;
+            if (workContext != null)
+            {
+                context.HttpContext.Request.Path = context.HttpContext.Request.Path.AddStoreAndLangSegment(workContext.CurrentStore, workContext.CurrentLanguage);
+            }
+            context.Result = RuleResult.ContinueRules;
+        }
+        #endregion
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,10,0],[16,13,16,114,0],[17,13,17,37,0],[18,13,18,14,0],[19,17,19,163,0],[20,13,20,14,0],[21,13,21,55,0],[22,9,22,10,0]]);
+    </script>
+  </body>
+</html>

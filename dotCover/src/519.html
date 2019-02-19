@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\api\apiuseractionscontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Interaction;
+using VirtoCommerce.Storefront.Model.Recommendations;
+
+namespace VirtoCommerce.Storefront.Controllers.Api
+{
+    public class ApiUserActionsController : StorefrontControllerBase
+    {
+        private readonly IRecommendationsProvider _productRecommendationsService;
+
+        public ApiUserActionsController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder,
+            IRecommendationsProvider productRecommendationsApi) : base(workContextAccessor, urlBuilder)
+        {
+            _productRecommendationsService = productRecommendationsApi;
+        }
+
+        /// &lt;summary&gt;
+        /// POST /storefrontapi/useractions/eventinfo
+        /// Record user actions events in VC platform
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;userSession&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; SaveEventInfo([FromBody] UserSession userSession)
+        {
+            //TODO: need to replace to other special detected VC API for usage
+            if (userSession.Interactions != null)
+            {
+                IList&lt;UsageEvent&gt; usageEvents = userSession.Interactions.Select(i =&gt; new UsageEvent
+                {
+                    EventType = i.Type,
+                    ItemId = i.Content,
+                    CreatedDate = i.CreatedAt,
+                    CustomerId = WorkContext.CurrentUser.Id,
+                    StoreId = WorkContext.CurrentStore.Id
+                }).ToList();
+
+                await _productRecommendationsService.AddEventAsync(usageEvents);
+            }
+
+            return Ok();
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,67,17,104,0],[18,9,18,10,0],[19,13,19,72,0],[20,9,20,10,0],[31,9,31,10,0],[33,13,33,50,0],[34,13,34,14,0],[35,17,42,29,0],[35,86,42,18,0],[44,17,44,81,0],[45,13,45,14,0],[47,13,47,25,0],[48,9,48,10,0]]);
+    </script>
+  </body>
+</html>

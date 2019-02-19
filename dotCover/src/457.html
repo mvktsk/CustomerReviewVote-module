@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\marketing\hrucarouselbannerconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Marketing;
+using marketingDto = VirtoCommerce.Storefront.AutoRestClients.HruMarketingModuleApi.Models;
+
+namespace VirtoCommerce.Storefront.Domain.Marketing
+{
+    public static class HruCarouselBannerConverter
+    {
+        public static CarouselBanner ToCarouselBanner(this marketingDto.CarouselBanner carouselBannerDto, IStorefrontUrlBuilder urlBuilder)
+        {
+            var carouselBanner = new CarouselBanner
+            {
+                BackgroundImageUrl = carouselBannerDto.BackgroundImageUrl,
+                ButtonLink = urlBuilder.ToAppAbsolute(carouselBannerDto.ButtonLink),
+                IsActive = carouselBannerDto.IsActive ?? false,
+                OverlayImageUrl = carouselBannerDto.OverlayImageUrl,
+                Title = carouselBannerDto.Title,
+                Subtitle = carouselBannerDto.Subtitle,
+                Label = carouselBannerDto.Label,
+                HasOwner = !carouselBannerDto.ObjectId.IsNullOrEmpty(),
+                ButtonTitle = carouselBannerDto.ButtonTitle
+            };
+
+            return carouselBanner;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,9,10,10,0],[11,13,22,15,0],[24,13,24,35,0],[25,9,25,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\cart\lineitem.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Storefront.Model.Cart.Services;
+using VirtoCommerce.Storefront.Model.Cart.ValidationErrors;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Marketing;
+using VirtoCommerce.Storefront.Model.Subscriptions;
+
+namespace VirtoCommerce.Storefront.Model.Cart
+{
+    public partial class LineItem : Entity, IDiscountable, IValidatable, ITaxable, IProductIsInStock
+    {
+        public LineItem(Currency currency, Language language)
+        {
+            Currency = currency;
+            LanguageCode = language.CultureName;
+            ListPrice = new Money(currency);
+            SalePrice = new Money(currency);
+            DiscountAmount = new Money(currency);
+            DiscountAmountWithTax = new Money(currency);
+            DiscountTotal = new Money(currency);
+            DiscountTotalWithTax = new Money();
+            ListPriceWithTax = new Money(currency);
+            SalePriceWithTax = new Money(currency);
+            PlacedPrice = new Money(currency);
+            PlacedPriceWithTax = new Money(currency);
+            ExtendedPrice = new Money(currency);
+            ExtendedPriceWithTax = new Money(currency);
+            TaxTotal = new Money(currency);
+            Discounts = new List&lt;Discount&gt;();
+            TaxDetails = new List&lt;TaxDetail&gt;();
+            DynamicProperties = new List&lt;DynamicProperty&gt;();
+            ValidationErrors = new List&lt;ValidationError&gt;();
+            IsValid = true;
+        }
+
+        /// &lt;summary&gt;
+        /// Gets or sets line item created date
+        /// &lt;/summary&gt;
+        public DateTime CreatedDate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the product corresponding to line item
+        /// &lt;/summary&gt;
+        public Product Product { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of product id
+        /// &lt;/summary&gt;
+        public string ProductId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the type of product (can be Physical, Digital or Subscription)
+        /// &lt;/summary&gt;
+        public string ProductType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of catalog id
+        /// &lt;/summary&gt;
+        public string CatalogId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of category id
+        /// &lt;/summary&gt;
+        public string CategoryId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of product SKU
+        /// &lt;/summary&gt;
+        public string Sku { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of line item name
+        /// &lt;/summary&gt;
+        public string Name { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of line item quantity
+        /// &lt;/summary&gt;
+        public int Quantity { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of line item package size 
+        /// &lt;/summary&gt;
+        public int? PackageSize =&gt; Product?.PackageSize;
+
+        /// &lt;summary&gt;
+        /// Gets minimum order quantity&quot;
+        /// &lt;/summary&gt;
+        public int? MinOrderQuantity =&gt; Product?.MinOrderQuantity;
+
+        /// &lt;summary&gt;
+        /// Gets or Sets InStockQuantity
+        /// &lt;/summary&gt;
+        public int InStockQuantity { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of line item warehouse location
+        /// &lt;/summary&gt;
+        public string WarehouseLocation { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of line item shipping method code
+        /// &lt;/summary&gt;
+        public string ShipmentMethodCode { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the requirement for line item shipping
+        /// &lt;/summary&gt;
+        public bool RequiredShipping { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of line item thumbnail image absolute URL
+        /// &lt;/summary&gt;
+        public string ThumbnailImageUrl { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of line item image absolute URL
+        /// &lt;/summary&gt;
+        public string ImageUrl { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the flag of line item is a gift
+        /// &lt;/summary&gt;
+        public bool IsGift { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of language code
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;
+        /// Culture name in ISO 3166-1 alpha-3 format
+        /// &lt;/value&gt;
+        public string LanguageCode { get; private set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of line item comment
+        /// &lt;/summary&gt;
+        public string Comment { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the flag of line item is recurring
+        /// &lt;/summary&gt;
+        public bool IsReccuring { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets flag of line item has tax
+        /// &lt;/summary&gt;
+        public bool TaxIncluded { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of line item volumetric weight
+        /// &lt;/summary&gt;
+        public decimal? VolumetricWeight { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of line item weight unit
+        /// &lt;/summary&gt;
+        public string WeightUnit { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of line item weight
+        /// &lt;/summary&gt;
+        public decimal? Weight { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of line item measurement unit
+        /// &lt;/summary&gt;
+        public string MeasureUnit { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of line item height
+        /// &lt;/summary&gt;
+        public decimal? Height { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of line item length
+        /// &lt;/summary&gt;
+        public decimal? Length { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of line item width
+        /// &lt;/summary&gt;
+        public decimal? Width { get; set; }
+
+        public bool IsReadOnly { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of line item original price
+        /// &lt;/summary&gt;
+        public Money ListPrice { get; set; }
+
+        /// &lt;summary&gt;
+        /// if the product is sold by subscription only this property contains the recurrence plan
+        /// &lt;/summary&gt;
+        public PaymentPlan PaymentPlan { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of line item original price including tax
+        /// ListPrice * TaxPercentRate;
+        /// &lt;/summary&gt;
+        public Money ListPriceWithTax { get; set; }
+        /// &lt;summary&gt;
+        /// Gets or sets the value of line item sale price
+        /// &lt;/summary&gt;
+        public Money SalePrice { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of line item sale price with tax
+        /// SalePrice * TaxPercentRate;
+        /// &lt;/summary&gt;
+        public Money SalePriceWithTax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets the value of line item actual price (include all types of discounts)
+        /// ListPrice - DiscountAmount;
+        /// &lt;/summary&gt;
+        public Money PlacedPrice { get; set; }
+        /// &lt;summary&gt;
+        /// PlacedPrice * TaxPercentRate
+        /// &lt;/summary&gt;
+        public Money PlacedPriceWithTax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets the value of line item extended price 
+        /// PlacedPrice * Quantity;
+        /// &lt;/summary&gt;
+        public Money ExtendedPrice { get; set; }
+        /// &lt;summary&gt;
+        /// ExtendedPrice * TaxPercentRate
+        /// &lt;/summary&gt;
+        public Money ExtendedPriceWithTax { get; set; }
+
+        public Money DiscountAmount { get; set; }
+
+        /// &lt;summary&gt;
+        /// DiscountAmount  * TaxPercentRate
+        /// &lt;/summary&gt;
+        public Money DiscountAmountWithTax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets the value of line item total discount amount
+        /// DiscountAmount * Math.Max(1, Quantity);
+        /// &lt;/summary&gt;
+        public Money DiscountTotal { get; set; }
+
+        /// &lt;summary&gt;
+        /// DiscountTotal * TaxPercentRate
+        /// &lt;/summary&gt;
+        public Money DiscountTotalWithTax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Used for dynamic properties management, contains object type string
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Used for dynamic properties management, contains object type string&lt;/value&gt;
+        public string ObjectType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Dynamic properties collections
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Dynamic properties collections&lt;/value&gt;
+        public IList&lt;DynamicProperty&gt; DynamicProperties { get; set; }
+
+        #region IValidatable Members
+        public bool IsValid { get; set; }
+        public IList&lt;ValidationError&gt; ValidationErrors { get; set; }
+        #endregion
+
+
+        #region ITaxable Members
+        /// &lt;summary&gt;
+        /// Gets or sets the value of total shipping tax amount
+        /// &lt;/summary&gt;
+        public virtual Money TaxTotal { get; set; }
+
+        public decimal TaxPercentRate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shipping tax type
+        /// &lt;/summary&gt;
+        public string TaxType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the collection of line item tax details lines
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;
+        /// Collection of TaxDetail objects
+        /// &lt;/value&gt;
+        public IList&lt;TaxDetail&gt; TaxDetails { get; set; }
+
+        public void ApplyTaxRates(IEnumerable&lt;TaxRate&gt; taxRates)
+        {
+            TaxPercentRate = 0m;
+            TaxIncludedRate = 0m;
+            var lineItemTaxRate = taxRates.FirstOrDefault(x =&gt; x.Line.Id != null &amp;&amp; x.Line.Id.EqualsInvariant(Id ?? &quot;&quot;));
+            if (lineItemTaxRate == null)
+            {
+                lineItemTaxRate = taxRates.FirstOrDefault(x =&gt; x.Line.Code != null &amp;&amp; x.Line.Code.EqualsInvariant(Sku ?? &quot;&quot;));
+            }
+            if (lineItemTaxRate != null &amp;&amp; lineItemTaxRate.Rate.Amount &gt; 0)
+            {
+                var amount = ExtendedPrice.Amount &gt; 0 ? ExtendedPrice.Amount : SalePrice.Amount;
+                if (amount &gt; 0)
+                {
+                    TaxPercentRate = TaxRate.TaxPercentRound(lineItemTaxRate.Rate.Amount / amount);
+                }
+            }
+
+            if (lineItemTaxRate?.RateIncluded != null)
+            {
+                TaxIncludedRate = lineItemTaxRate.RateIncluded.Value;
+            }
+            DynamicProperties.SetDecimalValue(&quot;Tax Included Rate&quot;, TaxIncludedRate);
+        }
+        #endregion
+
+
+        #region IDiscountable  Members
+        public Currency Currency { get; private set; }
+
+        public IList&lt;Discount&gt; Discounts { get; private set; }
+
+        public void ApplyRewards(IEnumerable&lt;PromotionReward&gt; rewards)
+        {
+            Discounts.Clear();
+
+            var lineItemRewards = rewards.Where(r =&gt; r.IsValid &amp;&amp; r.RewardType == PromotionRewardType.CatalogItemAmountReward &amp;&amp; (r.ProductId.IsNullOrEmpty() || r.ProductId.EqualsInvariant(ProductId)));
+            foreach (var reward in lineItemRewards)
+            {
+                if (!IsGift)
+                {
+                    DiscountAmount = new Money(Math.Max(0, (ListPrice - SalePrice).Amount), Currency);
+
+                    var discount = reward.ToDiscountModel(ListPrice - DiscountAmount);
+                    if (discount.Amount.Amount &gt; 0)
+                    {
+                        if (reward.Quantity &gt; 0)
+                        {
+                            discount.Amount = discount.Amount * Math.Min(reward.Quantity, Quantity) / Quantity;
+                        }
+
+                        Discounts.Add(discount);
+                        DiscountAmount += discount.Amount;
+
+                        AddPromotionCode(reward);
+                    }
+                }
+
+                if (reward.Promotion != null &amp;&amp; reward.Promotion.UsePromoSku &amp;&amp; reward.ProductId == ProductId)
+                {
+                    var altSku = Product.Properties?.GetValue(&quot;AltSku&quot;);
+                    DynamicProperties.SetValue(&quot;AltSku&quot;, &quot;ShortText&quot;, altSku);
+                }
+            }
+        }
+        #endregion
+
+        public Money EmptiesDeposit { get; set; }
+
+        public decimal TaxIncludedRate { get; set; }
+
+        public Money Vat
+        {
+            get
+            {
+                if (IsGift)
+                    return new Money(0.0m, Currency);
+
+                return (PlacedPrice - EmptiesDeposit) * TaxIncludedRate;
+            }
+        }
+
+        public bool ProductIsInStock { get; set; }
+
+        private readonly IList&lt;string&gt; _promotionCodes = new List&lt;string&gt;();
+        private readonly IDictionary&lt;string, IList&lt;string&gt;&gt; _conditionProductsWithPromotionCodes = new Dictionary&lt;string, IList&lt;string&gt;&gt;(StringComparer.OrdinalIgnoreCase);
+
+        public void AddPromotionCode(PromotionReward reward)
+        {
+            var promotionCode = reward.Promotion.GetReferenceCode();
+
+            AddPromotionCode(promotionCode);
+
+            // Add promotion code to condition products
+            var conditionProductIds = reward.GetConditionProductIds();
+            if (conditionProductIds?.Any() == true)
+            {
+                foreach (var conditionProductId in conditionProductIds)
+                {
+                    IList&lt;string&gt; promotionCodes;
+
+                    if (_conditionProductsWithPromotionCodes.ContainsKey(conditionProductId))
+                    {
+                        promotionCodes = _conditionProductsWithPromotionCodes[conditionProductId];
+                    }
+                    else
+                    {
+                        promotionCodes = new List&lt;string&gt;();
+                        _conditionProductsWithPromotionCodes[conditionProductId] = promotionCodes;
+                    }
+
+                    promotionCodes.Add(promotionCode);
+                }
+            }
+        }
+
+        public void AddPromotionCode(string promotionCode)
+        {
+            _promotionCodes.Add(promotionCode);
+        }
+
+        public IDictionary&lt;string, IList&lt;string&gt;&gt; GetConditionProductsWithPromotionCodes()
+        {
+            return _conditionProductsWithPromotionCodes;
+        }
+
+        public void CopyPromotionCodesToComment()
+        {
+            var comment = string.Join(&quot;,&quot;, _promotionCodes.Where(code =&gt; !string.IsNullOrEmpty(code)).Distinct().OrderBy(code =&gt; code, StringComparer.OrdinalIgnoreCase));
+            Comment = string.IsNullOrEmpty(comment) ? null : comment;
+
+            _promotionCodes.Clear();
+            _conditionProductsWithPromotionCodes.Clear();
+        }
+
+        public override string ToString()
+        {
+            return string.Format(&quot;cart lineItem #{0} {1} qty: {2}&quot;, Id ?? &quot;undef&quot;, Name ?? &quot;undef&quot;, Quantity);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,62,1],[16,9,16,10,1],[17,13,17,33,1],[18,13,18,49,1],[19,13,19,45,1],[20,13,20,45,1],[21,13,21,50,1],[22,13,22,57,1],[23,13,23,49,1],[24,13,24,48,1],[25,13,25,52,1],[26,13,26,52,1],[27,13,27,47,1],[28,13,28,54,1],[29,13,29,49,1],[30,13,30,56,1],[31,13,31,44,1],[32,13,32,46,1],[33,13,33,48,1],[34,13,34,61,1],[35,13,35,60,1],[36,13,36,28,1],[37,9,37,10,1],[42,39,42,43,0],[42,44,42,48,0],[47,34,47,38,1],[47,39,47,43,1],[52,35,52,39,0],[52,40,52,44,0],[57,37,57,41,0],[57,42,57,46,0],[62,35,62,39,0],[62,40,62,44,0],[67,36,67,40,0],[67,41,67,45,0],[72,29,72,33,1],[72,34,72,38,1],[77,30,77,34,0],[77,35,77,39,0],[82,31,82,35,1],[82,36,82,40,1],[87,36,87,56,1],[92,41,92,66,1],[97,38,97,42,0],[97,43,97,47,0],[102,43,102,47,0],[102,48,102,52,0],[107,44,107,48,0],[107,49,107,53,0],[112,40,112,44,0],[112,45,112,49,0],[117,43,117,47,0],[117,48,117,52,0],[122,34,122,38,0],[122,39,122,43,0],[127,30,127,34,0],[127,35,127,39,0],[135,38,135,42,0],[135,43,135,55,1],[140,33,140,37,0],[140,38,140,42,0],[145,35,145,39,0],[145,40,145,44,0],[150,35,150,39,0],[150,40,150,44,0],[155,44,155,48,0],[155,49,155,53,0],[160,36,160,40,0],[160,41,160,45,0],[165,34,165,38,0],[165,39,165,43,0],[170,37,170,41,0],[170,42,170,46,0],[175,34,175,38,0],[175,39,175,43,0],[180,34,180,38,0],[180,39,180,43,0],[185,33,185,37,0],[185,38,185,42,0],[187,34,187,38,0],[187,39,187,43,0],[192,34,192,38,0],[192,39,192,43,1],[197,42,197,46,0],[197,47,197,51,0],[203,41,203,45,0],[203,46,203,50,1],[207,34,207,38,0],[207,39,207,43,1],[213,41,213,45,0],[213,46,213,50,1],[219,36,219,40,0],[219,41,219,45,1],[223,43,223,47,0],[223,48,223,52,1],[229,38,229,42,0],[229,43,229,47,1],[233,45,233,49,0],[233,50,233,54,1],[235,39,235,43,0],[235,44,235,48,1],[240,46,240,50,0],[240,51,240,55,1],[246,38,246,42,0],[246,43,246,47,1],[251,45,251,49,0],[251,50,251,54,1],[257,36,257,40,0],[257,41,257,45,0],[263,59,263,63,0],[263,64,263,68,1],[266,31,266,35,0],[266,36,266,40,1],[267,58,267,62,0],[267,63,267,67,1],[275,41,275,45,0],[275,46,275,50,1],[277,41,277,45,0],[277,46,277,50,0],[282,33,282,37,0],[282,38,282,42,0],[290,46,290,50,0],[290,51,290,55,1],[293,9,293,10,0],[294,13,294,33,0],[295,13,295,34,0],[296,13,296,122,0],[296,64,296,120,0],[297,13,297,41,0],[298,13,298,14,0],[299,17,299,127,0],[299,64,299,125,0],[300,13,300,14,0],[301,13,301,76,0],[302,13,302,14,0],[303,17,303,97,0],[304,17,304,32,0],[305,17,305,18,0],[306,21,306,100,0],[307,17,307,18,0],[308,13,308,14,0],[310,13,310,55,0],[311,13,311,14,0],[312,17,312,70,0],[313,13,313,14,0],[314,13,314,85,0],[315,9,315,10,0],[320,36,320,40,0],[320,41,320,53,1],[322,44,322,48,0],[322,49,322,61,1],[325,9,325,10,0],[326,13,326,31,0],[328,13,328,203,0],[328,54,328,201,0],[329,13,329,20,0],[329,22,329,32,0],[329,33,329,35,0],[329,36,329,51,0],[330,13,330,14,0],[331,17,331,29,0],[332,17,332,18,0],[333,21,333,103,0],[335,21,335,87,0],[336,21,336,52,0],[337,21,337,22,0],[338,25,338,49,0],[339,25,339,26,0],[340,29,340,112,0],[341,25,341,26,0],[343,25,343,49,0],[344,25,344,59,0],[346,25,346,50,0],[347,21,347,22,0],[348,17,348,18,0],[350,17,350,111,0],[351,17,351,18,0],[352,21,352,73,0],[353,21,353,79,0],[354,17,354,18,0],[355,13,355,14,0],[356,9,356,10,0],[359,39,359,43,0],[359,44,359,48,0],[361,42,361,46,0],[361,47,361,51,0],[366,13,366,14,0],[367,17,367,28,0],[368,21,368,54,0],[370,17,370,73,0],[371,13,371,14,0],[374,40,374,44,0],[374,45,374,49,0],[376,9,376,77,1],[377,9,377,172,1],[380,9,380,10,0],[381,13,381,69,0],[383,13,383,45,0],[386,13,386,71,0],[387,13,387,52,0],[388,13,388,14,0],[389,17,389,24,0],[389,26,389,48,0],[389,49,389,51,0],[389,52,389,71,0],[390,17,390,18,0],[393,21,393,94,0],[394,21,394,22,0],[395,25,395,99,0],[396,21,396,22,0],[398,21,398,22,0],[399,25,399,61,0],[400,25,400,99,0],[401,21,401,22,0],[403,21,403,55,0],[404,17,404,18,0],[405,13,405,14,0],[406,9,406,10,0],[409,9,409,10,0],[410,13,410,48,0],[411,9,411,10,0],[414,9,414,10,0],[415,13,415,57,0],[416,9,416,10,0],[419,9,419,10,0],[420,13,420,171,0],[420,74,420,101,0],[420,130,420,134,0],[421,13,421,70,0],[423,13,423,37,0],[424,13,424,58,0],[425,9,425,10,0],[428,9,428,10,0],[429,13,429,111,0],[430,9,430,10,0]]);
+    </script>
+  </body>
+</html>

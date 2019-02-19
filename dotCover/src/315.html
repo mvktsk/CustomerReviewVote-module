@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\middleware\applicationtestmiddleware.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Globalization;
+using System.Net;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+
+namespace VirtoCommerce.Storefront.Middleware
+{
+    public class ApplicationTestMiddleware
+    {
+        private readonly RequestDelegate _next;
+
+        public ApplicationTestMiddleware(RequestDelegate next)
+        {
+            _next = next;
+        }
+
+        public async Task Invoke(HttpContext context)
+        {
+            if (context.Request.Path.Equals(&quot;/applicationtest&quot;, StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    if (context.Request.Query.ContainsKey(&quot;error&quot;))
+                    {
+                        throw new InvalidOperationException(&quot;Test error message&quot;);
+                    }
+
+                    await _next(context);
+                }
+                catch (Exception ex)
+                {
+                    context.Response.StatusCode = (int)HttpStatusCode.OK;
+                    var response = string.Format(CultureInfo.InvariantCulture, _responseFormat, ex.Message);
+                    await context.Response.WriteAsync(response);
+                }
+            }
+            else
+            {
+                await _next(context);
+            }
+        }
+
+        private const string _responseFormat =
+            &quot;&lt;!DOCTYPE html&gt;\r\n&quot; +
+            &quot;&lt;html lang=\&quot;en\&quot; xmlns=\&quot;http://www.w3.org/1999/xhtml\&quot;&gt;\r\n&quot; +
+            &quot;&lt;head&gt;\r\n&quot; +
+            &quot;    &lt;meta charset=\&quot;utf-8\&quot; /&gt;\r\n&quot; +
+            &quot;    &lt;title&gt;Application Test - Global B2B Order Transfer - Heineken Россия&lt;/title&gt;\r\n&quot; +
+            &quot;    &lt;style&gt;\r\n&quot; +
+            &quot;        body {{\r\n&quot; +
+            &quot;            background-color: #fff;\r\n&quot; +
+            &quot;            color: #232323;\r\n&quot; +
+            &quot;            font-family: Verdana, Helvetica, Sans-Serif;\r\n&quot; +
+            &quot;            font-size: .85em;\r\n&quot; +
+            &quot;        }}\r\n&quot; +
+            &quot;    &lt;/style&gt;\r\n&quot; +
+            &quot;&lt;/head&gt;\r\n&quot; +
+            &quot;&lt;body&gt;\r\n&quot; +
+            &quot;    &lt;h1&gt;Application Test&lt;/h1&gt;\r\n&quot; +
+            &quot;    &lt;p&gt;Error: {0}&lt;/p&gt;\r\n&quot; +
+            &quot;&lt;/body&gt;\r\n&quot; +
+            &quot;&lt;/html&gt;&quot;;
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,63,0],[14,9,14,10,0],[15,13,15,26,0],[16,9,16,10,0],[19,9,19,10,0],[20,13,20,101,0],[21,13,21,14,0],[23,17,23,18,0],[24,21,24,68,0],[25,21,25,22,0],[26,25,26,83,0],[29,21,29,42,0],[30,17,30,18,0],[31,17,31,37,0],[32,17,32,18,0],[33,21,33,74,0],[34,21,34,109,0],[35,21,35,65,0],[36,17,36,18,0],[37,13,37,14,0],[39,13,39,14,0],[40,17,40,38,0],[41,13,41,14,0],[42,9,42,10,0]]);
+    </script>
+  </body>
+</html>

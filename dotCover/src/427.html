@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\workcontextbuilder.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Text.Encodings.Web;
+using Microsoft.ApplicationInsights.AspNetCore.Extensions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using VirtoCommerce.Storefront.Extensions;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public partial class WorkContextBuilder : IWorkContextBuilder
+    {
+        public WorkContextBuilder(HttpContext httpContext)
+        {
+            HttpContext = httpContext;
+            WorkContext = new WorkContext();
+
+            WorkContext.RequestUrl = HttpContext.Request.GetUri();
+            var htmlEncoder = httpContext.RequestServices.GetRequiredService&lt;HtmlEncoder&gt;();
+            var qs = WorkContext.QueryString = HttpContext.Request.Query.ToNameValueCollection(htmlEncoder);
+            WorkContext.PageNumber = qs[&quot;page&quot;].ToNullableInt();
+            WorkContext.PageSize = qs[&quot;count&quot;].ToNullableInt();
+            if (WorkContext.PageSize == null)
+            {
+                WorkContext.PageSize = qs[&quot;page_size&quot;].ToNullableInt();
+            }
+        }
+
+        public HttpContext HttpContext { get; }
+        public WorkContext WorkContext { get; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,59,0],[14,9,14,10,0],[15,13,15,39,0],[16,13,16,45,0],[18,13,18,67,0],[19,13,19,93,0],[20,13,20,109,0],[21,13,21,65,0],[22,13,22,64,0],[23,13,23,46,0],[24,13,24,14,0],[25,17,25,72,0],[26,13,26,14,0],[27,9,27,10,0],[29,42,29,46,0],[30,42,30,46,0]]);
+    </script>
+  </body>
+</html>

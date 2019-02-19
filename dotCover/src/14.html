@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\tags\formtag.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Web;
+using DotLiquid;
+using DotLiquid.Exceptions;
+
+namespace VirtoCommerce.LiquidThemeEngine.Tags
+{
+    /// &lt;summary&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/tags/theme-tags#form
+    /// Creates an HTML &amp;lt;form&amp;gt; element with all the necessary attributes (action, id, etc.) and &amp;lt;input&amp;gt; 
+    /// to submit the form successfully.
+    /// &lt;/summary&gt;
+    public class FormTag : Block
+    {
+        private static readonly Regex _syntax = new Regex(string.Format(@&quot;^({0})\s*,?\s*({1}*)\s*&quot;, Liquid.QuotedFragment, Liquid.VariableSignature), RegexOptions.Compiled);
+        private string _formName;
+        private static readonly Dictionary&lt;string, string&gt; _formsMap = new Dictionary&lt;string, string&gt;();
+
+        static FormTag()
+        {
+            //Shopify know form types
+
+            //Generates a form for activating a customer account on the activate_account.liquid template.
+            _formsMap[&quot;activate_customer_password&quot;] = &quot;~/account/activate&quot;;
+            //Generates a form for submitting an email through the Liquid contact form.
+            _formsMap[&quot;contact&quot;] = &quot;~/contact&quot;;
+            //Generates a form for submitting an email through the Liquid contact form.
+            _formsMap[&quot;create_customer&quot;] = &quot;~/account/register&quot;;
+            //Generates a form for creating or editing customer account addresses on the addresses.liquid template. When creating a new address, include the parameter customer.new_address. When editing an existing address, include the parameter address.
+            _formsMap[&quot;customer_address&quot;] = &quot;~/account/addresses&quot;;
+            //Generates a form for logging into Customer Accounts on the login.liquid template.
+            _formsMap[&quot;customer_login&quot;] = &quot;~/account/login&quot;;
+            //Generates a form for recovering a lost password on the login.liquid template.
+            _formsMap[&quot;recover_customer_password&quot;] = &quot;~/account/forgotpassword&quot;;
+            //Generates a form for recovering a lost user name on the login.liquid template.
+            _formsMap[&quot;recover_customer_login&quot;] = &quot;~/account/forgotlogin&quot;;
+            //Generates a form for setting a new password on the reset_password.liquid template.
+            _formsMap[&quot;reset_customer_password&quot;] = &quot;~/account/resetpassword&quot;;
+            // Generates a form for adding product to customer wishlist (temporary without actual URL)
+            _formsMap[&quot;confirm_invitation&quot;] = &quot;~/account/confirminvitation&quot;;
+            // Generates a form for adding product to customer wishlist (temporary without actual URL)
+            _formsMap[&quot;customer&quot;] = &quot;~&quot;;
+            // Generates a form for recreateing customer invite
+            _formsMap[&quot;request_invite&quot;] = &quot;~/account/requestinvitationlink&quot;;
+        }
+
+        #region Public Methods and Operators
+        public override void Initialize(string tagName, string markup, List&lt;string&gt; tokens)
+        {
+            var syntaxMatch = _syntax.Match(markup);
+
+            if (syntaxMatch.Success)
+            {
+                _formName = syntaxMatch.Groups[1].Value.ToLowerInvariant();
+            }
+            else
+            {
+                throw new SyntaxException(&quot;Form tag syntax error&quot;);
+            }
+
+            base.Initialize(tagName, markup, tokens);
+        }
+
+        public override void Render(Context context, TextWriter result)
+        {
+            var formName = (context[_formName] ?? _formName).ToString();
+
+            string actionUrl;
+            if (_formsMap.TryGetValue(formName, out actionUrl))
+            {
+                var themeEngine = (ShopifyLiquidThemeEngine)Template.FileSystem;
+                var qs = HttpUtility.ParseQueryString(themeEngine.WorkContext.RequestUrl.Query);
+                var returnUrl = qs[&quot;ReturnUrl&quot;];
+                var actionAbsoluteUrl = themeEngine.UrlBuilder.ToAppAbsolute(actionUrl, themeEngine.WorkContext.CurrentStore, themeEngine.WorkContext.CurrentLanguage);
+
+                if (!string.IsNullOrEmpty(returnUrl))
+                {
+                    actionAbsoluteUrl += string.Concat(&quot;?ReturnUrl=&quot;, HttpUtility.UrlEncode(returnUrl));
+                }
+
+                result.WriteLine(&quot;&lt;form accept-charset=\&quot;UTF-8\&quot; action=\&quot;{0}\&quot; method=\&quot;post\&quot; id=\&quot;{1}\&quot; name=\&quot;{1}\&quot;&gt;&quot;,
+                    HttpUtility.HtmlAttributeEncode(actionAbsoluteUrl),
+                    HttpUtility.HtmlAttributeEncode(formName));
+
+                RenderAll(NodeList, context, result);
+
+                // add anti forgery token
+                AntiforgeryTag.GenerateAndWriteTo(result);
+
+                result.WriteLine(&quot;&lt;/form&gt;&quot;);
+            }
+            else
+            {
+                throw new SyntaxException(string.Concat(&quot;Unknow form type &quot;, _formName));
+            }
+
+        }
+        #endregion
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,9,17,174,0],[19,9,19,105,0],[22,9,22,10,0],[26,13,26,76,0],[28,13,28,48,0],[30,13,30,65,0],[32,13,32,67,0],[34,13,34,61,0],[36,13,36,81,0],[38,13,38,75,0],[40,13,40,78,0],[42,13,42,77,0],[44,13,44,41,0],[46,13,46,77,0],[47,9,47,10,0],[51,9,51,10,0],[52,13,52,53,0],[54,13,54,37,0],[55,13,55,14,0],[56,17,56,76,0],[57,13,57,14,0],[59,13,59,14,0],[60,17,60,68,0],[63,13,63,54,0],[64,9,64,10,0],[67,9,67,10,0],[68,13,68,73,0],[71,13,71,64,0],[72,13,72,14,0],[73,17,73,81,0],[74,17,74,97,0],[75,17,75,49,0],[76,17,76,168,0],[78,17,78,54,0],[79,17,79,18,0],[80,21,80,105,0],[81,17,81,18,0],[83,17,85,64,0],[87,17,87,54,0],[90,17,90,59,0],[92,17,92,45,0],[93,13,93,14,0],[95,13,95,14,0],[96,17,96,90,0],[99,9,99,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\money\money.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+/*
+ * This Money class gives you the ability to work with money of multiple currencies
+ * as if it were numbers.
+ * It looks and behaves like a decimal.
+ * Super light: Only a 64bit double and 16bit int are used to persist an instance.
+ * Super fast: Access to the internal double value for fast calculations.
+ * Currency codes are used to get everything from the MS Globalization classes.
+ * All lookups happen from a singleton dictionary.
+ * Formatting and significant digits are automatically handled.
+ * An allocation function also allows even distribution of Money.
+ * 
+ * References:
+ * Martin Fowler patterns
+ * Making Money with C# : http://www.lindelauf.com/?p=17
+ * http://www.codeproject.com/Articles/28244/A-Money-type-for-the-CLR?msg=3679755
+ * A few other articles on the web around representing money types
+ * http://en.wikipedia.org/wiki/ISO_4217
+ * http://www.currency-iso.org/iso_index/iso_tables/iso_tables_a1.htm
+ * 
+ * NB!
+ * Although the .Amount property wraps the class as Decimal, this Money class uses double to store the Money value internally.
+ * Only 15 decimal digits of accuracy are guaranteed! (16 if the first digit is smaller than 9)
+ * It should be fairly simple to replace the internal double with a decimal if this is not sufficient and performance is not an issue.
+ * Decimal operations are MUCH slower than double (average of 15x)
+ * http://stackoverflow.com/questions/366852/c-sharp-decimal-datatype-performance
+ * Use the .InternalAmount property to get to the double member.
+ * All the Money comparison operators use the Decimal wrapper with significant digits for the currency.
+ * All the Money arithmetic (+-/*) operators use the internal double value.
+ */
+
+using System;
+using System.Globalization;
+
+namespace VirtoCommerce.Storefront.Model.Common
+{
+    public class Money : IComparable&lt;Money&gt;, IEquatable&lt;Money&gt;, IComparable, IConvertible&lt;Money&gt;
+    {
+        #region Constructors
+
+        public Money()
+        {
+        }
+
+        public Money(Currency currency)
+            : this(0m, currency)
+        {
+        }
+
+        public Money(double amount, Currency currency)
+            : this((decimal)amount, currency)
+        {
+        }
+
+        public Money(decimal amount, Currency currency)
+        {
+            if (currency == null)
+                throw new ArgumentNullException(nameof(currency));
+
+            Currency = currency;
+            InternalAmount = amount;
+        }
+
+        #endregion
+
+        #region Public Properties
+        /// &lt;summary&gt;
+        /// Accesses the internal representation of the value of the Money
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;A decimal with the internal amount stored for this Money.&lt;/returns&gt;
+        public decimal InternalAmount { get; }
+
+        /// &lt;summary&gt;
+        /// Rounds the amount to the number of significant decimal digits
+        /// of the associated currency using MidpointRounding.AwayFromZero.
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;A decimal with the amount rounded to the significant number of decimal digits.&lt;/returns&gt;
+        public decimal Amount
+        {
+            get
+            {
+                return decimal.Round(InternalAmount, DecimalDigits, MidpointRounding.AwayFromZero);
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Truncates the amount to the number of significant decimal digits
+        /// of the associated currency.
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;A decimal with the amount truncated to the significant number of decimal digits.&lt;/returns&gt;
+        public decimal TruncatedAmount
+        {
+            get
+            {
+                if (DecimalDigits == 0)
+                {
+                    return InternalAmount;
+                }
+
+                return (decimal)(long)Math.Truncate(InternalAmount * DecimalDigits) / DecimalDigits;
+            }
+        }
+
+        public string FormattedAmount
+        {
+            get { return ToString(true, true); }
+        }
+
+        public string FormattedAmountWithoutPoint
+        {
+            get { return ToString(false, true); }
+        }
+
+        public string FormattedAmountWithoutPointAndCurrency
+        {
+            get { return ToString(false, false); }
+        }
+
+        public Currency Currency { get; }
+
+
+        /// &lt;summary&gt;
+        /// Gets the number of decimal digits for the associated currency.
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;An int containing the number of decimal digits.&lt;/returns&gt;
+        public int DecimalDigits
+        {
+            get { return Currency.NumberFormat.CurrencyDecimalDigits; }
+        }
+        #endregion
+
+        #region Money Operators
+
+        public override int GetHashCode()
+        {
+            return Amount.GetHashCode() ^ Currency.Code.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (obj is Money) &amp;&amp; Equals((Money)obj);
+        }
+
+        public bool Equals(Money other)
+        {
+            if (other == null)
+                return false;
+
+            if (ReferenceEquals(this, other))
+                return true;
+
+            return ((Currency.Equals(other.Currency)) &amp;&amp; (InternalAmount == other.InternalAmount));
+        }
+
+        public static bool operator ==(Money first, Money second)
+        {
+            if (ReferenceEquals(first, second))
+                return true;
+            if (ReferenceEquals(first, null) || ReferenceEquals(second, null))
+                return false;
+            return first.Equals(second);
+        }
+
+        public static bool operator !=(Money first, Money second)
+        {
+            return !(first == second);
+        }
+
+        public static bool operator &gt;(Money first, Money second)
+        {
+            return first.InternalAmount &gt; second.ConvertTo(first.Currency).InternalAmount
+              &amp;&amp; second.InternalAmount &lt; first.ConvertTo(second.Currency).InternalAmount;
+        }
+
+        public static bool operator &gt;=(Money first, Money second)
+        {
+            return first.InternalAmount &gt;= second.ConvertTo(first.Currency).InternalAmount
+              &amp;&amp; second.InternalAmount &lt;= first.ConvertTo(second.Currency).InternalAmount;
+        }
+
+        public static bool operator &lt;=(Money first, Money second)
+        {
+            return first.InternalAmount &lt;= second.ConvertTo(first.Currency).InternalAmount
+              &amp;&amp; second.InternalAmount &gt;= first.ConvertTo(second.Currency).InternalAmount;
+        }
+
+        public static bool operator &lt;(Money first, Money second)
+        {
+            return first.InternalAmount &lt; second.ConvertTo(first.Currency).InternalAmount
+              &amp;&amp; second.InternalAmount &gt; first.ConvertTo(second.Currency).InternalAmount;
+        }
+
+        public int CompareTo(object obj)
+        {
+            if (obj == null)
+                return 1;
+            if (!(obj is Money))
+                throw new ArgumentException(&quot;Argument must be Money&quot;);
+
+            return CompareTo((Money)obj);
+        }
+
+        public int CompareTo(Money other)
+        {
+            if (this &lt; other)
+                return -1;
+            if (this &gt; other)
+                return 1;
+            return 0;
+        }
+
+        public static Money operator +(Money first, Money second)
+        {
+            return new Money(first.InternalAmount + second.ConvertTo(first.Currency).InternalAmount, first.Currency);
+        }
+
+        public static Money operator -(Money first, Money second)
+        {
+            return new Money(first.InternalAmount - second.ConvertTo(first.Currency).InternalAmount, first.Currency);
+        }
+
+        public static Money operator *(Money first, Money second)
+        {
+            return new Money(first.InternalAmount * second.ConvertTo(first.Currency).InternalAmount, first.Currency);
+        }
+
+        public static Money operator /(Money first, Money second)
+        {
+            return new Money(first.InternalAmount / second.ConvertTo(first.Currency).InternalAmount, first.Currency);
+        }
+
+        #endregion
+
+        #region Cast Operators
+
+        public static bool operator ==(Money money, long value)
+        {
+            if (ReferenceEquals(money, null))
+                return false;
+            return (money.InternalAmount == value);
+        }
+        public static bool operator !=(Money money, long value)
+        {
+            return !(money == value);
+        }
+
+        public static bool operator ==(Money money, decimal value)
+        {
+            if (ReferenceEquals(money, null))
+                return false;
+            return (money.InternalAmount == value);
+        }
+        public static bool operator !=(Money money, decimal value)
+        {
+            return !(money == value);
+        }
+
+        public static bool operator ==(Money money, double value)
+        {
+            if (ReferenceEquals(money, null))
+                return false;
+            return (money.InternalAmount == (decimal)value);
+        }
+        public static bool operator !=(Money money, double value)
+        {
+            return !(money == value);
+        }
+
+        public static Money operator +(Money money, long value)
+        {
+            return money + (decimal)value;
+        }
+        public static Money operator +(Money money, double value)
+        {
+            return money + (decimal)value;
+        }
+        public static Money operator +(Money money, decimal value)
+        {
+            if (money == null)
+                throw new ArgumentNullException(nameof(money));
+
+            return new Money(money.InternalAmount + value, money.Currency);
+        }
+
+        public static Money operator -(Money money, long value)
+        {
+            return money - (decimal)value;
+        }
+        public static Money operator -(Money money, double value)
+        {
+            return money - (decimal)value;
+        }
+        public static Money operator -(Money money, decimal value)
+        {
+            if (money == null)
+                throw new ArgumentNullException(nameof(money));
+
+            return new Money(money.InternalAmount - value, money.Currency);
+        }
+
+        public static Money operator *(Money money, long value)
+        {
+            return money * (decimal)value;
+        }
+        public static Money operator *(Money money, double value)
+        {
+            return money * (decimal)value;
+        }
+        public static Money operator *(Money money, decimal value)
+        {
+            if (money == null)
+                throw new ArgumentNullException(nameof(money));
+
+            return new Money(money.InternalAmount * value, money.Currency);
+        }
+
+        public static Money operator /(Money money, long value)
+        {
+            return money / (decimal)value;
+        }
+        public static Money operator /(Money money, double value)
+        {
+            return money / (decimal)value;
+        }
+
+        public static Money operator /(Money money, decimal value)
+        {
+            if (money == null)
+                throw new ArgumentNullException(nameof(money));
+
+            return new Money(money.InternalAmount / value, money.Currency);
+        }
+
+        #endregion
+
+        #region Functions
+
+        public override string ToString()
+        {
+            return ToString(true, true);
+        }
+
+        public virtual string ToString(bool showDecimalDigits, bool showCurrencySymbol)
+        {
+            string result = null;
+
+            if (Currency != null &amp;&amp; !string.IsNullOrEmpty(Currency.CustomFormatting))
+            {
+                result = Amount.ToString(Currency.CustomFormatting, Currency.NumberFormat);
+            }
+
+            if (result == null)
+            {
+                var format = showDecimalDigits ? &quot;C&quot; : &quot;C0&quot;;
+
+                var numberFormat = Currency != null &amp;&amp; Currency.NumberFormat != null
+                    ? Currency.NumberFormat
+                    : CultureInfo.InvariantCulture.NumberFormat;
+
+                if (!showCurrencySymbol)
+                {
+                    numberFormat = (NumberFormatInfo)numberFormat.Clone();
+                    numberFormat.CurrencySymbol = string.Empty;
+                }
+
+                result = Amount.ToString(format, numberFormat);
+            }
+
+            return result;
+        }
+
+        /// &lt;summary&gt;
+        /// Evenly distributes the amount over n parts, resolving remainders that occur due to rounding 
+        /// errors, thereby garuanteeing the postcondition: result-&gt;sum(r|r.amount) = this.amount and
+        /// x elements in result are greater than at least one of the other elements, where x = amount mod n.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;n&quot;&gt;Number of parts over which the amount is to be distibuted.&lt;/param&gt;
+        /// &lt;returns&gt;Array with distributed Money amounts.&lt;/returns&gt;
+        public Money[] Allocate(int n)
+        {
+            var cents = Math.Pow(10, DecimalDigits);
+            var lowResult = ((long)Math.Truncate((double)InternalAmount / n * cents)) / cents;
+            var highResult = lowResult + 1.0d / cents;
+            var remainder = (int)(((double)InternalAmount * cents) % n);
+
+            var results = new Money[n];
+
+            for (var i = 0; i &lt; remainder; i++)
+                results[i] = new Money((decimal)highResult, Currency);
+
+            for (var i = remainder; i &lt; n; i++)
+                results[i] = new Money((decimal)lowResult, Currency);
+
+            return results;
+        }
+
+        #endregion
+
+        #region IConvertible&lt;Money&gt; Members
+
+        public Money ConvertTo(Currency toCurrency)
+        {
+            if (Currency == toCurrency)
+                return this;
+
+            return new Money(InternalAmount * Currency.ExchangeRate / toCurrency.ExchangeRate, toCurrency);
+        }
+
+        #endregion
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[40,9,40,23,1],[41,9,41,10,1],[42,9,42,10,1],[45,15,45,33,1],[46,9,46,10,1],[47,9,47,10,1],[50,15,50,46,0],[51,9,51,10,0],[52,9,52,10,0],[54,9,54,56,1],[55,9,55,10,1],[56,13,56,34,1],[57,17,57,67,0],[59,13,59,33,1],[60,13,60,37,1],[61,9,61,10,1],[70,41,70,45,1],[80,13,80,14,1],[81,17,81,100,1],[82,13,82,14,1],[93,13,93,14,0],[94,17,94,40,0],[95,17,95,18,0],[96,21,96,43,0],[99,17,99,101,0],[100,13,100,14,0],[105,17,105,18,0],[105,19,105,47,0],[105,48,105,49,0],[110,17,110,18,0],[110,19,110,48,0],[110,49,110,50,0],[115,17,115,18,0],[115,19,115,49,0],[115,50,115,51,0],[118,36,118,40,1],[127,17,127,18,1],[127,19,127,70,1],[127,71,127,72,1],[134,9,134,10,0],[135,13,135,71,0],[136,9,136,10,0],[139,9,139,10,0],[140,13,140,57,0],[141,9,141,10,0],[144,9,144,10,1],[145,13,145,31,1],[146,17,146,30,0],[148,13,148,46,1],[149,17,149,29,0],[151,13,151,100,1],[152,9,152,10,1],[155,9,155,10,1],[156,13,156,48,1],[157,17,157,29,0],[158,13,158,79,1],[159,17,159,30,1],[160,13,160,41,0],[161,9,161,10,1],[164,9,164,10,0],[165,13,165,39,0],[166,9,166,10,0],[169,9,169,10,0],[170,13,171,90,0],[172,9,172,10,0],[175,9,175,10,0],[176,13,177,91,0],[178,9,178,10,0],[181,9,181,10,0],[182,13,183,91,0],[184,9,184,10,0],[187,9,187,10,0],[188,13,189,90,0],[190,9,190,10,0],[193,9,193,10,0],[194,13,194,29,0],[195,17,195,26,0],[196,13,196,33,0],[197,17,197,71,0],[199,13,199,42,0],[200,9,200,10,0],[203,9,203,10,0],[204,13,204,30,0],[205,17,205,27,0],[206,13,206,30,0],[207,17,207,26,0],[208,13,208,22,0],[209,9,209,10,0],[212,9,212,10,0],[213,13,213,118,0],[214,9,214,10,0],[217,9,217,10,0],[218,13,218,118,0],[219,9,219,10,0],[222,9,222,10,0],[223,13,223,118,0],[224,9,224,10,0],[227,9,227,10,0],[228,13,228,118,0],[229,9,229,10,0],[236,9,236,10,0],[237,13,237,46,0],[238,17,238,30,0],[239,13,239,52,0],[240,9,240,10,0],[242,9,242,10,0],[243,13,243,38,0],[244,9,244,10,0],[247,9,247,10,0],[248,13,248,46,0],[249,17,249,30,0],[250,13,250,52,0],[251,9,251,10,0],[253,9,253,10,0],[254,13,254,38,0],[255,9,255,10,0],[258,9,258,10,0],[259,13,259,46,0],[260,17,260,30,0],[261,13,261,61,0],[262,9,262,10,0],[264,9,264,10,0],[265,13,265,38,0],[266,9,266,10,0],[269,9,269,10,0],[270,13,270,43,0],[271,9,271,10,0],[273,9,273,10,0],[274,13,274,43,0],[275,9,275,10,0],[277,9,277,10,0],[278,13,278,31,0],[279,17,279,64,0],[281,13,281,76,0],[282,9,282,10,0],[285,9,285,10,0],[286,13,286,43,0],[287,9,287,10,0],[289,9,289,10,0],[290,13,290,43,0],[291,9,291,10,0],[293,9,293,10,0],[294,13,294,31,0],[295,17,295,64,0],[297,13,297,76,0],[298,9,298,10,0],[301,9,301,10,0],[302,13,302,43,0],[303,9,303,10,0],[305,9,305,10,0],[306,13,306,43,0],[307,9,307,10,0],[309,9,309,10,0],[310,13,310,31,0],[311,17,311,64,0],[313,13,313,76,0],[314,9,314,10,0],[317,9,317,10,0],[318,13,318,43,0],[319,9,319,10,0],[321,9,321,10,0],[322,13,322,43,0],[323,9,323,10,0],[326,9,326,10,0],[327,13,327,31,0],[328,17,328,64,0],[330,13,330,76,0],[331,9,331,10,0],[338,9,338,10,0],[339,13,339,41,0],[340,9,340,10,0],[343,9,343,10,0],[344,13,344,34,0],[346,13,346,86,0],[347,13,347,14,0],[348,17,348,92,0],[349,13,349,14,0],[351,13,351,32,0],[352,13,352,14,0],[353,17,353,61,0],[355,17,357,65,0],[359,17,359,41,0],[360,17,360,18,0],[361,21,361,75,0],[362,21,362,64,0],[363,17,363,18,0],[365,17,365,64,0],[366,13,366,14,0],[368,13,368,27,0],[369,9,369,10,0],[379,9,379,10,0],[380,13,380,53,0],[381,13,381,95,0],[382,13,382,55,0],[383,13,383,73,0],[385,13,385,40,0],[387,18,387,27,0],[387,29,387,42,0],[387,44,387,47,0],[388,17,388,71,0],[390,18,390,35,0],[390,37,390,42,0],[390,44,390,47,0],[391,17,391,70,0],[393,13,393,28,0],[394,9,394,10,0],[401,9,401,10,0],[402,13,402,40,0],[403,17,403,29,0],[405,13,405,108,0],[406,9,406,10,0]]);
+    </script>
+  </body>
+</html>

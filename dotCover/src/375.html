@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\contentblobproviders\azureblobcontentoptions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using Microsoft.WindowsAzure.Storage.Blob;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public class AzureBlobContentOptions
+    {
+        public string Container { get; set; }
+        public string ConnectionString { get; set; }
+        public bool PollForChanges { get; set; } = false;
+        public TimeSpan ChangesPoolingInterval { get; set; } = TimeSpan.FromSeconds(15);
+        public BlobRequestOptions BlobRequestOptions { get; set; } = new BlobRequestOptions();
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,35,8,39,0],[8,40,8,44,0],[9,42,9,46,0],[9,47,9,51,0],[10,38,10,42,0],[10,43,10,47,0],[10,52,10,57,0],[11,50,11,54,0],[11,55,11,59,0],[11,64,11,88,0],[12,56,12,60,0],[12,61,12,65,0],[12,70,12,94,0]]);
+    </script>
+  </body>
+</html>

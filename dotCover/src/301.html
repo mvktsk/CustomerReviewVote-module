@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\security\securityconstants.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+
+namespace VirtoCommerce.Storefront.Model.Security
+{
+    public static class SecurityConstants
+    {
+        public const string AnonymousUsername = &quot;Anonymous&quot;;
+
+        public static class Claims
+        {
+            public const string PermissionClaimType = &quot;permission&quot;;
+            public const string OperatorUserNameClaimType = &quot;operatorname&quot;;
+            public const string OperatorUserIdClaimType = &quot;operatornameidentifier&quot;;
+            public const string CurrencyClaimType = &quot;currency&quot;;
+        }
+
+        public static class Roles
+        {
+            public const string Customer = &quot;Customer&quot;;
+            public const string Operator = &quot;Operator&quot;;
+            public const string Administrator = &quot;Administrator&quot;;
+            public static readonly Role OrganizationMaintainer = new Role
+            {
+                Id = &quot;org-maintainer&quot;,
+                Name = &quot;Organization maintainer&quot;,
+                Permissions = new string[] { Permissions.CanViewUsers, Permissions.CanCreateUsers, Permissions.CanSeeOrganizationDetail, Permissions.CanDeleteUsers, Permissions.CanEditOrganization, Permissions.CanEditUsers, Permissions.CanInviteUsers }
+            };
+            public static readonly Role OrganizationEmployee = new Role
+            {
+                Id = &quot;org-employee&quot;,
+                Name = &quot;Organization employee&quot;,
+                Permissions = new string[] { Permissions.CanSeeOrganizationDetail } 
+            };
+
+            public static readonly IEnumerable&lt;Role&gt; AllRoles = new[] { OrganizationMaintainer, OrganizationEmployee };
+        }
+
+        public static class Permissions
+        {
+            public const string CanResetCache = &quot;cache:reset&quot;;
+            public const string CanSeeOrganizationDetail = &quot;storefront:organization:view&quot;;
+            public const string CanEditOrganization = &quot;storefront:organization:edit&quot;;
+            public const string CanInviteUsers = &quot;storefront:user:invite&quot;;
+            public const string CanCreateUsers = &quot;storefront:user:create&quot;;
+            public const string CanEditUsers = &quot;storefront:user:edit&quot;;
+            public const string CanDeleteUsers = &quot;storefront:user:delete&quot;;
+            public const string CanViewUsers = &quot;storefront:user:view&quot;;
+
+            public static readonly IEnumerable&lt;string&gt; AllPermissions = new [] { CanViewUsers, CanResetCache, CanSeeOrganizationDetail, CanEditOrganization, CanInviteUsers, CanEditUsers, CanDeleteUsers, CanCreateUsers };
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[22,13,27,15,0],[28,13,33,15,0],[35,13,35,120,0],[49,13,49,221,0]]);
+    </script>
+  </body>
+</html>

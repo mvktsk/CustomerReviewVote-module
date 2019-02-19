@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\order\minimumorderquantitycalculator.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Storefront.Model.Cart;
+
+namespace VirtoCommerce.Storefront.Domain.Order
+{
+    public class MinimumOrderQuantityCalculator
+    {
+        private readonly int _storeMinimumOrderQuantity;
+
+        public MinimumOrderQuantityCalculator(int storeMinimumOrderQuantity)
+        {
+            _storeMinimumOrderQuantity = storeMinimumOrderQuantity;
+        }
+
+        public (double totalQty, int minQty) CalcMinimumOrderQuantity(IList&lt;LineItem&gt; items)
+        {
+            var shortInfoLineItems = items.OrderBy(x =&gt; x.MinOrderQuantity)
+                .Select(x =&gt; new
+                {
+                    //some products SKU starts from &#39;non-standard&#39;. For example Ozone_gift_card
+                    qty = x.Sku.ToLower().Contains(&quot;non-standard&quot;)
+                        ? 0d
+                        : (double)x.Quantity / (x.PackageSize ?? 1),
+                    moq = x.MinOrderQuantity == 0
+                        ? _storeMinimumOrderQuantity
+                        : x.MinOrderQuantity ?? _storeMinimumOrderQuantity
+                }).ToList();
+
+            var result = (totalQty: shortInfoLineItems.Select(x =&gt; x.qty).Sum(),
+                            minQty: Math.Min(_storeMinimumOrderQuantity, shortInfoLineItems.Min(x =&gt; x.moq)));
+
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,77,1],[13,9,13,10,1],[14,13,14,68,1],[15,9,15,10,1],[18,9,18,10,1],[19,13,29,29,1],[19,57,19,75,1],[20,30,29,18,1],[31,13,32,111,1],[31,68,31,73,1],[32,102,32,107,1],[34,13,34,27,1],[35,9,35,10,1]]);
+    </script>
+  </body>
+</html>

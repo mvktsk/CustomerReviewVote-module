@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\cart\cartsearchcriteria.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Specialized;
+using System.Runtime.Serialization;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Security;
+
+namespace VirtoCommerce.Storefront.Model.Cart
+{
+    public class CartSearchCriteria : PagedSearchCriteria
+    {
+        public static int DefaultPageSize { get; set; } = 20;
+
+        public CartSearchCriteria()
+            : base(new NameValueCollection(), DefaultPageSize)
+        {
+        }
+
+        public CartSearchCriteria(NameValueCollection queryString)
+            : base(queryString, DefaultPageSize)
+        {
+        }
+
+        public string Sort { get; set; }
+
+        public string StoreId { get; set; }
+
+        public string OutletId { get; set; }
+
+        public string Name { get; set; }
+
+        public string Type { get; set; }
+
+        [IgnoreDataMember]
+        public User Customer { get; set; }
+
+        [IgnoreDataMember]
+        public Currency Currency { get; set; }
+
+        [IgnoreDataMember]
+        public Language Language { get; set; }
+
+        public DateTime? StartDate { get; set; }
+
+        public DateTime? EndDate { get; set; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,45,11,49,0],[11,50,11,54,0],[11,59,11,61,0],[14,15,14,63,0],[15,9,15,10,0],[16,9,16,10,0],[19,15,19,49,0],[20,9,20,10,0],[21,9,21,10,0],[23,30,23,34,0],[23,35,23,39,0],[25,33,25,37,0],[25,38,25,42,0],[27,34,27,38,0],[27,39,27,43,0],[29,30,29,34,0],[29,35,29,39,0],[31,30,31,34,0],[31,35,31,39,0],[34,32,34,36,0],[34,37,34,41,0],[37,36,37,40,0],[37,41,37,45,0],[40,36,40,40,0],[40,41,40,45,0],[42,38,42,42,0],[42,43,42,47,0],[44,36,44,40,0],[44,41,44,45,0]]);
+    </script>
+  </body>
+</html>

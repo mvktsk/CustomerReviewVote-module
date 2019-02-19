@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\converters\productsearchcriteriaconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Linq;
+using VirtoCommerce.LiquidThemeEngine.Objects;
+namespace VirtoCommerce.LiquidThemeEngine.Converters
+{
+    public partial class ShopifyModelConverter
+    {
+
+        public virtual ProductSearchCriteria ToLiquidProductSearchCriteria(Storefront.Model.Catalog.ProductSearchCriteria productSearchCriteria)
+        {
+            var retVal = new ProductSearchCriteria();
+
+            retVal.PageNumber = productSearchCriteria.PageNumber;
+            retVal.PageSize = productSearchCriteria.PageSize;
+
+            retVal.SortBy = productSearchCriteria.SortBy;
+            retVal.Keyword = productSearchCriteria.Keyword;
+
+            if (productSearchCriteria.Terms.Any())
+            {
+                retVal.CurrentTags = new TagCollection(productSearchCriteria.Terms.Select(t =&gt; ToLiquidTag(t)).ToList());
+            }
+
+            return retVal;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,9,9,10,0],[10,13,10,54,0],[12,13,12,66,0],[13,13,13,62,0],[15,13,15,58,0],[16,13,16,60,0],[18,13,18,51,0],[19,13,19,14,0],[20,17,20,122,0],[20,96,20,110,0],[21,13,21,14,0],[23,13,23,27,0],[24,9,24,10,0]]);
+    </script>
+  </body>
+</html>

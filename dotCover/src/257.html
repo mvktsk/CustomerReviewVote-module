@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\typeextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+
+namespace VirtoCommerce.Storefront.Model.Common
+{
+    public static class TypeExtensions
+    {
+        public static Type[] GetTypeInheritanceChainTo(this Type type, Type toBaseType)
+        {
+            var retVal = new List&lt;Type&gt; { type };
+
+            var baseType = type.BaseType;
+
+            while (baseType != toBaseType &amp;&amp; baseType != typeof(object))
+            {
+                retVal.Add(baseType);
+                baseType = baseType.BaseType;
+            }
+
+            return retVal.ToArray();
+        }
+
+        private static readonly ConcurrentDictionary&lt;Type, string&gt; PrettyPrintCache = new ConcurrentDictionary&lt;Type, string&gt;();
+
+        public static string PrettyPrint(this Type type)
+        {
+            return PrettyPrintCache.GetOrAdd(
+                type,
+                t =&gt;
+                {
+                    try
+                    {
+                        return PrettyPrintRecursive(t, 0);
+                    }
+                    catch (Exception)
+                    {
+                        return t.Name;
+                    }
+                });
+        }
+
+        private static readonly ConcurrentDictionary&lt;Type, string&gt; TypeCacheKeys = new ConcurrentDictionary&lt;Type, string&gt;();
+        public static string GetCacheKey(this Type type)
+        {
+            return TypeCacheKeys.GetOrAdd(
+                type,
+                t =&gt; $&quot;{t.PrettyPrint()}[hash: {t.GetHashCode()}]&quot;);
+        }
+
+        private static string PrettyPrintRecursive(Type type, int depth)
+        {
+            if (depth &gt; 3)
+            {
+                return type.Name;
+            }
+
+            var nameParts = type.Name.Split(&#39;`&#39;);
+            if (nameParts.Length == 1)
+            {
+                return nameParts[0];
+            }
+
+            var genericArguments = type.GetTypeInfo().GetGenericArguments();
+            return !type.IsConstructedGenericType
+                ? $&quot;{nameParts[0]}&lt;{new string(&#39;,&#39;, genericArguments.Length - 1)}&gt;&quot;
+                : $&quot;{nameParts[0]}&lt;{string.Join(&quot;,&quot;, genericArguments.Select(t =&gt; PrettyPrintRecursive(t, depth + 1)))}&gt;&quot;;
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,10,0],[13,13,13,50,0],[15,13,15,42,0],[17,13,17,73,0],[18,13,18,14,0],[19,17,19,38,0],[20,17,20,46,0],[21,13,21,14,0],[23,13,23,37,0],[24,9,24,10,0],[26,9,26,128,0],[29,9,29,10,0],[30,13,42,20,0],[33,17,33,18,0],[35,21,35,22,0],[36,25,36,59,0],[38,21,38,38,0],[39,21,39,22,0],[40,25,40,39,0],[42,17,42,18,0],[43,9,43,10,0],[45,9,45,125,0],[47,9,47,10,0],[48,13,50,69,0],[50,22,50,67,0],[51,9,51,10,0],[54,9,54,10,0],[55,13,55,27,0],[56,13,56,14,0],[57,17,57,34,0],[60,13,60,50,0],[61,13,61,39,0],[62,13,62,14,0],[63,17,63,37,0],[66,13,66,77,0],[67,13,69,123,0],[69,83,69,117,0],[70,9,70,10,0]]);
+    </script>
+  </body>
+</html>

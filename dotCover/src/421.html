@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\subscriptions\subscriptionconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Storefront.Common;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Order;
+using VirtoCommerce.Storefront.Model.Subscriptions;
+using orderDto = VirtoCommerce.Storefront.AutoRestClients.OrdersModuleApi.Models;
+using subscriptionDto = VirtoCommerce.Storefront.AutoRestClients.SubscriptionModuleApi.Models;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+
+    public static partial class SubscriptionConverter
+    {
+        public static subscriptionDto.PaymentPlan ToPaymentPlanDto(this PaymentPlan paymentPlan)
+        {
+            var result = new subscriptionDto.PaymentPlan
+            {
+                Id = paymentPlan.Id,
+                Interval = paymentPlan.Interval.ToString(),
+                IntervalCount = paymentPlan.IntervalCount,
+                TrialPeriodDays = paymentPlan.TrialPeriodDays
+            };
+            return result;
+        }
+
+        public static PaymentPlan ToPaymentPlan(this subscriptionDto.PaymentPlan paymentPlanDto)
+        {
+            var result = new PaymentPlan
+            {
+                Id = paymentPlanDto.Id,
+                Interval = EnumUtility.SafeParse(paymentPlanDto.Interval, PaymentInterval.Months),
+                IntervalCount = paymentPlanDto.IntervalCount ?? 0,
+                TrialPeriodDays = paymentPlanDto.TrialPeriodDays ?? 0
+            };
+            return result;
+        }
+
+        public static subscriptionDto.SubscriptionSearchCriteria ToSearchCriteriaDto(this SubscriptionSearchCriteria criteria)
+        {
+            var result = new subscriptionDto.SubscriptionSearchCriteria
+            {
+                CustomerId = criteria.CustomerId,
+                Sort = criteria.Sort,
+                Number = criteria.Number,
+                Skip = criteria.Start,
+                Take = criteria.PageSize,
+                ResponseGroup = ((int)criteria.ResponseGroup).ToString(),
+                ModifiedSinceDate = criteria.ModifiedSinceDate
+            };
+            result.Sort = criteria.Sort;
+
+            return result;
+        }
+
+        public static Subscription ToSubscription(this subscriptionDto.Subscription subscriptionDto, IEnumerable&lt;Currency&gt; availCurrencies, Language language)
+        {
+            var currency = availCurrencies.FirstOrDefault(x =&gt; x.Equals(subscriptionDto.CustomerOrderPrototype.Currency)) ?? new Currency(language, subscriptionDto.CustomerOrderPrototype.Currency);
+            var order = subscriptionDto.CustomerOrderPrototype.JsonConvert&lt;orderDto.CustomerOrder&gt;()
+                                                                .ToCustomerOrder(availCurrencies, language);
+            var result = new Subscription(currency)
+            {
+                Addresses = order.Addresses,
+                ChannelId = order.ChannelId,
+                Comment = order.Comment,
+                CreatedBy = order.CreatedBy,
+                CreatedDate = order.CreatedDate,
+                CustomerId = order.CustomerId,
+                CustomerName = order.CustomerName,
+                Discount = order.Discount,
+                DiscountAmount = order.DiscountAmount,
+                DiscountAmountWithTax = order.DiscountAmountWithTax,
+                Discounts = order.Discounts,
+                DiscountTotal = order.DiscountTotal,
+                DiscountTotalWithTax = order.DiscountTotalWithTax,
+                DynamicProperties = order.DynamicProperties,
+                EmployeeId = order.EmployeeId,
+                EmployeeName = order.EmployeeName,
+                InPayments = order.InPayments,
+                Items = order.Items,
+                ModifiedBy = order.ModifiedBy,
+                ModifiedDate = order.ModifiedDate,
+                OrganizationId = order.OrganizationId,
+                OrganizationName = order.OrganizationName,
+                Shipments = order.Shipments,
+                ShippingDiscountTotal = order.ShippingDiscountTotal,
+                ShippingDiscountTotalWithTax = order.ShippingDiscountTotalWithTax,
+                ShippingTaxTotal = order.ShippingTaxTotal,
+                ShippingTotal = order.ShippingTotal,
+                ShippingTotalWithTax = order.ShippingTotalWithTax,
+                StoreId = order.StoreId,
+                StoreName = order.StoreName,
+                SubTotal = order.SubTotal,
+                SubTotalDiscount = order.SubTotalDiscount,
+                SubTotalDiscountWithTax = order.SubTotalDiscountWithTax,
+                SubTotalTaxTotal = order.SubTotalTaxTotal,
+                SubTotalWithTax = order.SubTotalWithTax,
+                TaxDetails = order.TaxDetails,
+                TaxTotal = order.TaxTotal,
+                Total = order.Total,
+
+                Id = subscriptionDto.Id,
+                Number = subscriptionDto.Number,
+                Balance = new Money(subscriptionDto.Balance ?? 0, currency),
+                Interval = EnumUtility.SafeParse(subscriptionDto.Interval, PaymentInterval.Months),
+                IntervalCount = subscriptionDto.IntervalCount ?? 1,
+                StartDate = subscriptionDto.StartDate,
+                EndDate = subscriptionDto.EndDate,
+                Status = subscriptionDto.SubscriptionStatus,
+                IsCancelled = subscriptionDto.IsCancelled,
+                CancelReason = subscriptionDto.CancelReason,
+                CancelledDate = subscriptionDto.CancelledDate,
+                TrialSart = subscriptionDto.TrialSart,
+                TrialEnd = subscriptionDto.TrialEnd,
+                TrialPeriodDays = subscriptionDto.TrialPeriodDays ?? 0,
+                CurrentPeriodStart = subscriptionDto.CurrentPeriodStart,
+                CurrentPeriodEnd = subscriptionDto.CurrentPeriodEnd
+            };
+
+            if (subscriptionDto.CustomerOrders != null)
+            {
+                foreach (var relatedOrderDto in subscriptionDto.CustomerOrders)
+                {
+                    var relatedOrder = new CustomerOrder(currency)
+                    {
+                        Id = relatedOrderDto.Id,
+                        Number = relatedOrderDto.Number,
+                        Total = new Money(relatedOrderDto.Total ?? 0, currency),
+                        CreatedDate = relatedOrderDto.CreatedDate,
+                        Status = relatedOrderDto.Status
+                    };
+                    result.CustomerOrders.Add(relatedOrder);
+                }
+            }
+
+            return result;
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,9,17,10,0],[18,13,24,15,0],[25,13,25,27,0],[26,9,26,10,0],[29,9,29,10,0],[30,13,36,15,0],[37,13,37,27,0],[38,9,38,10,0],[41,9,41,10,0],[42,13,51,15,0],[52,13,52,41,0],[54,13,54,27,0],[55,9,55,10,0],[58,9,58,10,0],[59,13,59,198,0],[59,64,59,121,0],[60,13,61,109,0],[62,13,119,15,0],[121,13,121,56,0],[122,13,122,14,0],[123,17,123,24,0],[123,26,123,45,0],[123,46,123,48,0],[123,49,123,79,0],[124,17,124,18,0],[125,21,132,23,0],[133,21,133,61,0],[134,17,134,18,0],[135,13,135,14,0],[137,13,137,27,0],[138,9,138,10,0]]);
+    </script>
+  </body>
+</html>

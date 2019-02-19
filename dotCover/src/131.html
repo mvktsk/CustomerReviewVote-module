@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\image.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model
+{
+    public partial class Image : ValueObject
+    {
+        /// &lt;summary&gt;
+        /// Full url of image
+        /// &lt;/summary&gt;
+        public string Url { get; set; }
+
+        public string FullSizeImageUrl { get; set; }
+
+        /// &lt;summary&gt;
+        /// Image title
+        /// &lt;/summary&gt;
+        public string Title { get; set; }
+
+        /// &lt;summary&gt;
+        /// Image alt text
+        /// &lt;/summary&gt;
+        public string Alt { get; set; }
+
+        protected override IEnumerable&lt;object&gt; GetEqualityComponents()
+        {
+            yield return Url;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,29,15,33,0],[15,34,15,38,0],[17,42,17,46,0],[17,47,17,51,0],[22,31,22,35,0],[22,36,22,40,0],[27,29,27,33,0],[27,34,27,38,0],[30,9,30,10,0],[31,13,31,30,0],[32,9,32,10,0]]);
+    </script>
+  </body>
+</html>

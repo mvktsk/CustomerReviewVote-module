@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\cart\getcartswithproductrequest.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Newtonsoft.Json;
+
+namespace VirtoCommerce.Storefront.Model.Cart
+{
+    public class GetCartsWithProductRequest
+    {
+        /// &lt;summary&gt;
+        /// Gets or sets the value of lists names to search product in
+        /// &lt;/summary&gt;
+        [JsonProperty(&quot;listNames&quot;)]
+        public string[] ListNames { get; set; }
+
+        /// &lt;summary&gt;
+        /// Cart type
+        /// &lt;/summary&gt;
+        [JsonProperty(&quot;type&quot;)]
+        public string Type { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of product id to search for
+        /// &lt;/summary&gt;
+        [JsonProperty(&quot;productId&quot;)]
+        public string ProductId { get; set; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,37,11,41,0],[11,42,11,46,0],[17,30,17,34,0],[17,35,17,39,0],[23,35,23,39,0],[23,40,23,44,0]]);
+    </script>
+  </body>
+</html>

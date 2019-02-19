@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\api\apilistscontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Cart;
+using VirtoCommerce.Storefront.Model.Cart.Services;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Services;
+
+namespace VirtoCommerce.Storefront.Controllers.Api
+{
+    public class ApiListsController : StorefrontControllerBase
+    {
+        private readonly ICartService _cartService;
+        private readonly ICartBuilder _cartBuilder;
+        private readonly ICatalogService _catalogService;
+
+        public ApiListsController(IWorkContextAccessor workContextAccessor, ICatalogService catalogService, ICartService cartService, ICartBuilder cartBuilder, IStorefrontUrlBuilder urlBuilder)
+            : base(workContextAccessor, urlBuilder)
+        {
+            _cartBuilder = cartBuilder;
+            _catalogService = catalogService;
+            _cartService = cartService;
+        }
+
+        // GET: storefrontapi/lists/{listName}/{type}
+        [HttpGet]
+        public async Task&lt;ActionResult&gt; GetListByName([FromRoute]string listName, [FromRoute]string type)
+        {
+            using (await AsyncLock.GetLockByKey(GetAsyncListKey(WorkContext, listName, type)).LockAsync())
+            {
+                var cartBuilder = await LoadOrCreateCartAsync(listName, type);
+                return Json(cartBuilder.Cart);
+            }
+        }
+
+        // POST: storefrontapi/lists/getlistswithproduct
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; GetListsWithProduct([FromBody] GetCartsWithProductRequest request)
+        {
+            var result = new List&lt;string&gt;();
+            using (await AsyncLock.GetLockByKey(GetAsyncListKey(WorkContext, &quot;*&quot;, request.Type)).LockAsync())
+            {
+                var criteria = new CartSearchCriteria
+                {
+                    Type = request.Type,
+                    StoreId = WorkContext.CurrentStore.Id,
+                    Customer = WorkContext.CurrentUser,
+                    Currency = WorkContext.CurrentCurrency,
+                    Language = WorkContext.CurrentLanguage,
+                    PageSize = int.MaxValue
+                };
+                var carts = await _cartService.SearchCartsAsync(criteria);
+                result.AddRange(carts.Where(c =&gt; c.Items.Any(i =&gt; i.ProductId == request.ProductId)).Select(x =&gt; x.Name));
+            }
+            return Json(result);
+        }
+
+        // POST: storefrontapi/lists/items
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; AddItemToList([FromBody] AddCartItem listItem)
+        {
+            //Need lock to prevent concurrent access to same list
+            using (await AsyncLock.GetLockByKey(GetAsyncListKey(WorkContext, listItem.ListName, listItem.Type)).LockAsync())
+            {
+                var cartBuilder = await LoadOrCreateCartAsync(listItem.ListName, listItem.Type);
+
+                var products = await _catalogService.GetProductsAsync(new[] { listItem.ProductId }, ItemResponseGroup.Inventory | ItemResponseGroup.ItemWithPrices | ItemResponseGroup.ItemProperties);
+                if (products != null &amp;&amp; products.Any())
+                {
+                    await cartBuilder.AddItemAsync(products.First(), 1);
+                    await cartBuilder.SaveAsync();
+                }
+                return Json(new { ItemsCount = cartBuilder.Cart.ItemsQuantity });
+            }
+        }
+
+        // DELETE: storefrontapi/lists/{listName}/type/items/{lineItemId}
+        [HttpDelete]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; RemoveItemFromList(string lineItemId, string listName, string type)
+        {
+            //Need lock to prevent concurrent access to same list
+            using (await AsyncLock.GetLockByKey(GetAsyncListKey(WorkContext, listName, type)).LockAsync())
+            {
+                var cartBuilder = await LoadOrCreateCartAsync(listName, type);
+                await cartBuilder.RemoveItemAsync(lineItemId);
+                await cartBuilder.SaveAsync();
+                return Json(new { ItemsCount = cartBuilder.Cart.ItemsQuantity });
+            }
+        }
+
+        // POST: storefrontapi/lists/search
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; SearchLists([FromBody] CartSearchCriteria searchCriteria)
+        {
+            if (searchCriteria == null)
+            {
+                searchCriteria = new CartSearchCriteria();
+            }
+
+            //restricting query to lists belongs to other customers
+            searchCriteria.StoreId = WorkContext.CurrentStore.Id;
+            searchCriteria.Customer = WorkContext.CurrentUser;
+            searchCriteria.Currency = WorkContext.CurrentCurrency;
+            searchCriteria.Language = WorkContext.CurrentLanguage;
+
+            var cartPagedList = await _cartService.SearchCartsAsync(searchCriteria);
+
+            return Json(new
+            {
+                Results = cartPagedList,
+                TotalCount = cartPagedList.TotalItemCount
+            });
+        }
+
+        // POST: storefrontapi/lists/{listName}/{type}/create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; CreateList(string listName, string type)
+        {
+            var cartBuilder = await LoadOrCreateCartAsync(listName, type);
+            if (cartBuilder.Cart.IsTransient())
+            {
+                await cartBuilder.SaveAsync();
+            }
+            return Json(cartBuilder.Cart);
+        }
+
+        // DELETE: storefrontapi/lists/deletelistsbyids?listIds=...&amp;listIds=...
+        [HttpDelete]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; DeleteListsByIds(string[] listIds)
+        {
+            //filter out the lists that don&#39;t belong to the current user
+            foreach (var id in listIds)
+            {
+                var cart = await _cartService.GetByIdAsync(id);
+                if (cart != null &amp;&amp; cart.CustomerId == WorkContext.CurrentUser.Id)
+                {
+                    await _cartBuilder.TakeCartAsync(cart);
+                    await _cartBuilder.RemoveCartAsync();
+                }
+            }
+            return Ok();
+        }
+
+        // POST: storefrontapi/lists/{listName}/{type}/mergewithcurrentcart
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; MergeWithCurrentCart(string listName, string type)
+        {
+            var currentCartName = WorkContext.CurrentCart.Value?.Name;
+            using (await AsyncLock.GetLockByKey(GetAsyncListKey(WorkContext, currentCartName, string.Empty)).LockAsync())
+            {
+                //load list
+                var cartBuilder = await LoadOrCreateCartAsync(listName, type);
+                var listCart = cartBuilder.Cart;
+
+                //load or create default cart
+                cartBuilder = await LoadOrCreateCartAsync(currentCartName);
+                await cartBuilder.MergeWithCartAsync(listCart);
+
+                await cartBuilder.SaveAsync();
+                return Ok();
+            }
+        }
+
+        private static string GetAsyncListKey(WorkContext context, string listName, string type)
+        {
+            return string.Join(&quot;:&quot;, listName, context.CurrentUser.Id, context.CurrentStore.Id, type);
+        }
+
+        private async Task&lt;ICartBuilder&gt; LoadOrCreateCartAsync(string cartName, string type = null)
+        {
+            await _cartBuilder.LoadOrCreateNewTransientCartAsync(cartName, WorkContext.CurrentStore, WorkContext.CurrentUser, WorkContext.CurrentLanguage, WorkContext.CurrentCurrency, type);
+            return _cartBuilder;
+        }
+
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[21,15,21,52,0],[22,9,22,10,0],[23,13,23,40,0],[24,13,24,46,0],[25,13,25,40,0],[26,9,26,10,0],[31,9,31,10,0],[32,13,32,107,0],[33,13,33,14,0],[34,17,34,79,0],[35,17,35,47,0],[37,9,37,10,0],[43,9,43,10,0],[44,13,44,45,0],[45,13,45,110,0],[46,13,46,14,0],[47,17,55,19,0],[56,17,56,75,0],[57,17,57,123,0],[57,50,57,100,0],[57,67,57,99,0],[57,114,57,120,0],[58,13,58,14,0],[59,13,59,33,0],[60,9,60,10,0],[66,9,66,10,0],[68,13,68,125,0],[69,13,69,14,0],[70,17,70,97,0],[72,17,72,200,0],[73,17,73,56,0],[74,17,74,18,0],[75,21,75,73,0],[76,21,76,51,0],[77,17,77,18,0],[78,17,78,82,0],[80,9,80,10,0],[86,9,86,10,0],[88,13,88,107,0],[89,13,89,14,0],[90,17,90,79,0],[91,17,91,63,0],[92,17,92,47,0],[93,17,93,82,0],[95,9,95,10,0],[101,9,101,10,0],[102,13,102,40,0],[103,13,103,14,0],[104,17,104,59,0],[105,13,105,14,0],[108,13,108,66,0],[109,13,109,63,0],[110,13,110,67,0],[111,13,111,67,0],[113,13,113,85,0],[115,13,119,16,0],[120,9,120,10,0],[126,9,126,10,0],[127,13,127,75,0],[128,13,128,48,0],[129,13,129,14,0],[130,17,130,47,0],[131,13,131,14,0],[132,13,132,43,0],[133,9,133,10,0],[139,9,139,10,0],[141,13,141,20,0],[141,22,141,28,0],[141,29,141,31,0],[141,32,141,39,0],[142,13,142,14,0],[143,17,143,64,0],[144,17,144,83,0],[145,17,145,18,0],[146,21,146,60,0],[147,21,147,58,0],[148,17,148,18,0],[149,13,149,14,0],[150,13,150,25,0],[151,9,151,10,0],[157,9,157,10,0],[158,13,158,71,0],[159,13,159,122,0],[160,13,160,14,0],[162,17,162,79,0],[163,17,163,49,0],[166,17,166,76,0],[167,17,167,64,0],[169,17,169,47,0],[170,17,170,29,0],[172,9,172,10,0],[175,9,175,10,0],[176,13,176,102,0],[177,9,177,10,0],[180,9,180,10,0],[181,13,181,191,0],[182,13,182,33,0],[183,9,183,10,0]]);
+    </script>
+  </body>
+</html>

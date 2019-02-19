@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\order\shipment.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Marketing;
+
+namespace VirtoCommerce.Storefront.Model.Order
+{
+    /// &lt;summary&gt;
+    /// Represents order shipment
+    /// &lt;/summary&gt;
+    public partial class Shipment
+    {
+        public Shipment(Currency currency)
+        {
+            Items = new List&lt;ShipmentItem&gt;();
+            Packages = new List&lt;ShipmentPackage&gt;();
+            InPayments = new List&lt;PaymentIn&gt;();
+            TaxDetails = new List&lt;TaxDetail&gt;();
+            ChildrenOperations = new List&lt;Operation&gt;();
+            DynamicProperties = new List&lt;DynamicProperty&gt;();
+            Currency = currency;
+
+            Price = new Money(currency);
+            PriceWithTax = new Money(currency);
+            DiscountAmount = new Money(currency);
+            DiscountAmountWithTax = new Money(currency);
+            ItemsSubtotal = new Money(currency);
+            ItemsSubtotalWithTax = new Money(currency);
+            TaxTotal = new Money(currency);
+            Total = new Money(currency);
+            TotalWithTax = new Money(currency);
+            Discounts = new List&lt;Discount&gt;();
+
+        }
+
+        /// &lt;summary&gt;
+        /// Customer organization
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Customer organization&lt;/value&gt;
+        public string OrganizationName { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets OrganizationId
+        /// &lt;/summary&gt;
+        public string OrganizationId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Fulfillment center where shipment will be handled
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Fulfillment center where shipment will be handled&lt;/value&gt;
+        public string FulfillmentCenterName { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets FulfillmentCenterId
+        /// &lt;/summary&gt;
+        public string FulfillmentCenterId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Code used for link shipment with external carrier service implementation (FedEx, USPS etc)
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Code used for link shipment with external carrier service implementation (FedEx, USPS etc)&lt;/value&gt;
+        public string ShipmentMethodCode { get; set; }
+
+        /// &lt;summary&gt;
+        /// Describe some shipment options (Vip, Air, Moment etc)
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Describe some shipment options (Vip, Air, Moment etc)&lt;/value&gt;
+        public string ShipmentMethodOption { get; set; }
+
+        /// &lt;summary&gt;
+        /// Employee who responsible for handling current shipment
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Employee who responsible for handling current shipment&lt;/value&gt;
+        public string EmployeeName { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets EmployeeId
+        /// &lt;/summary&gt;
+        public string EmployeeId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets WeightUnit
+        /// &lt;/summary&gt;
+        public string WeightUnit { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets Weight
+        /// &lt;/summary&gt;
+        public double? Weight { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets MeasureUnit
+        /// &lt;/summary&gt;
+        public string MeasureUnit { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets Height
+        /// &lt;/summary&gt;
+        public double? Height { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets Length
+        /// &lt;/summary&gt;
+        public double? Length { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets Width
+        /// &lt;/summary&gt;
+        public double? Width { get; set; }
+
+        /// &lt;summary&gt;
+        /// Information about quantity and order items belongs to current shipment
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Information about quantity and order items belongs to current shipment&lt;/value&gt;
+        public IList&lt;ShipmentItem&gt; Items { get; set; }
+
+        /// &lt;summary&gt;
+        /// Information about packages belongs to current shipment
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Information about packages belongs to current shipment&lt;/value&gt;
+        public IList&lt;ShipmentPackage&gt; Packages { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets InPayments
+        /// &lt;/summary&gt;
+        public IList&lt;PaymentIn&gt; InPayments { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets DeliveryAddress
+        /// &lt;/summary&gt;
+        public Address DeliveryAddress { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets TaxDetails
+        /// &lt;/summary&gt;
+        public IList&lt;TaxDetail&gt; TaxDetails { get; set; }
+
+        /// &lt;summary&gt;
+        /// Operation type string representation (CustomerOrder, Shipment etc)
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Operation type string representation (CustomerOrder, Shipment etc)&lt;/value&gt;
+        public string OperationType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Unique user friendly document number (generate automatically based on special algorithm realization)
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Unique user friendly document number (generate automatically based on special algorithm realization)&lt;/value&gt;
+        public string Number { get; set; }
+
+        /// &lt;summary&gt;
+        /// Flag can be used to refer to a specific order status in a variety of user scenarios with combination of Status\r\n            (Order completion, Shipment send etc)
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Flag can be used to refer to a specific order status in a variety of user scenarios with combination of Status\r\n            (Order completion, Shipment send etc)&lt;/value&gt;
+        public bool? IsApproved { get; set; }
+
+        /// &lt;summary&gt;
+        /// Current operation status may have any values defined by concrete business process
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Current operation status may have any values defined by concrete business process&lt;/value&gt;
+        public string Status { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets Comment
+        /// &lt;/summary&gt;
+        public string Comment { get; set; }
+
+        /// &lt;summary&gt;
+        /// Currecy code
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Currecy code&lt;/value&gt;
+        public Currency Currency { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets TaxIncluded
+        /// &lt;/summary&gt;
+        public bool? TaxIncluded { get; set; }     
+       
+        /// &lt;summary&gt;
+        /// Gets or Sets IsCancelled
+        /// &lt;/summary&gt;
+        public bool? IsCancelled { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets CancelledDate
+        /// &lt;/summary&gt;
+        public DateTime? CancelledDate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets CancelReason
+        /// &lt;/summary&gt;
+        public string CancelReason { get; set; }
+
+        /// &lt;summary&gt;
+        /// Used for construct hierarchy of operation and represent parent operation id
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Used for construct hierarchy of operation and represent parent operation id&lt;/value&gt;
+        public string ParentOperationId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets ChildrenOperations
+        /// &lt;/summary&gt;
+        public IList&lt;Operation&gt; ChildrenOperations { get; set; }
+
+        /// &lt;summary&gt;
+        /// Used for dynamic properties management, contains object type string
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Used for dynamic properties management, contains object type string&lt;/value&gt;
+        public string ObjectType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Dynamic properties collections
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Dynamic properties collections&lt;/value&gt;
+        public IList&lt;DynamicProperty&gt; DynamicProperties { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets CreatedDate
+        /// &lt;/summary&gt;
+        public DateTime? CreatedDate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets ModifiedDate
+        /// &lt;/summary&gt;
+        public DateTime? ModifiedDate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets CreatedBy
+        /// &lt;/summary&gt;
+        public string CreatedBy { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets ModifiedBy
+        /// &lt;/summary&gt;
+        public string ModifiedBy { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets Id
+        /// &lt;/summary&gt;
+        public string Id { get; set; }
+
+        public string TaxType { get; set; }
+        public Money TaxTotal { get; set; }
+        public decimal TaxPercentRate { get; set; }
+
+        public IList&lt;Discount&gt; Discounts { get; set; }
+
+        public Money Price { get; set; }
+        public Money PriceWithTax { get; set; }
+        public Money Total { get; set; }
+        public Money TotalWithTax { get; set; }
+        public Money ItemsSubtotal { get; set; }
+        public Money ItemsSubtotalWithTax { get; set; }
+        public Money DiscountAmount { get; set; }
+        public Money DiscountAmountWithTax { get; set; }
+
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,43,0],[14,9,14,10,0],[15,13,15,46,0],[16,13,16,52,0],[17,13,17,48,0],[18,13,18,48,0],[19,13,19,56,0],[20,13,20,61,0],[21,13,21,33,0],[23,13,23,41,0],[24,13,24,48,0],[25,13,25,50,0],[26,13,26,57,0],[27,13,27,49,0],[28,13,28,56,0],[29,13,29,44,0],[30,13,30,41,0],[31,13,31,48,0],[32,13,32,46,0],[34,9,34,10,0],[40,42,40,46,0],[40,47,40,51,0],[45,40,45,44,0],[45,45,45,49,0],[51,47,51,51,0],[51,52,51,56,0],[56,45,56,49,0],[56,50,56,54,0],[62,44,62,48,0],[62,49,62,53,0],[68,46,68,50,0],[68,51,68,55,0],[74,38,74,42,0],[74,43,74,47,0],[79,36,79,40,0],[79,41,79,45,0],[84,36,84,40,0],[84,41,84,45,0],[89,33,89,37,0],[89,38,89,42,0],[94,37,94,41,0],[94,42,94,46,0],[99,33,99,37,0],[99,38,99,42,0],[104,33,104,37,0],[104,38,104,42,0],[109,32,109,36,0],[109,37,109,41,0],[115,44,115,48,0],[115,49,115,53,0],[121,50,121,54,0],[121,55,121,59,0],[126,46,126,50,0],[126,51,126,55,0],[131,42,131,46,0],[131,47,131,51,0],[136,46,136,50,0],[136,51,136,55,0],[142,39,142,43,0],[142,44,142,48,0],[148,32,148,36,0],[148,37,148,41,0],[154,35,154,39,0],[154,40,154,44,0],[160,32,160,36,0],[160,37,160,41,0],[165,33,165,37,0],[165,38,165,42,0],[171,36,171,40,0],[171,41,171,45,0],[176,36,176,40,0],[176,41,176,45,0],[181,36,181,40,0],[181,41,181,45,0],[186,42,186,46,0],[186,47,186,51,0],[191,38,191,42,0],[191,43,191,47,0],[197,43,197,47,0],[197,48,197,52,0],[202,54,202,58,0],[202,59,202,63,0],[208,36,208,40,0],[208,41,208,45,0],[214,59,214,63,0],[214,64,214,68,0],[219,40,219,44,0],[219,45,219,49,0],[224,41,224,45,0],[224,46,224,50,0],[229,35,229,39,0],[229,40,229,44,0],[234,36,234,40,0],[234,41,234,45,0],[239,28,239,32,0],[239,33,239,37,0],[241,33,241,37,0],[241,38,241,42,0],[242,33,242,37,0],[242,38,242,42,0],[243,41,243,45,0],[243,46,243,50,0],[245,44,245,48,0],[245,49,245,53,0],[247,30,247,34,0],[247,35,247,39,0],[248,37,248,41,0],[248,42,248,46,0],[249,30,249,34,0],[249,35,249,39,0],[250,37,250,41,0],[250,42,250,46,0],[251,38,251,42,0],[251,43,251,47,0],[252,45,252,49,0],[252,50,252,54,0],[253,39,253,43,0],[253,44,253,48,0],[254,46,254,50,0],[254,51,254,55,0]]);
+    </script>
+  </body>
+</html>

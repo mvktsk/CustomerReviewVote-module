@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\marketing\discount.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model.Marketing
+{
+    public partial class Discount : ValueObject, IConvertible&lt;Discount&gt;
+    {
+        public Discount()
+        {
+        }
+        public Discount(Currency currency)
+        {
+            Amount = new Money(currency);
+        }
+        /// &lt;summary&gt;
+        /// Gets or sets the value of promotion id
+        /// &lt;/summary&gt;
+        public string PromotionId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of absolute discount amount per one item
+        /// &lt;/summary&gt;
+        public Money Amount { get; set; }
+
+        public string Coupon { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of discount description
+        /// &lt;/summary&gt;
+        public string Description { get; set; }
+
+        #region IConvertible&lt;Discount&gt; Members
+        public Discount ConvertTo(Currency currency)
+        {
+            var retVal = new Discount(currency);
+            retVal.PromotionId = PromotionId;
+            retVal.Description = Description;
+            retVal.Coupon = Coupon;
+            retVal.Amount = Amount.ConvertTo(currency);
+            return retVal;
+        }
+        #endregion
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,9,8,26,1],[9,9,9,10,1],[10,9,10,10,1],[11,9,11,43,1],[12,9,12,10,1],[13,13,13,42,1],[14,9,14,10,1],[18,37,18,41,0],[18,42,18,46,1],[23,31,23,35,1],[23,36,23,40,1],[25,32,25,36,0],[25,37,25,41,1],[30,37,30,41,0],[30,42,30,46,1],[34,9,34,10,0],[35,13,35,49,0],[36,13,36,46,0],[37,13,37,46,0],[38,13,38,36,0],[39,13,39,56,0],[40,13,40,27,0],[41,9,41,10,0]]);
+    </script>
+  </body>
+</html>

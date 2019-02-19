@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\security\pollingapiuserchangetoken.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Threading;
+using Microsoft.Extensions.Primitives;
+using VirtoCommerce.Storefront.AutoRestClients.PlatformModuleApi;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Security;
+
+namespace VirtoCommerce.Storefront.Domain.Security
+{
+    public sealed class PollingApiUserChangeToken : IChangeToken
+    {
+        private readonly ISecurity _platformSecurityApi;
+        private DateTime _lastCheckedTimeUtc;
+        private readonly TimeSpan _poolingInterval;
+        private readonly User _user;
+        private readonly object _lock = new object();
+
+        private PollingApiUserChangeToken(User user, ISecurity platformSecurityApi, TimeSpan poolingInterval)
+        {
+            _user = user;
+            _lastCheckedTimeUtc = DateTime.UtcNow;
+            _poolingInterval = poolingInterval;
+            _platformSecurityApi = platformSecurityApi;
+        }
+
+        public static IChangeToken CreateChangeToken(User user, ISecurity platformSecurityApi, TimeSpan poolingInterval)
+        {
+            return new PollingApiUserChangeToken(user, platformSecurityApi, poolingInterval);
+        }
+
+        /// &lt;summary&gt;
+        /// Always false.
+        /// &lt;/summary&gt;
+        public bool ActiveChangeCallbacks =&gt; false;
+
+        public bool HasChanged
+        {
+            get
+            {
+                var currentTime = DateTime.UtcNow;
+                if (currentTime - _lastCheckedTimeUtc &lt; _poolingInterval)
+                {
+                    return false;
+                }
+
+                var lockTaken = Monitor.TryEnter(_lock);
+                try
+                {
+                    //Do not wait if is locked by another thread 
+                    if (lockTaken)
+                    {
+                        var user = _platformSecurityApi.GetUserById(_user.Id)?.ToUser();
+                        _lastCheckedTimeUtc = currentTime;
+                        //TODO: Add additional properties check
+                        if (user != null &amp;&amp; user.IsLockedOut != _user.IsLockedOut)
+                        {
+                            SecurityCacheRegion.ExpireUser(_user.Id);
+                            return true;
+                        }
+
+                    }
+                }
+                finally
+                {
+                    if (lockTaken)
+                    {
+                        Monitor.Exit(_lock);
+                    }
+                }
+                return false;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Does not actually register callbacks.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;callback&quot;&gt;This parameter is ignored&lt;/param&gt;
+        /// &lt;param name=&quot;state&quot;&gt;This parameter is ignored&lt;/param&gt;
+        /// &lt;returns&gt;A disposable object that noops when disposed&lt;/returns&gt;
+        public IDisposable RegisterChangeCallback(Action&lt;object&gt; callback, object state) =&gt; EmptyDisposable.Instance;
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,9,16,54,0],[18,9,18,110,0],[19,9,19,10,0],[20,13,20,26,0],[21,13,21,51,0],[22,13,22,48,0],[23,13,23,56,0],[24,9,24,10,0],[27,9,27,10,0],[28,13,28,94,0],[29,9,29,10,0],[34,46,34,51,0],[39,13,39,14,0],[40,17,40,51,0],[41,17,41,74,0],[42,17,42,18,0],[43,21,43,34,0],[46,17,46,57,0],[48,17,48,18,0],[50,21,50,35,0],[51,21,51,22,0],[52,25,52,89,0],[53,25,53,59,0],[55,25,55,83,0],[56,25,56,26,0],[57,29,57,70,0],[58,29,58,41,0],[61,21,61,22,0],[62,17,62,18,0],[64,17,64,18,0],[65,21,65,35,0],[66,21,66,22,0],[67,25,67,45,0],[68,21,68,22,0],[69,17,69,18,0],[70,17,70,30,0],[71,13,71,14,0],[80,93,80,117,0]]);
+    </script>
+  </body>
+</html>

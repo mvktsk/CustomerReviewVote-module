@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\customerreviewvote-module\newmanagedmodule.data\services\customerreviewsearchservice.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using CustomerReviewVotes.Core.Model;
+using CustomerReviewVotes.Core.Services;
+using CustomerReviewVotes.Data.Repositories;
+using System;
+using System.Linq;
+using VirtoCommerce.Domain.Commerce.Model.Search;
+using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Data.Infrastructure;
+
+namespace CustomerReviewVotes.Data.Services
+{
+    public class CustomerReviewSearchService : ServiceBase, ICustomerReviewSearchService
+    {
+        private readonly Func&lt;ICustomerReviewRepository&gt; _repositoryFactory;
+        private readonly ICustomerReviewService _customerReviewService;
+
+        public CustomerReviewSearchService(Func&lt;ICustomerReviewRepository&gt; repositoryFactory, ICustomerReviewService customerReviewService)
+        {
+            _repositoryFactory = repositoryFactory;
+            _customerReviewService = customerReviewService;
+        }
+
+        public GenericSearchResult&lt;CustomerReview&gt; SearchCustomerReviews(CustomerReviewSearchCriteria criteria)
+        {
+            if (criteria == null)
+            {
+                throw new ArgumentNullException($&quot;{nameof(criteria)} must be set&quot;);
+            }
+
+            var retVal = new GenericSearchResult&lt;CustomerReview&gt;();
+
+            using (var repository = _repositoryFactory())
+            {
+                var query = repository.CustomerReviews;
+
+                if (!criteria.ProductIds.IsNullOrEmpty())
+                {
+                    query = query.Where(x =&gt; criteria.ProductIds.Contains(x.ProductId));
+                }
+
+                if (criteria.IsActive.HasValue)
+                {
+                    query = query.Where(x =&gt; x.IsActive == criteria.IsActive);
+                }
+
+                if (!criteria.SearchPhrase.IsNullOrEmpty())
+                {
+                    query = query.Where(x =&gt; x.Content.Contains(criteria.SearchPhrase));
+                }
+
+                var sortInfos = criteria.SortInfos;
+                if (sortInfos.IsNullOrEmpty())
+                {
+                    sortInfos = new[] { new SortInfo { SortColumn = &quot;CreatedDate&quot;, SortDirection = SortDirection.Descending } };
+                }
+                retVal.TotalCount = query.Count();
+
+                query = query.OrderBySortInfos(sortInfos);
+
+                retVal.TotalCount = query.Count();
+
+                var customerReviewIds = query.Skip(criteria.Skip)
+                                 .Take(criteria.Take)
+                                 .Select(x =&gt; x.Id)
+                                 .ToList();
+
+                //TODO rewrite for a 1 query
+                var customerReviews = _customerReviewService.GetReviewByIds(customerReviewIds.ToArray())
+                                                       .OrderBy(x =&gt; customerReviewIds.IndexOf(x.Id)).ToList();
+
+                foreach (var item in customerReviews)
+                {
+                    item.UserReviewRate = repository.CustomerReviewVotes
+                                                    .Where(x =&gt; criteria.AuthorId.Equals(x.AuthorId) &amp;&amp; item.Id.Equals(x.CustomerReviewId))
+                                                    .Select(x =&gt; x.ReviewRate)
+                                                    .FirstOrDefault();
+                }
+
+                retVal.Results = customerReviews;
+
+                return retVal;
+            }
+
+
+
+        }
+
+        public GenericSearchResult&lt;CustomerReviewVote&gt; SearchCustomerReviewVotes(CustomerReviewVoteSearchCriteria criteria)
+        {
+            if (criteria == null)
+            {
+                throw new ArgumentNullException($&quot;{nameof(criteria)} must be set&quot;);
+            }
+
+            var retVal = new GenericSearchResult&lt;CustomerReviewVote&gt;();
+
+            using (var repository = _repositoryFactory())
+            {
+                var query = repository.CustomerReviewVotes;
+
+                if (!criteria.CustomerReviewIds.IsNullOrEmpty())
+                {
+                    query = query.Where(x =&gt; criteria.CustomerReviewIds.Contains(x.CustomerReviewId));
+                }
+
+                var sortInfos = criteria.SortInfos;
+                if (sortInfos.IsNullOrEmpty())
+                {
+                    sortInfos = new[] { new SortInfo { SortColumn = &quot;CreatedDate&quot;, SortDirection = SortDirection.Descending } };
+                }
+                query = query.OrderBySortInfos(sortInfos);
+
+                retVal.TotalCount = query.Count();
+
+                var customerReviewVoteIds = query.Skip(criteria.Skip)
+                                 .Take(criteria.Take)
+                                 .Select(x =&gt; x.Id)
+                                 .ToList();
+
+                retVal.Results = _customerReviewService.GetVoteByIds(customerReviewVoteIds.ToArray())
+                                                       .OrderBy(x =&gt; customerReviewVoteIds.IndexOf(x.Id)).ToList();
+
+                return retVal;
+            }
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,9,17,140,1],[18,9,18,10,1],[19,13,19,52,1],[20,13,20,60,1],[21,9,21,10,1],[24,9,24,10,1],[25,13,25,34,1],[26,13,26,14,1],[27,17,27,84,1],[30,13,30,68,1],[32,20,32,57,1],[33,13,33,14,1],[34,17,34,56,1],[36,17,36,58,1],[37,17,37,18,1],[38,21,38,89,1],[39,17,39,18,1],[41,17,41,48,1],[42,17,42,18,0],[43,21,43,79,0],[44,17,44,18,0],[46,17,46,60,1],[47,17,47,18,0],[48,21,48,89,0],[49,17,49,18,0],[51,17,51,52,1],[52,17,52,47,1],[53,17,53,18,1],[54,21,54,129,1],[55,17,55,18,1],[56,17,56,51,1],[58,17,58,59,1],[60,17,60,51,1],[62,17,65,44,1],[68,17,69,112,1],[69,70,69,101,1],[71,17,71,24,1],[71,26,71,34,1],[71,35,71,37,1],[71,38,71,53,1],[72,17,72,18,1],[73,21,76,71,1],[77,17,77,18,1],[79,17,79,50,1],[81,17,81,31,1],[86,9,86,10,1],[89,9,89,10,1],[90,13,90,34,1],[91,13,91,14,1],[92,17,92,84,1],[95,13,95,72,1],[97,20,97,57,1],[98,13,98,14,1],[99,17,99,60,1],[101,17,101,65,1],[102,17,102,18,1],[103,21,103,103,1],[104,17,104,18,1],[106,17,106,52,1],[107,17,107,47,1],[108,17,108,18,1],[109,21,109,129,1],[110,17,110,18,1],[111,17,111,59,1],[113,17,113,51,1],[115,17,118,44,1],[120,17,121,116,1],[121,70,121,105,1],[123,17,123,31,1],[125,9,125,10,1]]);
+    </script>
+  </body>
+</html>

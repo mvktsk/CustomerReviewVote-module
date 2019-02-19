@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\routing\storefrontrouteattribute.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.AspNetCore.Mvc.Routing;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace VirtoCommerce.Storefront.Infrastructure
+{
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+    public class StorefrontRouteAttribute : Attribute, IRouteTemplateProvider
+    {
+        private const string _regexp = &quot;{store}/{language:regex([[a-zA-Z]]{{2}}-[[a-zA-Z]]{{2}})}/&quot;;
+        public StorefrontRouteAttribute(string template)
+        {
+            Template = _regexp + template;
+        }
+
+        #region IRouteTemplateProvider members
+        public string Template
+        {
+            get;
+            private set;
+        }
+
+        public int? Order =&gt; 0;
+
+        public string Name =&gt; null;
+        #endregion
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,57,0],[14,9,14,10,0],[15,13,15,43,0],[16,9,16,10,0],[21,13,21,17,0],[22,13,22,25,0],[25,30,25,31,0],[27,31,27,35,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\caching\cancellablecacheregion.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.Extensions.Primitives;
+using System.Threading;
+
+namespace VirtoCommerce.Storefront.Model.Common.Caching
+{
+    public class CancellableCacheRegion&lt;T&gt;
+    {
+        private static CancellationTokenSource _regionTokenSource;
+        private static CancellationChangeToken _regionChangeToken;
+        private static object _lock = new object();
+       
+        public static IChangeToken CreateChangeToken()
+        {
+            if(_regionChangeToken == null)
+            {
+                lock (_lock)
+                {
+                    if (_regionChangeToken == null)
+                    {
+                        _regionTokenSource = new CancellationTokenSource();
+                        _regionChangeToken = new CancellationChangeToken(_regionTokenSource.Token);
+                    }
+                }
+            }
+            return _regionChangeToken;
+        }
+
+        public static void ExpireRegion()
+        {
+            lock (_lock)
+            {
+                if (_regionTokenSource != null)
+                {
+                    _regionTokenSource.Cancel();
+                    _regionTokenSource.Dispose();
+                    //Need to reset cached tokens because they are already changed
+                    _regionTokenSource = null;
+                    _regionChangeToken = null;
+                }
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,9,10,52,0],[13,9,13,10,0],[14,13,14,43,0],[15,13,15,14,0],[16,17,16,29,0],[17,17,17,18,0],[18,21,18,52,0],[19,21,19,22,0],[20,25,20,76,0],[21,25,21,100,0],[22,21,22,22,0],[23,17,23,18,0],[24,13,24,14,0],[25,13,25,39,0],[26,9,26,10,0],[29,9,29,10,0],[30,13,30,25,0],[31,13,31,14,0],[32,17,32,48,0],[33,17,33,18,0],[34,21,34,49,0],[35,21,35,50,0],[37,21,37,47,0],[38,21,38,47,0],[39,17,39,18,0],[40,13,40,14,0],[41,9,41,10,0]]);
+    </script>
+  </body>
+</html>

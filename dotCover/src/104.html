@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\converters\productpropertyconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using VirtoCommerce.LiquidThemeEngine.Objects;
+using StorefrontModel = VirtoCommerce.Storefront.Model;
+
+namespace VirtoCommerce.LiquidThemeEngine.Converters
+{
+    public static class ProductPropertyConverter
+    {
+        public static ProductProperty ToShopifyModel(this StorefrontModel.Catalog.CatalogProperty property)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidProductProperty(property);
+        }
+    }
+
+    public partial class ShopifyModelConverter
+    {
+        public virtual ProductProperty ToLiquidProductProperty(StorefrontModel.Catalog.CatalogProperty property)
+        {
+            var result = new ProductProperty();
+            result.ValueType = property.ValueType;
+            result.Value = property.Value;
+            result.Name = property.Name;
+            result.DisplayName = property.DisplayName ?? property.Name;
+            return result;
+        }
+    }
+
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,9,9,10,0],[10,13,10,57,0],[11,13,11,64,0],[12,9,12,10,0],[18,9,18,10,0],[19,13,19,48,0],[20,13,20,51,0],[21,13,21,43,0],[22,13,22,41,0],[23,13,23,72,0],[24,13,24,27,0],[25,9,25,10,0]]);
+    </script>
+  </body>
+</html>

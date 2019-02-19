@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\extensions\uriextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Linq;
+using System.Web;
+
+namespace VirtoCommerce.LiquidThemeEngine.Extensions
+{
+    public static class UriExtensions
+    {
+        /// &lt;summary&gt;
+        /// Sets the given parameter value in the query string.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;url&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;name&quot;&gt;Name of the parameter to set.&lt;/param&gt;
+        /// &lt;param name=&quot;value&quot;&gt;Value for the parameter to set. Pass null to remove the parameter with given name.&lt;/param&gt;
+        /// &lt;returns&gt;Url with given parameter value.&lt;/returns&gt;
+        public static Uri SetQueryParameter(this Uri url, string name, string value)
+        {
+            var qs = HttpUtility.ParseQueryString(url.Query);
+
+            if (value != null)
+            {
+                qs[name] = value;
+            }
+            else
+            {
+                qs.Remove(name);
+            }
+
+            var result = new UriBuilder(url)
+            {
+                Query = string.Join(&quot;&amp;&quot;, qs.AllKeys.Select(key =&gt; string.Join(&quot;=&quot;, HttpUtility.UrlEncode(key), HttpUtility.UrlEncode(qs[key]))))
+            };
+
+            return result.Uri;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,9,17,10,0],[18,13,18,62,0],[20,13,20,31,0],[21,13,21,14,0],[22,17,22,34,0],[23,13,23,14,0],[25,13,25,14,0],[26,17,26,33,0],[27,13,27,14,0],[29,13,32,15,0],[31,67,31,143,0],[34,13,34,31,0],[35,9,35,10,0]]);
+    </script>
+  </body>
+</html>

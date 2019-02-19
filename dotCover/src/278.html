@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\catalog\specifications\productisavailablespecification.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using VirtoCommerce.Storefront.Model.Common.Specifications;
+
+namespace VirtoCommerce.Storefront.Model.Catalog
+{
+    public class ProductIsAvailableSpecification : ISpecification&lt;long&gt;
+    {
+        private readonly Product _product;
+        public ProductIsAvailableSpecification(Product product)
+        {
+            _product = product;
+        }
+
+        public virtual bool IsSatisfiedBy(long requestedQuantity)
+        {
+            var result = new ProductIsBuyableSpecification().IsSatisfiedBy(_product);
+
+            if (result &amp;&amp; _product.TrackInventory &amp;&amp; _product.Inventory != null)
+            {
+                result = _product.Inventory.AllowPreorder == true ||
+                              _product.Inventory.AllowBackorder == true ||
+                              _product.AvailableQuantity &gt;= requestedQuantity;
+            }
+
+            return result;
+        }
+        
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,9,8,64,0],[9,9,9,10,0],[10,13,10,32,0],[11,9,11,10,0],[14,9,14,10,0],[15,13,15,86,0],[17,13,17,81,0],[18,13,18,14,0],[19,17,21,79,0],[22,13,22,14,0],[24,13,24,27,0],[25,9,25,10,0]]);
+    </script>
+  </body>
+</html>

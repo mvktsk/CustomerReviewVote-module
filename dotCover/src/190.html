@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\quote\events\quoterequestupdatedevent.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using VirtoCommerce.Storefront.Model.Common.Events;
+
+namespace VirtoCommerce.Storefront.Model.Quote.Events
+{
+    public class QuoteRequestUpdatedEvent : DomainEvent
+    {
+        public QuoteRequestUpdatedEvent(QuoteRequest quoteRequest)
+        {
+            QuoteRequest = quoteRequest;
+        }
+
+        public QuoteRequest QuoteRequest { get; set; }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[7,9,7,67,0],[8,9,8,10,0],[9,13,9,41,0],[10,9,10,10,0],[12,44,12,48,0],[12,49,12,53,0]]);
+    </script>
+  </body>
+</html>

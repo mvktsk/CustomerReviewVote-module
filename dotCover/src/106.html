@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\converters\quoterequestconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using VirtoCommerce.LiquidThemeEngine.Objects;
+
+namespace VirtoCommerce.LiquidThemeEngine.Converters
+{
+    public static class QuoteRequestConverter
+    {
+        public static QuoteRequest ToShopifyModel(this Storefront.Model.Quote.QuoteRequest quoteRequest)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidQuoteRequest(quoteRequest);
+        }
+
+        public static QuoteItem ToShopifyModel(this Storefront.Model.Quote.QuoteItem quoteItem)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidQuoteItem(quoteItem);
+        }
+
+        public static QuoteRequestTotals ToShopifyModel(this Storefront.Model.Quote.QuoteRequestTotals totals)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidRequestTotal(totals);
+        }
+    }
+
+    public partial class ShopifyModelConverter
+    {
+        public virtual QuoteRequest ToLiquidQuoteRequest(Storefront.Model.Quote.QuoteRequest quoteRequest)
+        {
+            var result = new QuoteRequest();
+
+            result.CancelledDate = quoteRequest.CancelledDate;
+            result.CancelReason = quoteRequest.CancelReason;
+            result.ChannelId = quoteRequest.ChannelId;
+            result.Comment = quoteRequest.Comment;
+            result.CreatedBy = quoteRequest.CreatedBy;
+            result.CreatedDate = quoteRequest.CreatedDate;
+            result.CustomerId = quoteRequest.CustomerId;
+            result.CustomerName = quoteRequest.CustomerName;
+            result.EmployeeId = quoteRequest.EmployeeId;
+            result.EmployeeName = quoteRequest.EmployeeName;
+            result.EnableNotification = quoteRequest.EnableNotification;
+            result.ExpirationDate = quoteRequest.ExpirationDate;
+            result.Id = quoteRequest.Id;
+            result.IsAnonymous = quoteRequest.IsAnonymous;
+            result.IsCancelled = quoteRequest.IsCancelled;
+            result.IsLocked = quoteRequest.IsLocked;
+            result.ModifiedBy = quoteRequest.ModifiedBy;
+            result.ModifiedDate = quoteRequest.ModifiedDate;
+            result.Number = quoteRequest.Number;
+            result.ObjectType = quoteRequest.ObjectType;
+            result.OrganizationId = quoteRequest.OrganizationId;
+            result.OrganizationName = quoteRequest.OrganizationName;
+            result.ReminderDate = quoteRequest.ReminderDate;
+            result.Status = quoteRequest.Status;
+            result.StoreId = quoteRequest.StoreId;
+            
+            result.Addresses = new List&lt;Address&gt;();
+            foreach (var address in quoteRequest.Addresses)
+            {
+                result.Addresses.Add(ToLiquidAddress(address));
+            }
+
+            result.Attachments = new List&lt;Attachment&gt;();
+            foreach (var attachment in quoteRequest.Attachments)
+            {
+                result.Attachments.Add(ToLiquidAttachment(attachment));
+            }
+
+            if (quoteRequest.Coupon != null)
+            {
+                result.Coupon = quoteRequest.Coupon.Code;
+            }
+
+            result.Currency = ToLiquidCurrency(quoteRequest.Currency);
+
+            result.Items = new List&lt;QuoteItem&gt;();
+            foreach (var quoteItem in quoteRequest.Items)
+            {
+                result.Items.Add(ToLiquidQuoteItem(quoteItem));
+            }
+
+            result.Language = ToLiquidLanguage(quoteRequest.Language);
+            result.ManualRelDiscountAmount = quoteRequest.ManualRelDiscountAmount.Amount;
+            result.ManualShippingTotal = quoteRequest.ManualShippingTotal.Amount;
+            result.ManualSubTotal = quoteRequest.ManualSubTotal.Amount;
+
+            if (quoteRequest.ShipmentMethod != null)
+            {
+                result.ShipmentMethod = ToLiquidShippingMethod(quoteRequest.ShipmentMethod);
+            }
+
+            result.TaxDetails = new List&lt;TaxLine&gt;();
+            foreach (var taxDetail in quoteRequest.TaxDetails)
+            {
+                result.TaxDetails.Add(ToLiquidTaxLine(taxDetail));
+            }
+
+            if (quoteRequest.Totals != null)
+            {
+                result.Totals = ToLiquidRequestTotal(quoteRequest.Totals);
+            }
+
+            return result;
+        }
+
+        public virtual QuoteItem ToLiquidQuoteItem(Storefront.Model.Quote.QuoteItem quoteItem)
+        {
+            var result = new QuoteItem();
+
+            result.CatalogId = quoteItem.CatalogId;
+            result.CategoryId = quoteItem.CategoryId;
+            result.Comment = quoteItem.Comment;
+            result.CreatedBy = quoteItem.CreatedBy;
+            result.CreatedDate = quoteItem.CreatedDate;
+            result.Id = quoteItem.Id;
+            result.ImageUrl = quoteItem.ImageUrl;
+            result.ModifiedBy = quoteItem.ModifiedBy;
+            result.ModifiedDate = quoteItem.ModifiedDate;
+            result.Name = quoteItem.Name;
+            result.ProductId = quoteItem.ProductId;
+            result.Sku = quoteItem.Sku;
+            result.TaxType = quoteItem.TaxType;            
+
+            result.Currency = ToLiquidCurrency(quoteItem.Currency);
+            result.ListPrice = quoteItem.ListPrice.Amount * 100;
+
+            result.ProposalPrices = new List&lt;TierPrice&gt;();
+            foreach (var proposalPrice in quoteItem.ProposalPrices)
+            {
+                result.ProposalPrices.Add(ToLiquidTierPrice(proposalPrice));
+            }
+
+            result.SalePrice = quoteItem.SalePrice.Amount * 100;
+
+            if (quoteItem.SelectedTierPrice != null)
+            {
+                result.SelectedTierPrice = ToLiquidTierPrice(quoteItem.SelectedTierPrice);
+            }
+
+            return result;
+        }
+
+        public virtual QuoteRequestTotals ToLiquidRequestTotal(Storefront.Model.Quote.QuoteRequestTotals requestTotal)
+        {
+            var result = new QuoteRequestTotals();
+
+            result.AdjustmentQuoteExlTax = requestTotal.AdjustmentQuoteExlTax.Amount * 100;
+            result.DiscountTotal = requestTotal.DiscountTotal.Amount * 100;
+            result.GrandTotalExlTax = requestTotal.GrandTotalExlTax.Amount * 100;
+            result.GrandTotalInclTax = requestTotal.GrandTotalInclTax.Amount * 100;
+            result.OriginalSubTotalExlTax = requestTotal.OriginalSubTotalExlTax.Amount * 100;
+            result.ShippingTotal = requestTotal.ShippingTotal.Amount * 100;
+            result.SubTotalExlTax = requestTotal.SubTotalExlTax.Amount * 100;
+            result.TaxTotal = requestTotal.TaxTotal.Amount * 100;
+
+            return result;
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,9,9,10,0],[10,13,10,57,0],[11,13,11,65,0],[12,9,12,10,0],[15,9,15,10,0],[16,13,16,57,0],[17,13,17,59,0],[18,9,18,10,0],[21,9,21,10,0],[22,13,22,57,0],[23,13,23,59,0],[24,9,24,10,0],[30,9,30,10,0],[31,13,31,45,0],[33,13,33,63,0],[34,13,34,61,0],[35,13,35,55,0],[36,13,36,51,0],[37,13,37,55,0],[38,13,38,59,0],[39,13,39,57,0],[40,13,40,61,0],[41,13,41,57,0],[42,13,42,61,0],[43,13,43,73,0],[44,13,44,65,0],[45,13,45,41,0],[46,13,46,59,0],[47,13,47,59,0],[48,13,48,53,0],[49,13,49,57,0],[50,13,50,61,0],[51,13,51,49,0],[52,13,52,57,0],[53,13,53,65,0],[54,13,54,69,0],[55,13,55,61,0],[56,13,56,49,0],[57,13,57,51,0],[59,13,59,52,0],[60,13,60,20,0],[60,22,60,33,0],[60,34,60,36,0],[60,37,60,59,0],[61,13,61,14,0],[62,17,62,64,0],[63,13,63,14,0],[65,13,65,57,0],[66,13,66,20,0],[66,22,66,36,0],[66,37,66,39,0],[66,40,66,64,0],[67,13,67,14,0],[68,17,68,72,0],[69,13,69,14,0],[71,13,71,45,0],[72,13,72,14,0],[73,17,73,58,0],[74,13,74,14,0],[76,13,76,71,0],[78,13,78,50,0],[79,13,79,20,0],[79,22,79,35,0],[79,36,79,38,0],[79,39,79,57,0],[80,13,80,14,0],[81,17,81,64,0],[82,13,82,14,0],[84,13,84,71,0],[85,13,85,90,0],[86,13,86,82,0],[87,13,87,72,0],[89,13,89,53,0],[90,13,90,14,0],[91,17,91,93,0],[92,13,92,14,0],[94,13,94,53,0],[95,13,95,20,0],[95,22,95,35,0],[95,36,95,38,0],[95,39,95,62,0],[96,13,96,14,0],[97,17,97,67,0],[98,13,98,14,0],[100,13,100,45,0],[101,13,101,14,0],[102,17,102,75,0],[103,13,103,14,0],[105,13,105,27,0],[106,9,106,10,0],[109,9,109,10,0],[110,13,110,42,0],[112,13,112,52,0],[113,13,113,54,0],[114,13,114,48,0],[115,13,115,52,0],[116,13,116,56,0],[117,13,117,38,0],[118,13,118,50,0],[119,13,119,54,0],[120,13,120,58,0],[121,13,121,42,0],[122,13,122,52,0],[123,13,123,40,0],[124,13,124,48,0],[126,13,126,68,0],[127,13,127,65,0],[129,13,129,59,0],[130,13,130,20,0],[130,22,130,39,0],[130,40,130,42,0],[130,43,130,67,0],[131,13,131,14,0],[132,17,132,77,0],[133,13,133,14,0],[135,13,135,65,0],[137,13,137,53,0],[138,13,138,14,0],[139,17,139,91,0],[140,13,140,14,0],[142,13,142,27,0],[143,9,143,10,0],[146,9,146,10,0],[147,13,147,51,0],[149,13,149,92,0],[150,13,150,76,0],[151,13,151,82,0],[152,13,152,84,0],[153,13,153,94,0],[154,13,154,76,0],[155,13,155,78,0],[156,13,156,66,0],[158,13,158,27,0],[159,9,159,10,0]]);
+    </script>
+  </body>
+</html>

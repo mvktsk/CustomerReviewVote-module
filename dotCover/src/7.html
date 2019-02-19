@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\extensions\stringextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+
+namespace DotLiquid.ViewEngine.Extensions
+{
+    public static class StringExtensions
+    {
+        public static string TrimQuotes(this string input)
+        {
+            return input.Trim(&#39;\&#39;&#39;, &#39;\&quot;&#39;);
+        }
+
+        public static CultureInfo TryGetCultureInfo(this string languageCode)
+        {
+            try
+            {
+                return !string.IsNullOrEmpty(languageCode) ? CultureInfo.CreateSpecificCulture(languageCode) : null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,10,0],[13,13,13,43,0],[14,9,14,10,0],[17,9,17,10,0],[19,13,19,14,0],[20,17,20,117,0],[22,13,22,18,0],[23,13,23,14,0],[24,17,24,29,0],[26,9,26,10,0]]);
+    </script>
+  </body>
+</html>

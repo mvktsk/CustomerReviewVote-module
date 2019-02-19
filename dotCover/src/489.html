@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\monitoringcontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Controllers
+{
+    public class MonitoringController : StorefrontControllerBase
+    {
+        public MonitoringController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder)
+            : base(workContextAccessor, urlBuilder)
+        {
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult ApplicationTest()
+        {
+            return View(&quot;application-test&quot;, WorkContext);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,15,11,52,0],[12,9,12,10,0],[13,9,13,10,0],[18,9,18,10,0],[19,13,19,58,0],[20,9,20,10,0]]);
+    </script>
+  </body>
+</html>

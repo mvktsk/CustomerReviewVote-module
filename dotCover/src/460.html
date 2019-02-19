@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\marketing\hrupromotionevaluator.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
+using VirtoCommerce.Storefront.AutoRestClients.HruMarketingModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.HruMarketingModuleApi.Models;
+using VirtoCommerce.Storefront.Extensions;
+using VirtoCommerce.Storefront.Model.Caching;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Common.Caching;
+using VirtoCommerce.Storefront.Model.Marketing;
+using VirtoCommerce.Storefront.Model.Marketing.Services;
+using VirtoCommerce.Storefront.Model.Order;
+using VirtoCommerce.Storefront.Model.Order.Services;
+
+namespace VirtoCommerce.Storefront.Domain.Marketing
+{
+    public class HruPromotionEvaluator : IPromotionEvaluator
+    {
+        private readonly IHruPromotions _promotionApi;
+        private readonly IStorefrontMemoryCache _memoryCache;
+        private readonly ICustomerOrderService _orderService;
+
+        public HruPromotionEvaluator(IHruPromotions promotionApi, IStorefrontMemoryCache memoryCache, ICustomerOrderService orderService)
+        {
+            _promotionApi = promotionApi;
+            _memoryCache = memoryCache;
+            _orderService = orderService;
+        }
+
+        public async Task EvaluateDiscountsAsync(PromotionEvaluationContext context, IEnumerable&lt;IDiscountable&gt; owners)
+        {
+            var cacheKey = CacheKey.With(GetType(), &quot;EvaluateDiscountsAsync&quot;, context.GetCacheKey());
+            var rewardsResult = await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =&gt;
+            {
+                cacheEntry.AddExpirationToken(MarketingCacheRegion.CreateChangeToken());
+                cacheEntry.SetAbsoluteExpiration(TimeSpan.FromMinutes(1));
+                //TODO: Replace absolute cache expiration to based on change tokens with polling API for changes as it done in Subscriptions.PollingApiSubscriptionsChangeToken 
+                var orderSearchCriteria = new OrderSearchCriteria
+                {
+                    //Minimize the result object graph for better performance
+                    ResponseGroup = CustomerOrderResponseGroup.Default,
+                    CustomerId = context.User.Id,
+                    OutletIds = new[] { context.User.Contact?.Outlet?.Id },
+                    Statuses = new[]
+                            {
+                                OrderStatus.Confirmed,
+                                OrderStatus.HruOrderAccepted,
+                                OrderStatus.HruOrderPartial,
+                                OrderStatus.HruOrderGetted,
+                                OrderStatus.HruOrderShipped
+                            },
+                    Sort = &quot;CreatedDate:desc&quot;,
+                    //TODO: Take order numbers from configuration/options
+                    PageSize = 5 // now our promo used max 5 orders by month, but in future it should be configurable.
+                };
+                var lastOrders = await _orderService.SearchOrdersAsync(orderSearchCriteria);
+                var orderCreatedDates = lastOrders.Select(x =&gt; x.CreatedDate).ToList() ?? new List&lt;DateTime?&gt;();
+                var contextDto = context.ToHruPromotionEvaluationContextDto(orderCreatedDates);
+                var evaluationResult = await _promotionApi.EvaluatePromotionsAsync(contextDto);
+
+                return evaluationResult;
+            });
+
+            ApplyRewards(rewardsResult, owners);
+        }
+
+        protected virtual void ApplyRewards(HruEvaluatePromotionResult rewardsResult, IEnumerable&lt;IDiscountable&gt; owners)
+        {
+            if (rewardsResult?.Rewards != null)
+            {
+                var promotions = rewardsResult.Promotions.Select(x =&gt; x.ToPromotion()).ToList();
+                var rewardsMap = owners.Select(x =&gt; x.Currency).Distinct().ToDictionary(c =&gt; c, c =&gt; rewardsResult.Rewards.Select(r =&gt; ToHruPromotionReward(r, c, promotions)).ToArray());
+
+                foreach (var owner in owners)
+                {
+                    owner.ApplyRewards(rewardsMap[owner.Currency]);
+                }
+            }
+        }
+
+        private PromotionReward ToHruPromotionReward(HruPromotionReward rewardDto, Currency currency, List&lt;Promotion&gt; promotions)
+        {
+            var promotionReward = rewardDto.ToPromotionReward(currency);
+            promotionReward.Promotion = promotions.FirstOrDefault(x =&gt; x.Id == promotionReward.PromotionId);
+            return promotionReward;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[25,9,25,138,0],[26,9,26,10,0],[27,13,27,42,0],[28,13,28,40,0],[29,13,29,42,0],[30,9,30,10,0],[33,9,33,10,0],[34,13,34,102,0],[35,13,64,16,0],[36,13,36,14,0],[37,17,37,89,0],[38,17,38,75,0],[40,17,57,19,0],[58,17,58,93,0],[59,17,59,113,0],[59,64,59,77,0],[60,17,60,96,0],[61,17,61,96,0],[63,17,63,41,0],[64,13,64,14,0],[66,13,66,49,0],[67,9,67,10,0],[70,9,70,10,0],[71,13,71,48,0],[72,13,72,14,0],[73,17,73,97,0],[73,71,73,86,0],[74,17,74,187,0],[74,53,74,63,0],[74,94,74,95,0],[74,102,74,185,0],[74,136,74,174,0],[76,17,76,24,0],[76,26,76,35,0],[76,36,76,38,0],[76,39,76,45,0],[77,17,77,18,0],[78,21,78,68,0],[79,17,79,18,0],[80,13,80,14,0],[81,9,81,10,0],[84,9,84,10,0],[85,13,85,73,0],[86,13,86,109,0],[86,72,86,107,0],[87,13,87,36,0],[88,9,88,10,0]]);
+    </script>
+  </body>
+</html>

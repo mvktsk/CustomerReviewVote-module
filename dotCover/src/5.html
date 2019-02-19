@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.tests\moqcalculatortests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using VirtoCommerce.Storefront.Domain.Order;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Cart;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using Xunit;
+
+namespace VirtoCommerce.Storefront.Tests
+{
+    [Trait(&quot;Category&quot;, &quot;Unit&quot;)]
+    public class MoqCalculatorTests
+    {
+        private readonly Language _language;
+        private readonly Currency _currency;
+        private const string CorrectSku = &quot;123456&quot;;
+
+        public MoqCalculatorTests()
+        {
+            _language = new Language(&quot;ru-RU&quot;);
+            _currency = new Currency(_language, &quot;ru-RU&quot;);
+        }
+
+        [Fact]
+        public void OnlyFullPackagesTest()
+        {
+            // Arrange
+            var calculator = new MinimumOrderQuantityCalculator(5);
+
+            
+            var testData = new List&lt;LineItem&gt;
+            {
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 24, Product = new Product {PackageSize = 24, MinOrderQuantity = 0}},
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 24, Product = new Product {PackageSize = 24, MinOrderQuantity = 0}},
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 9, Product = new Product {PackageSize = 9, MinOrderQuantity = 0}},
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 24, Product = new Product {PackageSize = 24, MinOrderQuantity = 0}},
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 9, Product = new Product {PackageSize = 9, MinOrderQuantity = 0}}
+            };
+
+            // Act
+            var result = calculator.CalcMinimumOrderQuantity(testData);
+
+            // Assert
+            Assert.Equal(5, result.minQty);
+            Assert.Equal(5d, result.totalQty);
+        }
+
+        [Fact]
+        public void OnlyPartsOfPackagesTest()
+        {
+            // Arrange
+            var calculator = new MinimumOrderQuantityCalculator(5);
+            
+            var testData = new List&lt;LineItem&gt;
+            {
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 12, Product = new Product {PackageSize = 24, MinOrderQuantity = 0}},
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 12, Product = new Product {PackageSize = 24, MinOrderQuantity = 0}},
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 6, Product = new Product {PackageSize = 12, MinOrderQuantity = 0}},
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 12, Product = new Product {PackageSize = 24, MinOrderQuantity = 0}},
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 6, Product = new Product {PackageSize = 12, MinOrderQuantity = 0}},
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 12, Product = new Product {PackageSize = 24, MinOrderQuantity = 0}},
+            };
+
+            // Act
+            var result = calculator.CalcMinimumOrderQuantity(testData);
+
+            // Assert
+            Assert.Equal(5, result.minQty);
+            Assert.Equal(3d, result.totalQty);
+        }
+
+        [Fact]
+        public void FixUserProblemTest()
+        {
+            // Arrange
+            var calculator = new MinimumOrderQuantityCalculator(5);
+            
+            var testData = new List&lt;LineItem&gt;
+            {
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 6, Product = new Product {PackageSize = 24, MinOrderQuantity = 0}},
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 12, Product = new Product {PackageSize = 24, MinOrderQuantity = 0}},
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 18, Product = new Product {PackageSize = 9, MinOrderQuantity = 0}},
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 24, Product = new Product {PackageSize = 24, MinOrderQuantity = 0}},
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 9, Product = new Product {PackageSize = 9, MinOrderQuantity = 0}},
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 6, Product = new Product {PackageSize = 24, MinOrderQuantity = 0}},
+            };
+
+            // Act
+            var result = calculator.CalcMinimumOrderQuantity(testData);
+
+            // Assert
+            Assert.Equal(5, result.minQty);
+            Assert.Equal(5d, result.totalQty);
+        }
+
+        [Fact]
+        public void DoNotCountNonStandartSkuTest()
+        {
+            // Arrange
+            var calculator = new MinimumOrderQuantityCalculator(5);
+            var testData = new List&lt;LineItem&gt;
+            {
+                new LineItem(_currency, _language)
+                    {Sku = &quot;NON-STANDARD-SKU&quot;, Quantity = 1, Product = new Product {PackageSize = 1, MinOrderQuantity = 0}},
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 12, Product = new Product {PackageSize = 24, MinOrderQuantity = 0}},
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 12, Product = new Product {PackageSize = 12, MinOrderQuantity = 0}},
+            };
+
+            // Act
+            var result = calculator.CalcMinimumOrderQuantity(testData);
+
+            // Assert
+            Assert.Equal(5, result.minQty);
+            Assert.Equal(1.5d, result.totalQty);
+        }
+
+        [Fact]
+        public void UseMinimalQuantityOnProductTest()
+        {
+            // Arrange
+            var expectedMoq = 10;
+
+            var calculator = new MinimumOrderQuantityCalculator(50);
+            var testData = new List&lt;LineItem&gt;
+            {
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 12, Product = new Product {PackageSize = 24, MinOrderQuantity = expectedMoq}},
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 12, Product = new Product {PackageSize = 12, MinOrderQuantity = 0}},
+            };
+
+            // Act
+            var result = calculator.CalcMinimumOrderQuantity(testData);
+
+            // Assert
+            Assert.Equal(expectedMoq, result.minQty);
+            Assert.Equal(1.5d, result.totalQty);
+        }
+
+        [Fact]
+        public void UseMinimalQuantityFromProductsTest()
+        {
+            // Arrange
+            var expectedMoq = 3;
+
+            var calculator = new MinimumOrderQuantityCalculator(50);
+            var testData = new List&lt;LineItem&gt;
+            {
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 12, Product = new Product {PackageSize = 24, MinOrderQuantity = 10}},
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 12, Product = new Product {PackageSize = 12, MinOrderQuantity = expectedMoq}},
+            };
+
+            // Act
+            var result = calculator.CalcMinimumOrderQuantity(testData);
+
+            // Assert
+            Assert.Equal(expectedMoq, result.minQty);
+            Assert.Equal(1.5d, result.totalQty);
+        }
+
+        [Fact]
+        public void UseMinimalQuantityFromStoreTest()
+        {
+            // Arrange
+            var expectedMoq = 2;
+
+            var calculator = new MinimumOrderQuantityCalculator(expectedMoq);
+            var testData = new List&lt;LineItem&gt;
+            {
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 12, Product = new Product {PackageSize = 24, MinOrderQuantity = 5}},
+                new LineItem(_currency, _language)
+                    {Sku = CorrectSku, Quantity = 12, Product = new Product {PackageSize = 12, MinOrderQuantity = 3}},
+            };
+
+            // Act
+            var result = calculator.CalcMinimumOrderQuantity(testData);
+
+            // Assert
+            Assert.Equal(expectedMoq, result.minQty);
+            Assert.Equal(1.5d, result.totalQty);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,9,18,36,1],[19,9,19,10,1],[20,13,20,47,1],[21,13,21,58,1],[22,9,22,10,1],[26,9,26,10,1],[28,13,28,68,1],[31,13,43,15,1],[46,13,46,72,1],[49,13,49,44,1],[50,13,50,47,1],[51,9,51,10,1],[55,9,55,10,1],[57,13,57,68,1],[59,13,73,15,1],[76,13,76,72,1],[79,13,79,44,1],[80,13,80,47,1],[81,9,81,10,1],[85,9,85,10,1],[87,13,87,68,1],[89,13,103,15,1],[106,13,106,72,1],[109,13,109,44,1],[110,13,110,47,1],[111,9,111,10,1],[115,9,115,10,1],[117,13,117,68,1],[118,13,126,15,1],[129,13,129,72,1],[132,13,132,44,1],[133,13,133,49,1],[134,9,134,10,1],[138,9,138,10,1],[140,13,140,34,1],[142,13,142,69,1],[143,13,149,15,1],[152,13,152,72,1],[155,13,155,54,1],[156,13,156,49,1],[157,9,157,10,1],[161,9,161,10,1],[163,13,163,33,1],[165,13,165,69,1],[166,13,172,15,1],[175,13,175,72,1],[178,13,178,54,1],[179,13,179,49,1],[180,9,180,10,1],[184,9,184,10,1],[186,13,186,33,1],[188,13,188,78,1],[189,13,195,15,1],[198,13,198,72,1],[201,13,201,54,1],[202,13,202,49,1],[203,9,203,10,1]]);
+    </script>
+  </body>
+</html>

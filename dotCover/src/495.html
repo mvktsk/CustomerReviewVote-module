@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\staticcontentcontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Xml;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.SyndicationFeed;
+using Microsoft.SyndicationFeed.Rss;
+using VirtoCommerce.Storefront.Domain.Security;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.StaticContent;
+
+namespace VirtoCommerce.Storefront.Controllers
+{
+    public class StaticContentController : StorefrontControllerBase
+    {
+        private readonly IAuthorizationService _authorizationService;
+
+        public StaticContentController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder, IAuthorizationService authorizationService)
+            : base(workContextAccessor, urlBuilder)
+        {
+            _authorizationService = authorizationService;
+        }
+
+        public async Task&lt;ActionResult&gt; GetContentPage()
+        {
+            //Because MVC does not allow to use abstract types for model binding we are getting this value from route data
+            var page = RouteData.Values.GetValueOrDefault(&quot;page&quot;) as ContentItem;
+
+            if (page == null)
+            {
+                return NotFound();
+            }
+
+            // Checking that only authorized users can read pages marked as Authorized
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, page, CanReadContentItemAuthorizeRequirement.PolicyName);
+            if (!authorizationResult.Succeeded)
+            {
+                return Challenge();
+            }
+
+            WorkContext.CurrentPageSeo = new SeoInfo
+            {
+                Language = page.Language,
+                MetaDescription = string.IsNullOrEmpty(page.Description) ? page.Title : page.Description,
+                Title = page.Title,
+                Slug = page.Url
+            };
+
+            if (page is BlogArticle blogArticle)
+            {
+                WorkContext.CurrentPageSeo.ImageUrl = blogArticle.ImageUrl;
+                WorkContext.CurrentPageSeo.MetaDescription = blogArticle.Excerpt ?? blogArticle.Title;
+
+                WorkContext.CurrentBlogArticle = blogArticle;
+                WorkContext.CurrentBlog = WorkContext.Blogs.SingleOrDefault(x =&gt; x.Name.EqualsInvariant(blogArticle.BlogName));
+                WorkContext.Layout = string.IsNullOrEmpty(blogArticle.Layout) ? WorkContext.CurrentBlog.Layout : blogArticle.Layout;
+                return View(&quot;article&quot;, WorkContext);
+            }
+
+            var contentPage = page as ContentPage;
+            SetCurrentPage(contentPage);
+
+            return View(contentPage.Template, WorkContext);
+        }
+
+        // GET: /pages/{page}
+        public async Task&lt;ActionResult&gt; GetContentPageByName(string page)
+        {
+            var contentPage = WorkContext.Pages
+                .OfType&lt;ContentPage&gt;()
+                .Where(x =&gt; string.Equals(x.Url, page, StringComparison.OrdinalIgnoreCase))
+                .FindWithLanguage(WorkContext.CurrentLanguage);
+
+
+            if (contentPage != null)
+            {
+                var authorizationResult = await _authorizationService.AuthorizeAsync(User, contentPage, &quot;CanReadContentItem&quot;);
+                if (!authorizationResult.Succeeded)
+                    return Challenge();
+
+                SetCurrentPage(contentPage);
+                return View(contentPage.Template, WorkContext);
+            }
+
+            return NotFound();
+        }
+
+        // GET: /blogs/{blog}, /blog, /blog/category/category, /blogs/{blog}/category/{category}, /blogs/{blog}/tag/{tag}, /blog/tag/{tag}
+        public async Task&lt;ActionResult&gt; GetBlog(string blog = null, string category = null, string tag = null)
+        {
+            var context = WorkContext;
+            context.CurrentBlog = WorkContext.Blogs.FirstOrDefault();
+            if (!string.IsNullOrEmpty(blog))
+            {
+                context.CurrentBlog = WorkContext.Blogs.FirstOrDefault(x =&gt; x.Name.EqualsInvariant(blog));
+            }
+            WorkContext.CurrentBlogSearchCritera.Category = category;
+            WorkContext.CurrentBlogSearchCritera.Tag = tag;
+
+            if (context.CurrentBlog != null)
+            {
+                var authorizationResult = await _authorizationService.AuthorizeAsync(User, context.CurrentBlog, &quot;CanReadContentItem&quot;);
+                if (!authorizationResult.Succeeded)
+                    return Challenge();
+
+                context.CurrentPageSeo = new SeoInfo
+                {
+                    Language = context.CurrentBlog.Language,
+                    MetaDescription = context.CurrentBlog.Title ?? context.CurrentBlog.Name,
+                    Title = context.CurrentBlog.Title ?? context.CurrentBlog.Name,
+                    Slug = context.RequestUrl.AbsolutePath
+                };
+                WorkContext.Layout = WorkContext.CurrentBlog.Layout;
+                return View(&quot;blog&quot;, WorkContext);
+            }
+            return NotFound();
+        }
+
+        [HttpPost]
+        public ActionResult Search(StaticContentSearchCriteria request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            WorkContext.CurrentStaticSearchCriteria = request;
+            WorkContext.Layout = request.Layout;
+
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                var contentItems = WorkContext.Pages.Where(i =&gt;
+                !string.IsNullOrEmpty(i.Content) &amp;&amp; i.Content.IndexOf(request.Keyword, StringComparison.OrdinalIgnoreCase) &gt;= 0 ||
+                !string.IsNullOrEmpty(i.Title) &amp;&amp; i.Title.IndexOf(request.Keyword, StringComparison.OrdinalIgnoreCase) &gt;= 0);
+
+                if (!string.IsNullOrEmpty(request.SearchIn))
+                {
+                    contentItems = contentItems.Where(i =&gt; !string.IsNullOrEmpty(i.StoragePath) &amp;&amp; i.StoragePath.StartsWith(request.SearchIn, StringComparison.OrdinalIgnoreCase));
+                }
+
+                WorkContext.StaticContentSearchResult = new MutablePagedList&lt;ContentItem&gt;(contentItems.Where(x =&gt; x.Language.IsInvariant || x.Language == WorkContext.CurrentLanguage));
+            }
+
+            return View(&quot;search&quot;, WorkContext);
+        }
+
+        /// &lt;summary&gt;
+        /// GET blogs/{blogname}/rss,  blogs/rss,  blogs/{blogname}/feed,  blogs/feed
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;blogName&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        [HttpGet]
+        public async Task&lt;ActionResult&gt; BlogRssFeed(string blogName)
+        {
+            var blog = WorkContext.Blogs.FirstOrDefault();
+            if (!string.IsNullOrEmpty(blogName))
+            {
+                WorkContext.CurrentBlog = WorkContext.Blogs.FirstOrDefault(x =&gt; x.Name.EqualsInvariant(blogName));
+            }
+
+            if (blog == null)
+            {
+                return NotFound();
+            }
+
+            var feedItems = new List&lt;SyndicationItem&gt;();
+            foreach (var article in blog.Articles.OrderByDescending(a =&gt; a.PublishedDate))
+            {
+                if (!string.IsNullOrEmpty(article.Url))
+                {
+                    var urlString = UriHelper.GetDisplayUrl(Request);
+                    var requestUri = new Uri(urlString);
+                    var baseUri = new Uri(requestUri.Scheme + Uri.SchemeDelimiter + requestUri.Host);
+                    var fullUrl = new Uri(baseUri, UrlBuilder.ToAppAbsolute(article.Url, WorkContext.CurrentStore, WorkContext.CurrentLanguage));
+                    var syndicationItem = new SyndicationItem()
+                    {
+                        Title = article.Title,
+                        Description = article.Excerpt,
+                        Published = article.PublishedDate.HasValue ? new DateTimeOffset(article.PublishedDate.Value) : new DateTimeOffset()
+                    };
+                    syndicationItem.AddLink(new SyndicationLink(fullUrl));
+                    feedItems.Add(syndicationItem);
+                }
+            }
+
+
+            var sw = new StringWriter();
+            using (var xmlWriter = XmlWriter.Create(sw, new XmlWriterSettings() { Async = true, Indent = true }))
+            {
+                var writer = new RssFeedWriter(xmlWriter);
+
+                await writer.WriteTitle(blog.Title);
+                await writer.WriteDescription(blog.Title);
+                await writer.Write(new SyndicationLink(new Uri(blog.Url, UriKind.Relative)));
+
+                foreach (var item in feedItems)
+                {
+                    await writer.Write(item);
+                }
+
+                xmlWriter.Flush();
+            }
+
+            return Content(sw.ToString(), &quot;text/xml&quot;);
+
+        }
+
+        private void SetCurrentPage(ContentPage contentPage)
+        {
+            WorkContext.Layout = contentPage.Layout;
+            WorkContext.CurrentPage = contentPage;
+            WorkContext.CurrentPageSeo = new SeoInfo
+            {
+                Language = contentPage.Language,
+                MetaDescription = string.IsNullOrEmpty(contentPage.Description) ? contentPage.Title : contentPage.Description,
+                Title = contentPage.Title,
+                Slug = contentPage.Permalink
+            };
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[24,15,24,52,0],[25,9,25,10,0],[26,13,26,58,0],[27,9,27,10,0],[30,9,30,10,0],[32,13,32,82,0],[34,13,34,30,0],[35,13,35,14,0],[36,17,36,35,0],[40,13,40,145,0],[41,13,41,48,0],[42,13,42,14,0],[43,17,43,36,0],[46,13,52,15,0],[54,13,54,49,0],[55,13,55,14,0],[56,17,56,76,0],[57,17,57,103,0],[59,17,59,62,0],[60,17,60,128,0],[60,82,60,126,0],[61,17,61,133,0],[62,17,62,53,0],[65,13,65,51,0],[66,13,66,41,0],[68,13,68,60,0],[69,9,69,10,0],[73,9,73,10,0],[74,13,77,64,0],[76,29,76,91,0],[80,13,80,37,0],[81,13,81,14,0],[82,17,82,127,0],[83,17,83,52,0],[84,21,84,40,0],[86,17,86,45,0],[87,17,87,64,0],[90,13,90,31,0],[91,9,91,10,0],[95,9,95,10,0],[96,13,96,39,0],[97,13,97,70,0],[98,13,98,45,0],[99,13,99,14,0],[100,17,100,107,0],[100,77,100,105,0],[101,13,101,14,0],[102,13,102,70,0],[103,13,103,60,0],[105,13,105,45,0],[106,13,106,14,0],[107,17,107,135,0],[108,17,108,52,0],[109,21,109,40,0],[111,17,117,19,0],[118,17,118,69,0],[119,17,119,50,0],[121,13,121,31,0],[122,9,122,10,0],[126,9,126,10,0],[127,13,127,33,0],[128,13,128,14,0],[129,17,129,66,0],[132,13,132,63,0],[133,13,133,49,0],[135,13,135,56,0],[136,13,136,14,0],[137,17,139,126,0],[138,17,139,124,0],[141,17,141,61,0],[142,17,142,18,0],[143,21,143,180,0],[143,60,143,178,0],[144,17,144,18,0],[146,17,146,185,0],[146,115,146,182,0],[147,13,147,14,0],[149,13,149,48,0],[150,9,150,10,0],[159,9,159,10,0],[160,13,160,59,0],[161,13,161,49,0],[162,13,162,14,0],[163,17,163,115,0],[163,81,163,113,0],[164,13,164,14,0],[166,13,166,30,0],[167,13,167,14,0],[168,17,168,35,0],[171,13,171,57,0],[172,13,172,20,0],[172,22,172,33,0],[172,34,172,36,0],[172,37,172,90,0],[172,74,172,89,0],[173,13,173,14,0],[174,17,174,56,0],[175,17,175,18,0],[176,21,176,70,0],[177,21,177,57,0],[178,21,178,102,0],[179,21,179,146,0],[180,21,185,23,0],[186,21,186,75,0],[187,21,187,52,0],[188,17,188,18,0],[189,13,189,14,0],[192,13,192,41,0],[193,20,193,113,0],[194,13,194,14,0],[195,17,195,59,0],[197,17,197,53,0],[198,17,198,59,0],[199,17,199,94,0],[201,17,201,24,0],[201,26,201,34,0],[201,35,201,37,0],[201,38,201,47,0],[202,17,202,18,0],[203,21,203,46,0],[204,17,204,18,0],[206,17,206,35,0],[207,13,207,14,0],[209,13,209,55,0],[211,9,211,10,0],[214,9,214,10,0],[215,13,215,53,0],[216,13,216,51,0],[217,13,223,15,0],[224,9,224,10,0]]);
+    </script>
+  </body>
+</html>

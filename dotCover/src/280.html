@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\catalog\specifications\productisinstockspecification.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using VirtoCommerce.Storefront.Model.Common.Specifications;
+
+namespace VirtoCommerce.Storefront.Model.Catalog
+{
+    public class ProductIsInStockSpecification : ISpecification&lt;Product&gt;
+    { 
+        public virtual bool IsSatisfiedBy(Product product)
+        {
+            var result = true;
+            if (product.TrackInventory &amp;&amp; product.Inventory != null)
+            {
+                result = product.Inventory.AllowPreorder == true || product.Inventory.AllowBackorder == true || product.AvailableQuantity &gt; 0;
+            }
+            return result;
+        }
+        
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,9,8,10,0],[9,13,9,31,0],[10,13,10,69,0],[11,13,11,14,0],[12,17,12,143,0],[13,13,13,14,0],[14,13,14,27,0],[15,9,15,10,0]]);
+    </script>
+  </body>
+</html>

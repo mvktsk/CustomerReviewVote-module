@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\security\caneditorganizationresourceauthorizationhandler.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Customer;
+
+namespace VirtoCommerce.Storefront.Domain.Security
+{
+    public class CanEditOrganizationResourceAuthorizeRequirement : IAuthorizationRequirement {
+        public const string PolicyName = &quot;CanEditOrganizationResource&quot;;
+    }
+
+    public class CanEditOrganizationResourceAuthorizationHandler : AuthorizationHandler&lt;CanEditOrganizationResourceAuthorizeRequirement, Organization&gt;
+    {
+        private readonly IWorkContextAccessor _workContextAccessor;
+        public CanEditOrganizationResourceAuthorizationHandler(IWorkContextAccessor workContextAccessor)
+        {
+            _workContextAccessor = workContextAccessor;
+        }
+
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, CanEditOrganizationResourceAuthorizeRequirement requirement, Organization resource)
+        {
+
+            var workContext = _workContextAccessor.WorkContext;
+            //Allow to do all things with self 
+
+            var currentUserOrgId = workContext.CurrentUser?.Contact?.OrganizationId;
+            var result = currentUserOrgId != null &amp;&amp; resource != null &amp;&amp; currentUserOrgId == resource.Id;
+
+            if (result)
+            {
+                context.Succeed(requirement);
+            }
+
+            return Task.CompletedTask;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,105,0],[16,9,16,10,0],[17,13,17,56,0],[18,9,18,10,0],[21,9,21,10,0],[23,13,23,64,0],[26,13,26,85,0],[27,13,27,106,0],[29,13,29,24,0],[30,13,30,14,0],[31,17,31,46,0],[32,13,32,14,0],[34,13,34,39,0],[35,9,35,10,0]]);
+    </script>
+  </body>
+</html>

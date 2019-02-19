@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\middleware\apierrorhandlingmiddleware.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Net;
+using System.Threading.Tasks;
+using Microsoft.ApplicationInsights;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.Rest;
+using Newtonsoft.Json;
+
+namespace VirtoCommerce.Storefront.Middleware
+{
+    public class ApiErrorHandlingMiddleware
+    {
+        private readonly RequestDelegate _next;
+        private readonly ILogger&lt;ApiErrorHandlingMiddleware&gt; _logger;
+        public ApiErrorHandlingMiddleware(RequestDelegate next, ILogger&lt;ApiErrorHandlingMiddleware&gt; logger)
+        {
+            _next = next;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
+        public async Task Invoke(HttpContext context)
+        {
+            try
+            {
+                await _next.Invoke(context);
+            }
+            catch (Exception ex)
+            {
+                //Need handle only storefront api errors
+                if (!context.Response.HasStarted &amp;&amp; context.Request.Path.ToString().Contains(&quot;/storefrontapi/&quot;))
+                {
+                    _logger.LogError(ex, ex.Message);
+
+                    var message = ex.Message;
+                    var httpStatusCode = HttpStatusCode.InternalServerError;
+                    //Need to extract AutoRest errors
+                    if (ex is HttpOperationException httpException)
+                    {
+                        message = httpException.Response.Content;
+                    }
+                    var json = JsonConvert.SerializeObject(new { message, stackTrace = ex.StackTrace });
+                    context.Response.ContentType = &quot;application/json&quot;;
+                    context.Response.StatusCode = (int)httpStatusCode;
+                    await context.Response.WriteAsync(json);
+
+                    new TelemetryClient().TrackException(ex);
+                }
+                else
+                {
+                    var httpException = ex as HttpOperationException ?? ex?.InnerException as HttpOperationException;
+                    //Need to extract AutoRest errors
+                    if (httpException != null)
+                    {
+                        throw new HttpOperationException(httpException.Message + httpException.Response.Content);
+                    }
+                    //Continue default error handling
+                    throw;
+                }
+            }
+        }
+    }
+
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,9,16,108,0],[17,9,17,10,0],[18,13,18,26,0],[19,13,19,81,0],[20,9,20,10,0],[23,9,23,10,0],[25,13,25,14,0],[26,17,26,45,0],[27,13,27,14,0],[28,13,28,33,0],[29,13,29,14,0],[31,17,31,113,0],[32,17,32,18,0],[33,21,33,54,0],[35,21,35,46,0],[36,21,36,77,0],[38,21,38,68,0],[39,21,39,22,0],[40,25,40,66,0],[41,21,41,22,0],[42,21,42,105,0],[43,21,43,71,0],[44,21,44,71,0],[45,21,45,61,0],[47,21,47,62,0],[48,17,48,18,0],[50,17,50,18,0],[51,21,51,118,0],[53,21,53,47,0],[54,21,54,22,0],[55,25,55,114,0],[58,21,58,27,0],[59,17,59,18,0],[60,13,60,14,0],[61,9,61,10,0]]);
+    </script>
+  </body>
+</html>

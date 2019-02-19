@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\contentblobproviders\filesystemcontentblobprovider.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.FileProviders.Physical;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
+using VirtoCommerce.Storefront.Extensions;
+using VirtoCommerce.Storefront.Model.Caching;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Common.Caching;
+using VirtoCommerce.Storefront.Model.StaticContent;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public class FileSystemContentBlobProvider : IContentBlobProvider
+    {
+        private readonly FileSystemBlobContentOptions _options;
+        private readonly IStorefrontMemoryCache _memoryCache;
+        // Keep links to file watchers to prevent GC to collect it
+        private readonly PhysicalFilesWatcher _fileSystemWatcher;
+
+        public FileSystemContentBlobProvider(IOptions&lt;FileSystemBlobContentOptions&gt; options, IStorefrontMemoryCache memoryCache)
+        {
+            _options = options.Value;
+            _memoryCache = memoryCache;
+            //Create fileSystemWatcher instance only when rootFolder exist to prevent whole application crash on initialization phase. 
+            if (Directory.Exists(_options.Path))
+            {
+                //It is very important to have rootPath with leading slash &#39;\&#39; without this any changes won&#39;t reflected
+                var rootPath = _options.Path.TrimEnd(&#39;\\&#39;) + &#39;\\&#39;;
+                _fileSystemWatcher = new PhysicalFilesWatcher(rootPath, new FileSystemWatcher(rootPath), false);
+            }
+        }
+        #region IContentBlobProvider Members
+        /// &lt;summary&gt;
+        /// Open blob for read 
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;path&quot;&gt;blob relative path /folder/blob.md&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public virtual Stream OpenRead(string path)
+        {
+            path = NormalizePath(path);
+            // traversing above root not permitted.
+            if (PathUtils.PathNavigatesAboveRoot(path))
+            {
+                throw new InvalidOperationException(path);
+            }
+            return File.OpenRead(path);
+        }
+
+        /// &lt;summary&gt;
+        /// Open blob for write by path
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;path&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;blob stream&lt;/returns&gt;
+        public virtual Stream OpenWrite(string path)
+        {
+            path = NormalizePath(path);
+            // traversing above root not permitted.
+            if (PathUtils.PathNavigatesAboveRoot(path))
+            {
+                throw new InvalidOperationException(path);
+            }
+
+            var folderPath = Path.GetDirectoryName(path);
+
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+            return File.Open(path, FileMode.Create);
+        }
+
+        /// &lt;summary&gt;
+        /// Check that blob or folder with passed path exist
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;path&quot;&gt;relative path /folder/blob.md&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public virtual bool PathExists(string path)
+        {
+            var cacheKey = CacheKey.With(GetType(), &quot;PathExists&quot;, path);
+            return _memoryCache.GetOrCreateExclusive(cacheKey, (cacheEntry) =&gt;
+            {
+                path = NormalizePath(path);
+                cacheEntry.AddExpirationToken(Watch(path));
+                cacheEntry.AddExpirationToken(ContentBlobCacheRegion.CreateChangeToken());
+                var retVal = Directory.Exists(path);
+                if (!retVal)
+                {
+                    retVal = File.Exists(path);
+                }
+                return retVal;
+            });
+        }
+
+        /// &lt;summary&gt;
+        /// Search blob content in specified folder
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;path&quot;&gt;relative folder path in which the search  Example: /folder&lt;/param&gt;
+        /// &lt;param name=&quot;searchPattern&quot;&gt;search blob name pattern can be used mask (*, ? symbols)&lt;/param&gt;
+        /// &lt;param name=&quot;recursive&quot;&gt; recursive search&lt;/param&gt;
+        /// &lt;returns&gt;Returns relative path for all found blobs  example: /folder/blob.md &lt;/returns&gt;
+        public virtual IEnumerable&lt;string&gt; Search(string path, string searchPattern, bool recursive)
+        {
+            var retVal = new List&lt;string&gt;();
+            path = NormalizePath(path);
+            searchPattern = searchPattern.TrimStart(Path.PathSeparator);
+            if (Directory.Exists(Path.GetDirectoryName(Path.Combine(path, searchPattern))))
+            {
+                var files = Directory.GetFiles(path, searchPattern, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
+                                     .Select(x =&gt; GetRelativePath(x));
+                retVal.AddRange(files);
+            }
+            return retVal;
+        }
+
+        public virtual IChangeToken Watch(string path)
+        {
+            //TODO: Test with symbolic links
+            if (_fileSystemWatcher != null)
+            {
+                // Absolute paths not permitted for watcher, need to convert it to relative
+                if (Path.IsPathRooted(path))
+                {
+                    path = GetRelativePath(path).TrimStart(&#39;/&#39;);
+                }
+                return _fileSystemWatcher.CreateFileChangeToken(path);
+            }
+            else
+            {
+                return new CancellationChangeToken(new CancellationToken());
+            }
+        }
+        #endregion
+
+        protected virtual string GetRelativePath(string path)
+        {
+            return path.Replace(_options.Path, string.Empty).Replace(Path.DirectorySeparatorChar, &#39;/&#39;);
+        }
+
+        protected virtual string NormalizePath(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentNullException(&quot;path&quot;);
+            }
+            path = path.Replace(&#39;/&#39;, Path.DirectorySeparatorChar);
+            path = path.Replace(_options.Path, string.Empty);
+            return Path.Combine(_options.Path, path.TrimStart(Path.DirectorySeparatorChar));
+        }
+
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[25,9,25,129,0],[26,9,26,10,0],[27,13,27,38,0],[28,13,28,40,0],[30,13,30,49,0],[31,13,31,14,0],[33,17,33,67,0],[34,17,34,113,0],[35,13,35,14,0],[36,9,36,10,0],[44,9,44,10,0],[45,13,45,40,0],[47,13,47,56,0],[48,13,48,14,0],[49,17,49,59,0],[51,13,51,40,0],[52,9,52,10,0],[60,9,60,10,0],[61,13,61,40,0],[63,13,63,56,0],[64,13,64,14,0],[65,17,65,59,0],[68,13,68,58,0],[70,13,70,47,0],[71,13,71,14,0],[72,17,72,55,0],[73,13,73,14,0],[74,13,74,53,0],[75,9,75,10,0],[83,9,83,10,0],[84,13,84,73,0],[85,13,96,16,0],[86,13,86,14,0],[87,17,87,44,0],[88,17,88,60,0],[89,17,89,91,0],[90,17,90,53,0],[91,17,91,29,0],[92,17,92,18,0],[93,21,93,48,0],[94,17,94,18,0],[95,17,95,31,0],[96,13,96,14,0],[97,9,97,10,0],[107,9,107,10,0],[108,13,108,45,0],[109,13,109,40,0],[110,13,110,73,0],[111,13,111,92,0],[112,13,112,14,0],[113,17,114,71,0],[114,51,114,69,0],[115,17,115,40,0],[116,13,116,14,0],[117,13,117,27,0],[118,9,118,10,0],[121,9,121,10,0],[123,13,123,44,0],[124,13,124,14,0],[126,17,126,45,0],[127,17,127,18,0],[128,21,128,65,0],[129,17,129,18,0],[130,17,130,71,0],[133,13,133,14,0],[134,17,134,77,0],[136,9,136,10,0],[140,9,140,10,0],[141,13,141,104,0],[142,9,142,10,0],[145,9,145,10,0],[146,13,146,44,0],[147,13,147,14,0],[148,17,148,57,0],[150,13,150,67,0],[151,13,151,62,0],[152,13,152,93,0],[153,9,153,10,0]]);
+    </script>
+  </body>
+</html>

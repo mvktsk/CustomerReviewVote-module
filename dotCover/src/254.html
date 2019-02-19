@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\sortinfo.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace VirtoCommerce.Storefront.Model.Common
+{
+    //
+    // Summary:
+    //     Specifies the direction in which to sort a list of items.
+    public enum SortDirection
+    {
+        //
+        // Summary:
+        //     Sort from smallest to largest. For example, from A to Z.
+        Ascending = 0,
+        //
+        // Summary:
+        //     Sort from largest to smallest. For example, from Z to A.
+        Descending = 1
+    }
+
+    public sealed class SortInfo : ValueObject
+    {
+        public override string ToString()
+        {
+            return SortColumn + &quot;-&quot; + (SortDirection == SortDirection.Descending ? &quot;desc&quot; : &quot;asc&quot;);
+        }
+        public static string ToString(IEnumerable&lt;SortInfo&gt; sortInfos)
+        {
+            if (!sortInfos.IsNullOrEmpty())
+            {
+                return string.Join(&quot;;&quot;, sortInfos);
+            }
+            return string.Empty;
+        }
+        public static IEnumerable&lt;SortInfo&gt; Parse(string sortExpr)
+        {
+            var retVal = new List&lt;SortInfo&gt;();
+            if (String.IsNullOrEmpty(sortExpr))
+                return retVal;
+
+            var sortInfoStrings = sortExpr.Split(new[] { &#39;;&#39; }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var sortInfoString in sortInfoStrings)
+            {
+                var parts = sortInfoString.Split(new[] { &#39;:&#39;, &#39;-&#39; }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Any())
+                {
+                    var sortInfo = new SortInfo
+                    {
+                        SortColumn = parts[0].Trim(),
+                        SortDirection = SortDirection.Ascending
+                    };
+                    if (parts.Count() &gt; 1)
+                    {
+                        sortInfo.SortDirection = parts[1].Trim().StartsWith(&quot;desc&quot;, StringComparison.InvariantCultureIgnoreCase) ? SortDirection.Descending : SortDirection.Ascending;
+                    }
+                    retVal.Add(sortInfo);
+                }
+            }
+            return retVal;
+        }
+
+        public string SortColumn { get; set; }
+
+        public SortDirection SortDirection { get; set; }
+       
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[25,9,25,10,0],[26,13,26,100,0],[27,9,27,10,0],[29,9,29,10,0],[30,13,30,44,0],[31,13,31,14,0],[32,17,32,52,0],[34,13,34,33,0],[35,9,35,10,0],[37,9,37,10,0],[38,13,38,47,0],[39,13,39,48,0],[40,17,40,31,0],[42,13,42,104,0],[43,13,43,20,0],[43,22,43,40,0],[43,41,43,43,0],[43,44,43,59,0],[44,13,44,14,0],[45,17,45,109,0],[46,17,46,33,0],[47,17,47,18,0],[48,21,52,23,0],[53,21,53,43,0],[54,21,54,22,0],[55,25,55,183,0],[56,21,56,22,0],[57,21,57,42,0],[58,17,58,18,0],[59,13,59,14,0],[60,13,60,27,0],[61,9,61,10,0],[63,36,63,40,0],[63,41,63,45,0],[65,46,65,50,0],[65,51,65,55,0]]);
+    </script>
+  </body>
+</html>

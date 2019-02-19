@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\converters\productconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using PagedList.Core;
+using System;
+using System.Linq;
+using VirtoCommerce.LiquidThemeEngine.Objects;
+using VirtoCommerce.Storefront.Model.Common;
+using storefrontModel = VirtoCommerce.Storefront.Model.Catalog;
+
+namespace VirtoCommerce.LiquidThemeEngine.Converters
+{
+    public static class ProductStaticConverter
+    {
+        public static Product ToShopifyModel(this storefrontModel.Product product)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidProduct(product);
+        }
+
+        public static Variant ToVariant(this storefrontModel.Product product)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidVariant(product);
+        }
+    }
+
+    public partial class ShopifyModelConverter
+    {
+        public virtual Product ToLiquidProduct(storefrontModel.Product product)
+        {
+            var result = new Product();
+            result.Id = product.Id;
+            result.CatalogId = product.CatalogId;
+            result.CategoryId = product.CategoryId;
+            result.Description = product.Description;
+            result.IsQuotable = product.IsQuotable;
+            result.TaxType = product.TaxType;
+
+            result.Variants.Add(ToLiquidVariant(product));
+
+            if (product.Variations != null &amp;&amp; product.Variations.Any())
+            {
+                result.Variants.AddRange(product.Variations.Select(x =&gt; x.ToVariant()));
+                result.Available = product.IsAvailable || product.Variations.Any(v =&gt; v.IsAvailable);
+                result.Buyable = product.IsBuyable || product.Variations.Any(v =&gt; v.IsBuyable);
+                result.InStock = product.IsInStock || product.Variations.Any(v =&gt; v.IsInStock);
+            }
+            else
+            {
+                result.Available = product.IsAvailable;
+                result.Buyable = product.IsBuyable;
+                result.InStock = product.IsInStock;
+            }
+
+            result.CatalogId = product.CatalogId;
+            result.CategoryId = product.CategoryId;
+
+            result.CompareAtPriceMax = result.Variants.Select(x =&gt; x.CompareAtPrice).Max();
+            result.CompareAtPriceMin = result.Variants.Select(x =&gt; x.CompareAtPrice).Min();
+            result.CompareAtPriceVaries = result.CompareAtPriceMax != result.CompareAtPriceMin;
+
+            result.CompareAtPrice = product.Price.ListPrice.Amount * 100;
+            result.CompareAtPriceWithTax = product.Price.ListPriceWithTax.Amount * 100;
+            result.Price = product.Price.ActualPrice.Amount * 100;
+            result.PriceWithTax = product.Price.ActualPriceWithTax.Amount * 100;
+
+            result.PriceMax = result.Variants.Select(x =&gt; x.Price).Max();
+            result.PriceMin = result.Variants.Select(x =&gt; x.Price).Min();
+            result.PriceVaries = result.PriceMax != result.PriceMin;
+
+            result.Content = product.Description;
+            result.Description = result.Content;
+
+            result.Descriptions = new Descriptions(product.Descriptions.Select(d =&gt; new Description
+            {
+                Content = d.Value,
+                Type = d.ReviewType
+            }));
+
+            result.FeaturedImage = product.PrimaryImage != null ? product.PrimaryImage.ToShopifyModel() : null;
+
+            if (result.FeaturedImage != null)
+            {
+                result.FeaturedImage.ProductId = product.Id;
+                result.FeaturedImage.AttachedToVariant = false;
+            }
+
+            result.FirstAvailableVariant = result.Variants.FirstOrDefault(x =&gt; x.Available);
+            result.Handle = product.SeoInfo != null ? product.SeoInfo.Slug : product.Id;
+            result.Images = product.Images.Select(x =&gt; x.ToShopifyModel()).ToArray();
+
+            foreach (var image in result.Images)
+            {
+                image.ProductId = product.Id;
+                image.AttachedToVariant = false;
+            }
+
+            if (product.VariationProperties != null)
+            {
+                result.Options = product.VariationProperties.Where(x =&gt; !string.IsNullOrEmpty(x.Value)).Select(x =&gt; x.Name).ToArray();
+            }
+
+            if (product.Properties != null)
+            {
+                result.Properties = product.Properties.Select(x =&gt; x.ToShopifyModel()).ToList();
+                result.Metafields = new MetaFieldNamespacesCollection(new[] { new MetafieldsCollection(&quot;properties&quot;, product.Properties) });
+            }
+
+            result.SelectedVariant = result.Variants.First();
+            result.Title = product.Name;
+            result.Type = product.ProductType;
+            result.Url = product.Url;
+
+            result.PackageType = product.PackageType;
+            result.PackageSize = product.PackageSize;
+            result.WeightUnit = product.WeightUnit;
+            result.Weight = product.Weight;
+            result.Height = product.Height;
+            result.MeasureUnit = product.MeasureUnit;
+            result.Width = product.Width;
+            result.Length = product.Length;
+            result.Outline = product.Outline;
+
+            if (!product.Associations.IsNullOrEmpty())
+            {
+                result.RelatedProducts = new MutablePagedList&lt;Product&gt;((pageNumber, pageSize, sortInfos) =&gt;
+                {
+                    //Need to load related products from associated  product and categories
+                    var skip = (pageNumber - 1) * pageSize;
+                    var take = pageSize;
+                    var productAssociations = product.Associations.OfType&lt;storefrontModel.ProductAssociation&gt;().OrderBy(x =&gt; x.Priority);
+                    var retVal = productAssociations.Select(x =&gt; x.Product).Skip(skip).Take(take).ToList();
+                    var totalCount = productAssociations.Count();
+                    skip = Math.Max(0, skip - totalCount);
+                    take = Math.Max(0, take - retVal.Count);
+
+                    //Load product from associated categories with correct pagination
+                    foreach (var categoryAssociation in product.Associations.OfType&lt;storefrontModel.CategoryAssociation&gt;().OrderBy(x =&gt; x.Priority))
+                    {
+                        if (categoryAssociation.Category != null &amp;&amp; categoryAssociation.Category.Products != null)
+                        {
+                            categoryAssociation.Category.Products.Slice(skip / pageSize + 1, take, sortInfos);
+                            retVal.AddRange(categoryAssociation.Category.Products);
+                            totalCount += categoryAssociation.Category.Products.GetTotalCount();
+                            skip = Math.Max(0, skip - totalCount);
+                            take = Math.Max(0, take - categoryAssociation.Category.Products.Count());
+                        }
+                    }
+
+                    return new StaticPagedList&lt;Product&gt;(retVal.Select(x =&gt; x.ToShopifyModel()), pageNumber, pageSize, totalCount);
+                }, 1, 20);
+            }
+
+            if (product.Vendor != null)
+            {
+                result.Vendor = product.Vendor.ToShopifyModel();
+            }
+            return result;
+        }
+
+        public virtual Variant ToLiquidVariant(storefrontModel.Product product)
+        {
+            var result = new Variant();
+
+            result.Available = product.IsAvailable;
+            result.Buyable = product.IsBuyable;
+            result.InStock = product.IsInStock;
+            result.Barcode = product.Gtin;
+            result.CatalogId = product.CatalogId;
+            result.CategoryId = product.CategoryId;
+            result.Id = product.Id;
+            result.InventoryPolicy = product.TrackInventory ? &quot;deny&quot; : &quot;continue&quot;;
+            result.InventoryQuantity = product.Inventory != null ? Math.Max(0, (product.Inventory.InStockQuantity ?? 0L) - (product.Inventory.ReservedQuantity ?? 0L)) : 0;
+            result.Options = product.VariationProperties.Where(p =&gt; !string.IsNullOrEmpty(p.Value)).Select(p =&gt; p.Value).ToArray();
+            result.CompareAtPrice = product.Price.ListPrice.Amount * 100;
+            result.CompareAtPriceWithTax = product.Price.ListPriceWithTax.Amount * 100;
+            result.Price = product.Price.ActualPrice.Amount * 100;
+            result.PriceWithTax = product.Price.ActualPriceWithTax.Amount * 100;
+            result.Selected = false;
+            result.Sku = product.Sku;
+            result.Title = product.Name;
+            result.Url = product.Url;
+            result.Weight = product.Weight ?? 0m;
+            result.WeightUnit = product.WeightUnit;
+            result.FeaturedImage = product.PrimaryImage != null ? product.PrimaryImage.ToShopifyModel() : null;
+
+            result.PackageType = product.PackageType;
+            result.Height = product.Height;
+            result.MeasureUnit = product.MeasureUnit;
+            result.Width = product.Width;
+            result.Length = product.Length;
+
+
+
+            if (result.FeaturedImage != null)
+            {
+                result.FeaturedImage.ProductId = product.Id;
+                result.FeaturedImage.AttachedToVariant = true;
+                result.FeaturedImage.Variants = new[] { result };
+            }
+
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,10,0],[14,13,14,57,0],[15,13,15,55,0],[16,9,16,10,0],[19,9,19,10,0],[20,13,20,57,0],[21,13,21,55,0],[22,9,22,10,0],[28,9,28,10,0],[29,13,29,40,0],[30,13,30,36,0],[31,13,31,50,0],[32,13,32,52,0],[33,13,33,54,0],[34,13,34,52,0],[35,13,35,46,0],[37,13,37,59,0],[39,13,39,72,0],[40,13,40,14,0],[41,17,41,89,0],[41,73,41,86,0],[42,17,42,102,0],[42,87,42,100,0],[43,17,43,96,0],[43,83,43,94,0],[44,17,44,96,0],[44,83,44,94,0],[45,13,45,14,0],[47,13,47,14,0],[48,17,48,56,0],[49,17,49,52,0],[50,17,50,52,0],[51,13,51,14,0],[53,13,53,50,0],[54,13,54,52,0],[56,13,56,92,0],[56,68,56,84,0],[57,13,57,92,0],[57,68,57,84,0],[58,13,58,96,0],[60,13,60,74,0],[61,13,61,88,0],[62,13,62,67,0],[63,13,63,81,0],[65,13,65,74,0],[65,59,65,66,0],[66,13,66,74,0],[66,59,66,66,0],[67,13,67,69,0],[69,13,69,50,0],[70,13,70,49,0],[72,13,76,17,0],[72,85,76,14,0],[78,13,78,112,0],[80,13,80,46,0],[81,13,81,14,0],[82,17,82,61,0],[83,17,83,64,0],[84,13,84,14,0],[86,13,86,93,0],[86,80,86,91,0],[87,13,87,89,0],[88,13,88,86,0],[88,56,88,74,0],[90,13,90,20,0],[90,22,90,31,0],[90,32,90,34,0],[90,35,90,48,0],[91,13,91,14,0],[92,17,92,46,0],[93,17,93,49,0],[94,13,94,14,0],[96,13,96,53,0],[97,13,97,14,0],[98,17,98,135,0],[98,73,98,103,0],[98,117,98,123,0],[99,13,99,14,0],[101,13,101,44,0],[102,13,102,14,0],[103,17,103,97,0],[103,68,103,86,0],[104,17,104,141,0],[105,13,105,14,0],[107,13,107,62,0],[108,13,108,41,0],[109,13,109,47,0],[110,13,110,38,0],[112,13,112,54,0],[113,13,113,54,0],[114,13,114,52,0],[115,13,115,44,0],[116,13,116,44,0],[117,13,117,54,0],[118,13,118,42,0],[119,13,119,44,0],[120,13,120,46,0],[122,13,122,55,0],[123,13,123,14,0],[124,17,149,27,0],[125,17,125,18,0],[127,21,127,60,0],[128,21,128,41,0],[129,21,129,138,0],[129,126,129,136,0],[130,21,130,108,0],[130,66,130,75,0],[131,21,131,66,0],[132,21,132,59,0],[133,21,133,61,0],[136,21,136,28,0],[136,30,136,53,0],[136,54,136,56,0],[136,57,136,148,0],[136,137,136,147,0],[137,21,137,22,0],[138,25,138,115,0],[139,25,139,26,0],[140,29,140,111,0],[141,29,141,84,0],[142,29,142,97,0],[143,29,143,67,0],[144,29,144,102,0],[145,25,145,26,0],[146,21,146,22,0],[148,21,148,131,0],[148,76,148,94,0],[149,17,149,18,0],[150,13,150,14,0],[152,13,152,40,0],[153,13,153,14,0],[154,17,154,65,0],[155,13,155,14,0],[156,13,156,27,0],[157,9,157,10,0],[160,9,160,10,0],[161,13,161,40,0],[163,13,163,52,0],[164,13,164,48,0],[165,13,165,48,0],[166,13,166,43,0],[167,13,167,50,0],[168,13,168,52,0],[169,13,169,36,0],[170,13,170,83,0],[171,13,171,172,0],[172,13,172,132,0],[172,69,172,99,0],[172,113,172,120,0],[173,13,173,74,0],[174,13,174,88,0],[175,13,175,67,0],[176,13,176,81,0],[177,13,177,37,0],[178,13,178,38,0],[179,13,179,41,0],[180,13,180,38,0],[181,13,181,50,0],[182,13,182,52,0],[183,13,183,112,0],[185,13,185,54,0],[186,13,186,44,0],[187,13,187,54,0],[188,13,188,42,0],[189,13,189,44,0],[193,13,193,46,0],[194,13,194,14,0],[195,17,195,61,0],[196,17,196,63,0],[197,17,197,66,0],[198,13,198,14,0],[200,13,200,27,0],[201,9,201,10,0]]);
+    </script>
+  </body>
+</html>

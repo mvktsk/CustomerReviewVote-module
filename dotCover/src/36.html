@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\formerrors.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using DotLiquid;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// array of strings if the form was not submitted successfully. The strings returned depend on which fields of the form were left empty or contained errors. Possible values are:
+    /// &lt;/summary&gt;
+    public class FormErrors : Drop, IEnumerable&lt;string&gt;
+    {
+        public FormErrors(ModelStateDictionary modelState)
+        {
+            Messages = modelState
+                .Where(x =&gt; x.Value.Errors.Any())
+                .ToDictionary(x =&gt; x.Key, x =&gt; x.Value.Errors.Select(y =&gt; y.ErrorMessage).FirstOrDefault());
+
+            _fields = Messages.Keys.ToList();
+        }
+
+        private IList&lt;string&gt; _fields { get; set; }
+
+        public IDictionary&lt;string, string&gt; Messages { get; set; }
+
+        public IEnumerator&lt;string&gt; GetEnumerator()
+        {
+            foreach (string field in _fields)
+            {
+                yield return field;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            foreach (string field in _fields)
+            {
+                yield return field;
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,14,59,0],[15,9,15,10,0],[16,13,18,109,0],[17,29,17,49,0],[18,36,18,41,0],[18,48,18,107,0],[18,75,18,89,0],[20,13,20,46,0],[21,9,21,10,0],[23,41,23,45,0],[23,46,23,50,0],[25,55,25,59,0],[25,60,25,64,0],[28,9,28,10,0],[29,13,29,20,0],[29,22,29,34,0],[29,35,29,37,0],[29,38,29,45,0],[30,13,30,14,0],[31,17,31,36,0],[32,13,32,14,0],[33,9,33,10,0],[36,9,36,10,0],[37,13,37,20,0],[37,22,37,34,0],[37,35,37,37,0],[37,38,37,45,0],[38,13,38,14,0],[39,17,39,36,0],[40,13,40,14,0],[41,9,41,10,0]]);
+    </script>
+  </body>
+</html>

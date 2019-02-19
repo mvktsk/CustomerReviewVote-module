@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\customerreviewvote-module\newmanagedmodule.data\model\customerreviewvoteentity.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.ComponentModel.DataAnnotations;
+using CustomerReviewVotes.Core.Model;
+using VirtoCommerce.Platform.Core.Common;
+
+namespace CustomerReviewVotes.Data.Model
+{
+    public class CustomerReviewVoteEntity : AuditableEntity
+    {
+        [Required]
+        [StringLength(1024)]
+        public string AuthorId { get; set; }
+
+        [Required]
+        public VoteRate ReviewRate { get; set; }
+
+        #region Navigation Properties
+        [Required]
+        [StringLength(128)]
+        public string CustomerReviewId { get; set; }
+
+        public virtual CustomerReviewEntity CustomerReview { get; set; }
+        #endregion
+
+        public virtual CustomerReviewVote ToModel(CustomerReviewVote customerReviewVote)
+        {
+            if (customerReviewVote == null)
+                throw new ArgumentNullException(nameof(customerReviewVote));
+
+            customerReviewVote.Id = Id;
+            customerReviewVote.CreatedBy = CreatedBy;
+            customerReviewVote.ModifiedBy = ModifiedBy;
+            customerReviewVote.ModifiedDate = ModifiedDate;
+
+            customerReviewVote.AuthorId = AuthorId;
+            customerReviewVote.ReviewRate = ReviewRate;
+            customerReviewVote.CustomerReviewId = CustomerReviewId;
+
+            return customerReviewVote;
+        }
+
+        public virtual CustomerReviewVoteEntity FromModel(CustomerReviewVote customerReviewVote, PrimaryKeyResolvingMap pkMap)
+        {
+            if (customerReviewVote == null)
+                throw new ArgumentNullException(nameof(customerReviewVote));
+
+            pkMap.AddPair(customerReviewVote, this);
+
+            Id = customerReviewVote.Id;
+            CreatedBy = customerReviewVote.CreatedBy;
+            CreatedDate = customerReviewVote.CreatedDate;
+            ModifiedBy = customerReviewVote.ModifiedBy;
+            ModifiedDate = customerReviewVote.ModifiedDate;
+
+            AuthorId = customerReviewVote.AuthorId;
+            ReviewRate = customerReviewVote.ReviewRate;
+            CustomerReviewId = customerReviewVote.CustomerReviewId;
+
+            return this;
+        }
+
+        public virtual void Patch(CustomerReviewVoteEntity target)
+        {
+            if (target == null)
+                throw new ArgumentNullException(nameof(target));
+
+            target.AuthorId = AuthorId;
+            target.ReviewRate = ReviewRate;
+            
+        }
+
+
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,34,12,38,1],[12,39,12,43,1],[15,38,15,42,1],[15,43,15,47,1],[20,42,20,46,1],[20,47,20,51,1],[22,62,22,66,1],[22,67,22,71,1],[26,9,26,10,1],[27,13,27,44,1],[28,17,28,77,0],[30,13,30,40,1],[31,13,31,54,1],[32,13,32,56,1],[33,13,33,60,1],[35,13,35,52,1],[36,13,36,56,1],[37,13,37,68,1],[39,13,39,39,1],[40,9,40,10,1],[43,9,43,10,1],[44,13,44,44,1],[45,17,45,77,0],[47,13,47,53,1],[49,13,49,40,1],[50,13,50,54,1],[51,13,51,58,1],[52,13,52,56,1],[53,13,53,60,1],[55,13,55,52,1],[56,13,56,56,1],[57,13,57,68,1],[59,13,59,25,1],[60,9,60,10,1],[63,9,63,10,1],[64,13,64,32,1],[65,17,65,65,0],[67,13,67,40,1],[68,13,68,44,1],[70,9,70,10,1]]);
+    </script>
+  </body>
+</html>

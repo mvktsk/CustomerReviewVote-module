@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\converters\articleconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.LiquidThemeEngine.Objects;
+using VirtoCommerce.Storefront.Model.Common;
+using StorefrontModel = VirtoCommerce.Storefront.Model.StaticContent;
+
+namespace VirtoCommerce.LiquidThemeEngine.Converters
+{
+    public static class ArticleConverter
+    {
+        public static Article ToShopifyModel(this StorefrontModel.BlogArticle article)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidArticle(article);
+        }
+    }
+
+    public partial class ShopifyModelConverter
+    {
+       public virtual Article ToLiquidArticle(StorefrontModel.BlogArticle article)
+        {
+            var retVal = new Article();
+
+            retVal.Author = article.Author;
+            retVal.Category = article.Category;
+            retVal.Content = article.Content;
+            retVal.Description = article.Description;
+            retVal.Excerpt = article.Excerpt;
+            retVal.ImageUrl = article.ImageUrl;
+            retVal.IsSticked = article.IsSticked;
+            retVal.IsTrending = article.IsTrending;
+            retVal.Priority = article.Priority;
+            retVal.Title = article.Title;
+            retVal.Type = article.Type;
+            retVal.Url = article.Url;
+            retVal.Handle = article.Url;
+            retVal.CreatedAt = article.CreatedDate;
+            retVal.PublishedAt = article.PublishedDate ?? article.CreatedDate;
+            retVal.Tags = article.Tags != null ? article.Tags.OrderBy(t =&gt; t).Select(t =&gt; t.Handelize()).ToArray() : null;
+            retVal.Comments = new MutablePagedList&lt;Comment&gt;(new List&lt;Comment&gt;());
+            if (article.Category != null)
+            {
+                retVal.Category = article.Category.Handelize();
+            }
+            return retVal;
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,10,0],[13,13,13,57,0],[14,13,14,55,0],[15,9,15,10,0],[21,9,21,10,0],[22,13,22,40,0],[24,13,24,44,0],[25,13,25,48,0],[26,13,26,46,0],[27,13,27,54,0],[28,13,28,46,0],[29,13,29,48,0],[30,13,30,50,0],[31,13,31,52,0],[32,13,32,48,0],[33,13,33,42,0],[34,13,34,40,0],[35,13,35,38,0],[36,13,36,41,0],[37,13,37,52,0],[38,13,38,79,0],[39,13,39,123,0],[39,76,39,77,0],[39,91,39,104,0],[40,13,40,82,0],[41,13,41,42,0],[42,13,42,14,0],[43,17,43,64,0],[44,13,44,14,0],[45,13,45,27,0],[46,9,46,10,0]]);
+    </script>
+  </body>
+</html>

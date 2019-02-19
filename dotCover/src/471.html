@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\cart\deliverydateservice.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Storefront.Model.Cart.Services;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Domain.Cart
+{
+    public class DeliveryDateService : IDeliveryDateService
+    {
+        private readonly Dictionary&lt;string, DayOfWeek&gt; _daysOfWeek = new Dictionary&lt;string, DayOfWeek&gt;(StringComparer.OrdinalIgnoreCase)
+        {
+            { &quot;Mon&quot;, DayOfWeek.Monday },
+            { &quot;Tue&quot;, DayOfWeek.Tuesday },
+            { &quot;Wen&quot;, DayOfWeek.Wednesday },
+            { &quot;Thu&quot;, DayOfWeek.Thursday },
+            { &quot;Fri&quot;, DayOfWeek.Friday },
+            { &quot;Sat&quot;, DayOfWeek.Saturday },
+            { &quot;Sun&quot;, DayOfWeek.Sunday },
+        };
+
+        private class DeliveryScheduleItem
+        {
+            public DayOfWeek DayOfWeek { get; set; }
+            public bool IsDeliveryDay { get; set; }
+            public int Hour { get; set; }
+            public int Minute { get; set; }
+            public DeliveryScheduleItem NextItem { get; set; }
+        }
+
+        public DateTime? CalculateDeliveryDate(DateTime orderDate, string deliverySchedule)
+        {
+            DateTime? result = null;
+
+            var scheduleItems = ParseSchedule(deliverySchedule);
+
+            // Make a circular linked list
+            if (scheduleItems.Count &gt; 1)
+            {
+                for (var i = 0; i &lt; scheduleItems.Count - 1; i++)
+                {
+                    scheduleItems[i].NextItem = scheduleItems[i + 1];
+                }
+                scheduleItems[scheduleItems.Count - 1].NextItem = scheduleItems[0];
+            }
+
+            var currentItem = scheduleItems.FirstOrDefault(item =&gt; item.DayOfWeek == orderDate.DayOfWeek);
+            if (currentItem != null)
+            {
+                var currentDate = orderDate;
+                var isNextDayDelivery = currentItem.Hour == 23 &amp;&amp; currentItem.Minute == 59 ||
+                              orderDate.Hour &lt; currentItem.Hour ||
+                              orderDate.Hour == currentItem.Hour &amp;&amp; orderDate.Minute &lt; currentItem.Minute;
+
+                // Find the next delivery day
+                for (var i = 0; i &lt; 7; i++)
+                {
+                    currentDate = currentDate.AddDays(1);
+                    currentItem = currentItem.NextItem;
+
+                    if (currentItem.IsDeliveryDay)
+                    {
+                        break;
+                    }
+                }
+
+                // Find the delivery day after the next delivery day
+                if (!isNextDayDelivery)
+                {
+                    for (var i = 0; i &lt; 7; i++)
+                    {
+                        currentDate = currentDate.AddDays(1);
+                        currentItem = currentItem.NextItem;
+
+                        if (currentItem.IsDeliveryDay)
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                if (currentItem.IsDeliveryDay)
+                {
+                    result = currentDate;
+                }
+            }
+
+            return result;
+        }
+
+        public IEnumerable&lt;DateTime&gt; GetAvailableDeliveryDates(DateTime orderDate, DateTime startDate, DateTime endDate, IEnumerable&lt;DateTime&gt; holidays)
+        {
+            if (orderDate == null)
+            {
+                throw new ArgumentNullException(nameof(orderDate));
+            }
+            if (startDate == null)
+            {
+                throw new ArgumentNullException(nameof(startDate));
+            }
+            if (endDate == null)
+            {
+                throw new ArgumentNullException(nameof(endDate));
+            }
+
+            var dates = DaysEnumerator.Enumerate(startDate, endDate);
+
+            var orderDateMidnight = new DateTime(orderDate.Year, orderDate.Month, orderDate.Day, 0, 0, 0);
+
+            var availableDates = dates.Select(d =&gt; new DateTime(d.Year, d.Month, d.Day))
+                .Where(d =&gt; d.DayOfWeek != DayOfWeek.Sunday &amp;&amp; d &gt;= orderDateMidnight).Except(holidays ?? new DateTime[] { });
+
+            if (orderDate.DayOfWeek == DayOfWeek.Monday)
+            {
+                if (orderDate.TimeOfDay &lt;= TimeSpan.FromHours(10))
+                {
+                    availableDates = availableDates.Where(d =&gt; d &gt;= orderDateMidnight);
+                }
+                if (orderDate.TimeOfDay &gt; TimeSpan.FromHours(10) &amp;&amp; orderDate.TimeOfDay &lt;= TimeSpan.FromHours(16))
+                {
+                    availableDates = availableDates.Where(d =&gt; d &gt;= orderDateMidnight.AddDays(1));
+                }
+                if (orderDate.TimeOfDay &gt; TimeSpan.FromHours(16))
+                {
+                    availableDates = availableDates.Where(d =&gt; d &gt;= orderDateMidnight.AddDays(2));
+                }
+            }
+            else if (orderDate.DayOfWeek == DayOfWeek.Saturday)
+            {
+                availableDates = availableDates.Where(d =&gt; d &gt;= orderDateMidnight.AddDays(2));
+            }
+            else if (orderDate.TimeOfDay &lt;= TimeSpan.FromHours(16))
+            {
+                availableDates = availableDates.Where(d =&gt; d &gt;= orderDateMidnight.AddDays(1));
+            }
+            else
+            {
+                availableDates = availableDates.Where(d =&gt; d &gt;= orderDateMidnight.AddDays(2));
+            }
+
+            return availableDates;
+        }
+
+        // Format: Mon-true-17:00|Tue-true-17:00
+        private IList&lt;DeliveryScheduleItem&gt; ParseSchedule(string value)
+        {
+            return (value ?? string.Empty)
+                .Split(new[] { &#39;|&#39; }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(ParseScheduleItem)
+                .Where(i =&gt; i != null)
+                .GroupBy(i =&gt; i.DayOfWeek)
+                .Select(g =&gt; g.First())
+                .ToList();
+        }
+
+        // Format: Mon-true-17:00
+        private DeliveryScheduleItem ParseScheduleItem(string value)
+        {
+            DeliveryScheduleItem result = null;
+
+            var parts = value.Split(&#39;-&#39;);
+            if (parts.Length == 3)
+            {
+                if (_daysOfWeek.ContainsKey(parts[0]))
+                {
+                    result = new DeliveryScheduleItem
+                    {
+                        DayOfWeek = _daysOfWeek[parts[0]],
+                        IsDeliveryDay = parts[1].EqualsInvariant(&quot;true&quot;),
+                    };
+
+                    var timeParts = parts[2].Split(&#39;:&#39;);
+                    if (timeParts.Length == 2)
+                    {
+                        if (int.TryParse(timeParts[0], out var hour))
+                        {
+                            result.Hour = hour;
+                        }
+
+                        if (int.TryParse(timeParts[1], out var minute))
+                        {
+                            result.Minute = minute;
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,9,20,11,1],[24,42,24,46,1],[24,47,24,51,1],[25,41,25,45,1],[25,46,25,50,1],[26,31,26,35,1],[26,36,26,40,1],[27,33,27,37,1],[27,38,27,42,1],[28,52,28,56,1],[28,57,28,61,1],[32,9,32,10,1],[33,13,33,37,1],[35,13,35,65,1],[38,13,38,41,1],[39,13,39,14,1],[40,22,40,31,1],[40,33,40,60,1],[40,62,40,65,1],[41,17,41,18,1],[42,21,42,70,1],[43,17,43,18,1],[44,17,44,84,1],[45,13,45,14,1],[47,13,47,107,1],[47,68,47,105,1],[48,13,48,37,1],[49,13,49,14,1],[50,17,50,45,1],[51,17,53,107,1],[56,22,56,31,1],[56,33,56,38,1],[56,40,56,43,1],[57,17,57,18,1],[58,21,58,58,1],[59,21,59,56,1],[61,21,61,51,1],[62,21,62,22,1],[63,25,63,31,1],[65,17,65,18,1],[68,17,68,40,1],[69,17,69,18,1],[70,26,70,35,1],[70,37,70,42,1],[70,44,70,47,1],[71,21,71,22,1],[72,25,72,62,1],[73,25,73,60,1],[75,25,75,55,1],[76,25,76,26,1],[77,29,77,35,1],[79,21,79,22,1],[80,17,80,18,1],[82,17,82,47,1],[83,17,83,18,1],[84,21,84,42,1],[85,17,85,18,1],[86,13,86,14,1],[88,13,88,27,1],[89,9,89,10,1],[92,9,92,10,1],[93,13,93,35,1],[97,13,97,35,1],[101,13,101,33,1],[106,13,106,70,1],[108,13,108,107,1],[110,13,111,127,1],[110,52,110,88,1],[111,29,111,86,1],[113,13,113,57,1],[114,13,114,14,1],[115,17,115,67,1],[116,17,116,18,1],[117,21,117,88,1],[117,64,117,86,1],[118,17,118,18,1],[119,17,119,115,1],[120,17,120,18,1],[121,21,121,99,1],[121,64,121,97,1],[122,17,122,18,1],[123,17,123,66,1],[124,17,124,18,1],[125,21,125,99,1],[125,64,125,97,1],[126,17,126,18,1],[127,13,127,14,1],[128,18,128,64,1],[129,13,129,14,1],[130,17,130,95,1],[130,60,130,93,1],[131,13,131,14,1],[132,18,132,68,1],[133,13,133,14,1],[134,17,134,95,1],[134,60,134,93,1],[135,13,135,14,1],[137,13,137,14,1],[138,17,138,95,1],[138,60,138,93,1],[139,13,139,14,1],[141,13,141,35,1],[142,9,142,10,1],[146,9,146,10,1],[147,13,153,27,1],[150,29,150,38,1],[151,31,151,42,1],[152,30,152,39,1],[154,9,154,10,1],[158,9,158,10,1],[159,13,159,48,1],[161,13,161,42,1],[162,13,162,35,1],[163,13,163,14,1],[164,17,164,55,1],[165,17,165,18,1],[166,21,170,23,1],[172,21,172,57,1],[173,21,173,47,1],[174,21,174,22,1],[175,25,175,70,1],[176,25,176,26,1],[177,29,177,48,1],[178,25,178,26,1],[180,25,180,72,1],[181,25,181,26,1],[182,29,182,52,1],[183,25,183,26,1],[184,21,184,22,1],[185,17,185,18,1],[186,13,186,14,1],[188,13,188,27,1],[189,9,189,10,1]]);
+    </script>
+  </body>
+</html>

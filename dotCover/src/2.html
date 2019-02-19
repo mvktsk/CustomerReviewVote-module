@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.tests\deliverydatetests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using VirtoCommerce.Storefront.Domain.Cart;
+using VirtoCommerce.Storefront.Model.Cart.Services;
+using Xunit;
+
+namespace VirtoCommerce.Storefront.Tests
+{
+    public class DeliveryDateTests
+    {
+        private readonly IDeliveryDateService _deliveryDateService;
+
+        public DeliveryDateTests()
+        {
+            _deliveryDateService = new DeliveryDateService();
+        }
+
+        [Theory]
+        [InlineData(&quot;&quot;, &quot;2018-01-01T05:00&quot;, &quot;2018-01-01T13:00&quot;, &quot;&quot;)]
+        [InlineData(&quot;Mon-false-17:00|Tue-false-17:00|Wen-false-17:00|Thu-false-17:00|Fri-false-17:00|Sat-false-0:00|Sun-false-0:00&quot;, &quot;2018-01-01T05:00&quot;, &quot;2018-01-01T13:00&quot;, &quot;&quot;)]
+        [InlineData(&quot;Mon-false-17:00|Tue-true-23:59|Wen-false-17:00|Thu-true-23:59|Fri-false-23:59|Sat-false-23:59|Sun-false-23:59&quot;, &quot;2018-01-01T05:00&quot;, &quot;2018-01-01T13:00&quot;, &quot;2018-01-02&quot;)]
+        [InlineData(&quot;Mon-false-17:00|Tue-true-23:59|Wen-false-17:00|Thu-true-23:59|Fri-false-23:59|Sat-false-23:59|Sun-false-23:59&quot;, &quot;2018-01-01T09:00&quot;, &quot;2018-01-01T17:00&quot;, &quot;2018-01-04&quot;)]
+        [InlineData(&quot;Mon-false-17:00|Tue-true-23:59|Wen-false-17:00|Thu-true-23:59|Fri-false-23:59|Sat-false-23:59|Sun-false-23:59&quot;, &quot;2018-01-07T09:00&quot;, &quot;2018-01-07T17:00&quot;, &quot;2018-01-09&quot;)]
+        [InlineData(&quot;Mon-true-17:00|Tue-true-17:00|Wen-true-17:00|Thu-true-17:00|Fri-true-17:00|Sat-false-12:00|Sun-false-0:00&quot;, &quot;2018-01-01T05:00&quot;, &quot;2018-01-01T13:00&quot;, &quot;2018-01-02&quot;)]
+        [InlineData(&quot;Mon-true-17:00|Tue-true-17:00|Wen-true-17:00|Thu-true-17:00|Fri-true-17:00|Sat-false-12:00|Sun-false-0:00&quot;, &quot;2018-01-01T09:00&quot;, &quot;2018-01-01T17:00&quot;, &quot;2018-01-03&quot;)]
+        [InlineData(&quot;Mon-true-17:00|Tue-true-17:00|Wen-true-17:00|Thu-true-17:00|Fri-true-17:00|Sat-false-12:00|Sun-false-0:00&quot;, &quot;2018-01-02T05:00&quot;, &quot;2018-01-02T13:00&quot;, &quot;2018-01-03&quot;)]
+        [InlineData(&quot;Mon-true-17:00|Tue-true-17:00|Wen-true-17:00|Thu-true-17:00|Fri-true-17:00|Sat-false-12:00|Sun-false-0:00&quot;, &quot;2018-01-02T09:00&quot;, &quot;2018-01-02T17:00&quot;, &quot;2018-01-04&quot;)]
+        [InlineData(&quot;Mon-true-17:00|Tue-true-17:00|Wen-true-17:00|Thu-true-17:00|Fri-true-17:00|Sat-false-12:00|Sun-false-0:00&quot;, &quot;2018-01-05T05:00&quot;, &quot;2018-01-05T13:00&quot;, &quot;2018-01-08&quot;)] // TODO: clarify
+        [InlineData(&quot;Mon-true-17:00|Tue-true-17:00|Wen-true-17:00|Thu-true-17:00|Fri-true-17:00|Sat-false-12:00|Sun-false-0:00&quot;, &quot;2018-01-05T09:00&quot;, &quot;2018-01-05T17:00&quot;, &quot;2018-01-09&quot;)] // TODO: clarify
+        public void Calculate(string deliverySchedule, string utcDateString, string expectedLocalDateString, string expectedDeliveryDateString)
+        {
+            var utcDate = DateTime.Parse(utcDateString, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
+            var localDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(utcDate, &quot;Singapore Standard Time&quot;);
+            var expectedLocalDate = DateTime.Parse(expectedLocalDateString, CultureInfo.InvariantCulture, DateTimeStyles.None);
+            Assert.Equal(expectedLocalDate, localDate);
+
+            var deliveryDate = _deliveryDateService.CalculateDeliveryDate(localDate, deliverySchedule);
+
+            var deliveryDateString = deliveryDate?.ToString(&quot;yyyy-MM-dd&quot;, CultureInfo.InvariantCulture) ?? string.Empty;
+            Assert.Equal(expectedDeliveryDateString, deliveryDateString);
+        }
+
+        [Fact]
+        public void Ordered_Monday_Before1000_WithoutHolidays_AvailableDeliveryDates()
+        {
+            // Arrange
+            var orderDate = new DateTime(year: 2018, month: 11, day: 12, hour: 9, minute: 0, second: 0);
+            var expectedDeliveryDate = new DateTime(year: 2018, month: 11, day: 12);
+
+            var rangeStartDate = new DateTime(year: 2018, month: 11, day: 12);
+            var rangeEndDate = new DateTime(year: 2018, month: 11, day: 18);
+
+            // Act
+            var availableDeliveryDates = _deliveryDateService.GetAvailableDeliveryDates(orderDate, rangeStartDate, rangeEndDate, holidays: null);
+
+            // Assert
+            Assert.Equal(6, availableDeliveryDates.Count());
+            Assert.Contains(expectedDeliveryDate, availableDeliveryDates);
+        }
+
+        [Fact]
+        public void Ordered_MondayHoliday_Before1000_WithHolidays_AvailableDeliveryDates()
+        {
+            // Arrange
+            var orderDate = new DateTime(year: 2018, month: 11, day: 12, hour: 9, minute: 0, second: 0);
+            var expectedDeliveryDate = new DateTime(year: 2018, month: 11, day: 14);
+
+            var rangeStartDate = new DateTime(year: 2018, month: 11, day: 12);
+            var rangeEndDate = new DateTime(year: 2018, month: 11, day: 18);
+
+            var holidays = new[] {
+                new DateTime(year: 2018, month: 11, day: 12),
+                new DateTime(year: 2018, month: 11, day: 13)
+            };
+
+            // Act
+            var availableDeliveryDates = _deliveryDateService.GetAvailableDeliveryDates(orderDate, rangeStartDate, rangeEndDate, holidays);
+
+            // Assert
+            Assert.Equal(4, availableDeliveryDates.Count());
+            Assert.Contains(expectedDeliveryDate, availableDeliveryDates);
+        }
+
+        [Fact]
+        public void Ordered_Monday_Between1000And16000_WithoutHolidays_AvailableDeliveryDates()
+        {
+            // Arrange
+            var orderDate = new DateTime(year: 2018, month: 11, day: 12, hour: 12, minute: 0, second: 0);
+            var expectedDeliveryDate = new DateTime(year: 2018, month: 11, day: 13);
+
+            var rangeStartDate = new DateTime(year: 2018, month: 11, day: 12);
+            var rangeEndDate = new DateTime(year: 2018, month: 11, day: 18);
+
+            // Act
+            var availableDeliveryDates = _deliveryDateService.GetAvailableDeliveryDates(orderDate, rangeStartDate, rangeEndDate, holidays: null);
+
+            // Assert
+            Assert.Equal(5, availableDeliveryDates.Count());
+            Assert.Contains(expectedDeliveryDate, availableDeliveryDates);
+        }
+
+        [Fact]
+        public void Ordered_Monday_After1600_WithoutHolidays_AvailableDeliveryDates()
+        {
+            // Arrange
+            var orderDate = new DateTime(year: 2018, month: 11, day: 12, hour: 18, minute: 0, second: 0);
+            var expectedDeliveryDate = new DateTime(year: 2018, month: 11, day: 14);
+
+            var rangeStartDate = new DateTime(year: 2018, month: 11, day: 12);
+            var rangeEndDate = new DateTime(year: 2018, month: 11, day: 18);
+
+            // Act
+            var availableDeliveryDates = _deliveryDateService.GetAvailableDeliveryDates(orderDate, rangeStartDate, rangeEndDate, holidays: null);
+
+            // Assert
+            Assert.Equal(4, availableDeliveryDates.Count());
+            Assert.Contains(expectedDeliveryDate, availableDeliveryDates);
+        }
+
+        [Fact]
+        public void Ordered_MidWeek_Before1600_WithoutHolidays_AvailableDeliveryDates()
+        {
+            // Arrange
+            var orderDate = new DateTime(year: 2018, month: 11, day: 13, hour: 10, minute: 0, second: 0);
+            var expectedDeliveryDate = new DateTime(year: 2018, month: 11, day: 14);
+
+            var rangeStartDate = new DateTime(year: 2018, month: 11, day: 12);
+            var rangeEndDate = new DateTime(year: 2018, month: 11, day: 18);
+
+            // Act
+            var availableDeliveryDates = _deliveryDateService.GetAvailableDeliveryDates(orderDate, rangeStartDate, rangeEndDate, holidays: null);
+
+            // Assert
+            Assert.Equal(4, availableDeliveryDates.Count());
+            Assert.Contains(expectedDeliveryDate, availableDeliveryDates);
+        }
+
+        [Fact]
+        public void Ordered_MidWeek_After1600_WithoutHolidays_AvailableDeliveryDates()
+        {
+            // Arrange
+            var orderDate = new DateTime(year: 2018, month: 11, day: 13, hour: 18, minute: 0, second: 0);
+            var expectedDeliveryDate = new DateTime(year: 2018, month: 11, day: 15);
+
+            var rangeStartDate = new DateTime(year: 2018, month: 11, day: 12);
+            var rangeEndDate = new DateTime(year: 2018, month: 11, day: 18);
+
+            // Act
+            var availableDeliveryDates = _deliveryDateService.GetAvailableDeliveryDates(orderDate, rangeStartDate, rangeEndDate, holidays: null);
+
+            // Assert
+            Assert.Equal(3, availableDeliveryDates.Count());
+            Assert.Contains(expectedDeliveryDate, availableDeliveryDates);
+        }
+
+        [Fact]
+        public void Ordered_Midweek_Before1600_WithHolidays_AvailableDeliveryDates()
+        {
+            // Arrange
+            var orderDate = new DateTime(year: 2018, month: 11, day: 13, hour: 9, minute: 0, second: 0);
+            var expectedDeliveryDate = new DateTime(year: 2018, month: 11, day: 16);
+
+            var rangeStartDate = new DateTime(year: 2018, month: 11, day: 12);
+            var rangeEndDate = new DateTime(year: 2018, month: 11, day: 18);
+
+            var holidays = new[] {
+                new DateTime(year: 2018, month: 11, day: 14),
+                new DateTime(year: 2018, month: 11, day: 15)
+            };
+
+            // Act
+            var availableDeliveryDates = _deliveryDateService.GetAvailableDeliveryDates(orderDate, rangeStartDate, rangeEndDate, holidays);
+
+            // Assert
+            Assert.Equal(2, availableDeliveryDates.Count());
+            Assert.Contains(expectedDeliveryDate, availableDeliveryDates);
+        }
+
+        [Fact]
+        public void Ordered_Midweek_After1600_WithHolidays_AvailableDeliveryDates()
+        {
+            // Arrange
+            var orderDate = new DateTime(year: 2018, month: 11, day: 13, hour: 18, minute: 0, second: 0);
+            var expectedDeliveryDate = new DateTime(year: 2018, month: 11, day: 17);
+
+            var rangeStartDate = new DateTime(year: 2018, month: 11, day: 12);
+            var rangeEndDate = new DateTime(year: 2018, month: 11, day: 18);
+
+            var holidays = new[] {
+                new DateTime(year: 2018, month: 11, day: 15),
+                new DateTime(year: 2018, month: 11, day: 16)
+            };
+
+            // Act
+            var availableDeliveryDates = _deliveryDateService.GetAvailableDeliveryDates(orderDate, rangeStartDate, rangeEndDate, holidays);
+
+            // Assert
+            Assert.Single(availableDeliveryDates);
+            Assert.Contains(expectedDeliveryDate, availableDeliveryDates);
+        }
+
+        [Fact]
+        public void Ordered_Saturday_WithoutHolidays_AvailableDeliveryDates()
+        {
+            // Arrange
+            var orderDate = new DateTime(year: 2018, month: 11, day: 10, hour: 8, minute: 0, second: 0);
+            var expectedDeliveryDate = new DateTime(year: 2018, month: 11, day: 12);
+
+            var rangeStartDate = new DateTime(year: 2018, month: 11, day: 10);
+            var rangeEndDate = new DateTime(year: 2018, month: 11, day: 18);
+
+            // Act
+            var availableDeliveryDates = _deliveryDateService.GetAvailableDeliveryDates(orderDate, rangeStartDate, rangeEndDate, holidays: null);
+
+            // Assert
+            Assert.Equal(6, availableDeliveryDates.Count());
+            Assert.Contains(expectedDeliveryDate, availableDeliveryDates);
+        }
+
+        [Fact]
+        public void Ordered_Saturday_WithHolidays_AvailableDeliveryDates()
+        {
+            // Arrange
+            var orderDate = new DateTime(year: 2018, month: 11, day: 10, hour: 8, minute: 0, second: 0);
+            var expectedDeliveryDate = new DateTime(year: 2018, month: 11, day: 14);
+
+            var rangeStartDate = new DateTime(year: 2018, month: 11, day: 10);
+            var rangeEndDate = new DateTime(year: 2018, month: 11, day: 18);
+
+            var holidays = new[] {
+                new DateTime(year: 2018, month: 11, day: 12),
+                new DateTime(year: 2018, month: 11, day: 13)
+            };
+
+            // Act
+            var availableDeliveryDates = _deliveryDateService.GetAvailableDeliveryDates(orderDate, rangeStartDate, rangeEndDate, holidays);
+
+            // Assert
+            Assert.Equal(4, availableDeliveryDates.Count());
+            Assert.Contains(expectedDeliveryDate, availableDeliveryDates);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,35,1],[16,9,16,10,1],[17,13,17,62,1],[18,9,18,10,1],[33,9,33,10,1],[34,13,34,154,1],[35,13,35,108,1],[36,13,36,128,1],[37,13,37,56,1],[39,13,39,104,1],[41,13,41,121,1],[42,13,42,74,1],[43,9,43,10,1],[47,9,47,10,1],[49,13,49,105,1],[50,13,50,85,1],[52,13,52,79,1],[53,13,53,77,1],[56,13,56,146,1],[59,13,59,61,1],[60,13,60,75,1],[61,9,61,10,1],[65,9,65,10,1],[67,13,67,105,1],[68,13,68,85,1],[70,13,70,79,1],[71,13,71,77,1],[73,13,76,15,1],[79,13,79,140,1],[82,13,82,61,1],[83,13,83,75,1],[84,9,84,10,1],[88,9,88,10,1],[90,13,90,106,1],[91,13,91,85,1],[93,13,93,79,1],[94,13,94,77,1],[97,13,97,146,1],[100,13,100,61,1],[101,13,101,75,1],[102,9,102,10,1],[106,9,106,10,1],[108,13,108,106,1],[109,13,109,85,1],[111,13,111,79,1],[112,13,112,77,1],[115,13,115,146,1],[118,13,118,61,1],[119,13,119,75,1],[120,9,120,10,1],[124,9,124,10,1],[126,13,126,106,1],[127,13,127,85,1],[129,13,129,79,1],[130,13,130,77,1],[133,13,133,146,1],[136,13,136,61,1],[137,13,137,75,1],[138,9,138,10,1],[142,9,142,10,1],[144,13,144,106,1],[145,13,145,85,1],[147,13,147,79,1],[148,13,148,77,1],[151,13,151,146,1],[154,13,154,61,1],[155,13,155,75,1],[156,9,156,10,1],[160,9,160,10,1],[162,13,162,105,1],[163,13,163,85,1],[165,13,165,79,1],[166,13,166,77,1],[168,13,171,15,1],[174,13,174,140,1],[177,13,177,61,1],[178,13,178,75,1],[179,9,179,10,1],[183,9,183,10,1],[185,13,185,106,1],[186,13,186,85,1],[188,13,188,79,1],[189,13,189,77,1],[191,13,194,15,1],[197,13,197,140,1],[200,13,200,51,1],[201,13,201,75,1],[202,9,202,10,1],[206,9,206,10,1],[208,13,208,105,1],[209,13,209,85,1],[211,13,211,79,1],[212,13,212,77,1],[215,13,215,146,1],[218,13,218,61,1],[219,13,219,75,1],[220,9,220,10,1],[224,9,224,10,1],[226,13,226,105,1],[227,13,227,85,1],[229,13,229,79,1],[230,13,230,77,1],[232,13,235,15,1],[238,13,238,140,1],[241,13,241,61,1],[242,13,242,75,1],[243,9,243,10,1]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\countries\countriesworkcontextbuilderextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.Model;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public static class CountriesWorkContextBuilderExtensions
+    {
+        public static Task WithCountriesAsync(this IWorkContextBuilder builder, IList&lt;Country&gt; countries)
+        {
+            builder.WorkContext.AllCountries = countries;
+            return Task.CompletedTask;
+        }
+
+        public static async Task WithCountriesAsync(this IWorkContextBuilder builder)
+        {
+            var serviceProvider = builder.HttpContext.RequestServices;
+            var countryService = serviceProvider.GetRequiredService&lt;ICountriesService&gt;();
+            var countries = await countryService.GetCountriesAsync();
+            await builder.WithCountriesAsync(countries);
+        }     
+     
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,9,11,10,0],[12,13,12,58,0],[13,13,13,39,0],[14,9,14,10,0],[17,9,17,10,0],[18,13,18,71,0],[19,13,19,90,0],[20,13,20,70,0],[21,13,21,57,0],[22,9,22,10,0]]);
+    </script>
+  </body>
+</html>

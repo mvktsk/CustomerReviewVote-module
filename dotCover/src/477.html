@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\assetcontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using System.IO;
+using System.Linq;
+using VirtoCommerce.LiquidThemeEngine;
+using VirtoCommerce.Storefront.Extensions;
+using VirtoCommerce.Storefront.Infrastructure;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.StaticContent;
+
+namespace VirtoCommerce.Storefront.Controllers
+{
+    [ResponseCache(CacheProfileName = &quot;Asset&quot;)]
+    public class AssetController : StorefrontControllerBase
+    {
+        private readonly ILiquidThemeEngine _themeEngine;
+        private readonly IContentBlobProvider _contentBlobProvider;
+        private readonly IHostingEnvironment _hostingEnvironment;
+
+        public AssetController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder, ILiquidThemeEngine themeEngine, 
+                               IContentBlobProvider staticContentBlobProvider, IHostingEnvironment hostingEnvironment)
+            : base(workContextAccessor, urlBuilder)
+        {
+            _themeEngine = themeEngine;
+            _contentBlobProvider = staticContentBlobProvider;
+            _hostingEnvironment = hostingEnvironment;
+        }
+
+        /// &lt;summary&gt;
+        /// GET: /themes/localization.json
+        /// Return localization resources for current theme
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public ActionResult GetThemeLocalizationJson()
+        {
+            var retVal = _themeEngine.ReadLocalization();
+            return Json(retVal);
+        }
+
+        /// &lt;summary&gt;
+        /// GET: /themes/assets/{*path}
+        /// Handle theme assets requests
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;path&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public ActionResult GetThemeAssets(string path)
+        {
+            var stream = _themeEngine.GetAssetStream(path);
+            return stream != null
+                ? File(stream, MimeTypes.GetMimeType(path))
+                : HandleStaticFiles(path);
+        }
+
+        /// &lt;summary&gt;
+        /// GET: /assets/{*path}
+        /// Handle all static content assets requests
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;path&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public ActionResult GetStaticContentAssets(string path)
+        {
+            var blobPath = _contentBlobProvider.Search(Path.Combine(&quot;Pages&quot;, WorkContext.CurrentStore.Id, &quot;assets&quot;), path, true).FirstOrDefault();
+            if (!string.IsNullOrEmpty(blobPath))
+            {
+                var stream = _contentBlobProvider.OpenRead(blobPath);
+                if (stream != null)
+                {
+                    return File(stream, MimeTypes.GetMimeType(blobPath));
+                }
+            }
+
+            return NotFound();
+        }
+
+        /// &lt;summary&gt;
+        /// Serve static files. This controller called from SeoRoute when it cannot find any other routes for request.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;path&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public ActionResult HandleStaticFiles(string path)
+        {
+            path = _hostingEnvironment.MapPath(&quot;~/&quot; + path);
+            var mimeType = MimeTypes.GetMimeType(path);
+            if (System.IO.File.Exists(path) &amp;&amp; mimeType != &quot;application/octet-stream&quot;)
+            {
+                return PhysicalFile(path, MimeTypes.GetMimeType(path));
+            }
+            return NotFound();
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[23,15,23,52,0],[24,9,24,10,0],[25,13,25,40,0],[26,13,26,62,0],[27,13,27,54,0],[28,9,28,10,0],[36,9,36,10,0],[37,13,37,58,0],[38,13,38,33,0],[39,9,39,10,0],[48,9,48,10,0],[49,13,49,60,0],[50,13,52,43,0],[53,9,53,10,0],[62,9,62,10,0],[63,13,63,147,0],[64,13,64,49,0],[65,13,65,14,0],[66,17,66,70,0],[67,17,67,36,0],[68,17,68,18,0],[69,21,69,74,0],[71,13,71,14,0],[73,13,73,31,0],[74,9,74,10,0],[82,9,82,10,0],[83,13,83,61,0],[84,13,84,56,0],[85,13,85,87,0],[86,13,86,14,0],[87,17,87,72,0],[89,13,89,31,0],[90,9,90,10,0]]);
+    </script>
+  </body>
+</html>

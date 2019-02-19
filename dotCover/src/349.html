@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\extensions\objectextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Newtonsoft.Json.Linq;
+
+namespace VirtoCommerce.Storefront.Common
+{
+    public static class ObjectExtensions
+    {
+        public static T JsonClone&lt;T&gt;(this T source)
+        {
+            var jObject = JObject.FromObject(source);
+            var result = jObject.ToObject&lt;T&gt;();
+            return result;
+        }
+
+        public static T JsonConvert&lt;T&gt;(this object source)
+        {
+            var jObject = JObject.FromObject(source);
+            var result = jObject.ToObject&lt;T&gt;();
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,9,8,10,0],[9,13,9,54,0],[10,13,10,48,0],[11,13,11,27,0],[12,9,12,10,0],[15,9,15,10,0],[16,13,16,54,0],[17,13,17,48,0],[18,13,18,27,0],[19,9,19,10,0]]);
+    </script>
+  </body>
+</html>

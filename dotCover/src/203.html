@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\order\events\orderplacedevent.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.Model.Cart;
+using VirtoCommerce.Storefront.Model.Common.Events;
+
+namespace VirtoCommerce.Storefront.Model.Order.Events
+{
+    /// &lt;summary&gt;
+    /// Event generated when user finished checkout process and placed new order
+    /// &lt;/summary&gt;
+    public class OrderPlacedEvent : DomainEvent
+    {
+        public OrderPlacedEvent(WorkContext workContext, CustomerOrder order, ShoppingCart cart)
+        {
+            WorkContext = workContext;
+            Cart = cart;
+            Order = order;
+        }
+        public WorkContext WorkContext { get; set; }
+        public ShoppingCart Cart { get; set; }
+        public CustomerOrder Order { get; set; }
+        
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,9,16,97,0],[17,9,17,10,0],[18,13,18,39,0],[19,13,19,25,0],[20,13,20,27,0],[21,9,21,10,0],[22,42,22,46,0],[22,47,22,51,0],[23,36,23,40,0],[23,41,23,45,0],[24,38,24,42,0],[24,43,24,47,0]]);
+    </script>
+  </body>
+</html>

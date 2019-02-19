@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\productcontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Storefront.Common;
+using VirtoCommerce.Storefront.Infrastructure;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Services;
+
+namespace VirtoCommerce.Storefront.Controllers
+{
+    public class ProductController : StorefrontControllerBase
+    {
+        private readonly ICatalogService _catalogSearchService;
+
+        public ProductController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder, ICatalogService catalogSearchService)
+            : base(workContextAccessor, urlBuilder)
+        {
+            _catalogSearchService = catalogSearchService;
+        }
+
+        /// &lt;summary&gt;
+        /// This action used by storefront to get product details by product id
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;productId&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns
+        public async Task&lt;ActionResult&gt; ProductDetails(string productId)
+        {
+            var product = (await _catalogSearchService.GetProductsAsync(new[] { productId }, WorkContext.CurrentProductResponseGroup)).FirstOrDefault();
+            WorkContext.CurrentProduct = product;
+
+            if (product != null)
+            {
+                WorkContext.CurrentPageSeo = product.SeoInfo.JsonClone();
+                WorkContext.CurrentPageSeo.Slug = product.Url;
+
+                // make sure title is set
+                if (string.IsNullOrEmpty(WorkContext.CurrentPageSeo.Title))
+                {
+                    WorkContext.CurrentPageSeo.Title = product.Name;
+                }
+
+                if (product.CategoryId != null)
+                {
+                    var category = (await _catalogSearchService.GetCategoriesAsync(new[] { product.CategoryId }, CategoryResponseGroup.Full)).FirstOrDefault();
+                    WorkContext.CurrentCategory = category;
+
+                    if (category != null)
+                    {
+                        category.Products = new MutablePagedList&lt;Product&gt;((pageNumber, pageSize, sortInfos) =&gt;
+                        {
+                            var criteria = WorkContext.CurrentProductSearchCriteria.Clone();
+                            criteria.Outline = product.GetCategoryOutline();
+                            criteria.PageNumber = pageNumber;
+                            criteria.PageSize = pageSize;
+                            if (string.IsNullOrEmpty(criteria.SortBy) &amp;&amp; !sortInfos.IsNullOrEmpty())
+                            {
+                                criteria.SortBy = SortInfo.ToString(sortInfos);
+                            }
+                            return _catalogSearchService.SearchProducts(criteria).Products;
+                        }, 1, ProductSearchCriteria.DefaultPageSize);
+                    }
+                }
+            }
+            return View(&quot;product&quot;, WorkContext);
+        }
+
+        public ActionResult Compare()
+        {
+            return View(&quot;product-compare&quot;);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,15,18,52,0],[19,9,19,10,0],[20,13,20,58,0],[21,9,21,10,0],[29,9,29,10,0],[30,13,30,153,0],[31,13,31,50,0],[33,13,33,33,0],[34,13,34,14,0],[35,17,35,74,0],[36,17,36,63,0],[39,17,39,76,0],[40,17,40,18,0],[41,21,41,69,0],[42,17,42,18,0],[44,17,44,48,0],[45,17,45,18,0],[46,21,46,160,0],[47,21,47,60,0],[49,21,49,42,0],[50,21,50,22,0],[51,25,62,70,0],[52,25,52,26,0],[53,29,53,93,0],[54,29,54,77,0],[55,29,55,62,0],[56,29,56,58,0],[57,29,57,101,0],[58,29,58,30,0],[59,33,59,80,0],[60,29,60,30,0],[61,29,61,92,0],[62,25,62,26,0],[63,21,63,22,0],[64,17,64,18,0],[65,13,65,14,0],[66,13,66,49,0],[67,9,67,10,0],[70,9,70,10,0],[71,13,71,44,0],[72,9,72,10,0]]);
+    </script>
+  </body>
+</html>

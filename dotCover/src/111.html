@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\converters\tagconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using VirtoCommerce.LiquidThemeEngine.Objects;
+using VirtoCommerce.Storefront.Model.Catalog;
+
+namespace VirtoCommerce.LiquidThemeEngine.Converters
+{
+    public static class TagConverter
+    {
+        public static Tag ToShopifyModel(this Term term)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidTag(term);
+        }
+
+        public static Tag ToShopifyModel(this AggregationItem item, Aggregation aggregation)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidTag(item, aggregation);
+        }
+    }
+
+    public partial class ShopifyModelConverter
+    {
+        public virtual Tag ToLiquidTag(Term term)
+        {
+            var result = new Tag(term.Name, term.Value);
+            return result;
+        }
+
+        public virtual Tag ToLiquidTag(AggregationItem item, Aggregation aggregation)
+        {
+            var result = new Tag(aggregation.Field, item.Value?.ToString())
+            {
+                GroupType = aggregation.AggregationType,
+                GroupLabel = aggregation.Label,
+                Label = item.Label,
+                Count = item.Count,
+                Lower = item.Lower,
+                Upper = item.Upper,
+            };
+
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,9,9,10,0],[10,13,10,57,0],[11,13,11,48,0],[12,9,12,10,0],[15,9,15,10,0],[16,13,16,57,0],[17,13,17,61,0],[18,9,18,10,0],[24,9,24,10,0],[25,13,25,57,0],[26,13,26,27,0],[27,9,27,10,0],[30,9,30,10,0],[31,13,39,15,0],[41,13,41,27,0],[42,9,42,10,0]]);
+    </script>
+  </body>
+</html>

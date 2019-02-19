@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\marketing\promotionevaluationcontext.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Security;
+
+namespace VirtoCommerce.Storefront.Model.Marketing
+{
+    /// &lt;summary&gt;
+    /// Represents context object for promotion evaluation
+    /// &lt;/summary&gt;
+    public partial class PromotionEvaluationContext : ValueObject
+    {
+        public PromotionEvaluationContext(Language language, Currency currency)
+        {
+            Language = language;
+            Currency = currency;
+        }
+            
+        public string StoreId { get; set; }
+        public Language Language { get; set; }
+        public Currency Currency { get; set; } 
+        public User User { get; set; }
+        public Cart.ShoppingCart Cart { get; set; }
+        public IList&lt;Product&gt; Products { get; set; } = new List&lt;Product&gt;();
+        public Product Product { get; set; }
+
+        protected override IEnumerable&lt;object&gt; GetEqualityComponents()
+        {
+            yield return StoreId;
+            yield return Language;
+            yield return Currency;
+            yield return User;
+            yield return Product;
+
+            if (Cart != null)
+            {
+                yield return Cart.Total;
+                yield return Cart.Coupon;
+                yield return Cart.Currency;
+                yield return Cart.Language;
+
+                if (!Cart.Items.IsNullOrEmpty())
+                {
+                    foreach (var lineItem in Cart.Items)
+                    {
+                        yield return lineItem;
+                        yield return lineItem.ProductId;
+                        yield return lineItem.Quantity;
+                        yield return lineItem.PlacedPrice;
+                        yield return lineItem.InStockQuantity;
+                    }
+                }
+                if (!Cart.Shipments.IsNullOrEmpty())
+                {
+                    foreach (var shipment in Cart.Shipments)
+                    {
+                        yield return shipment.ShipmentMethodCode;
+                        yield return shipment.ShipmentMethodOption;
+                        yield return shipment.Price;
+                    }
+                }
+                if (!Cart.Payments.IsNullOrEmpty())
+                {
+                    foreach (var shipment in Cart.Payments)
+                    {
+                        yield return shipment.PaymentGatewayCode;
+                        yield return shipment.Price;
+
+                    }
+                }
+            }
+            if (!Products.IsNullOrEmpty())
+            {
+                foreach (var product in Products)
+                {
+                    yield return product;                   
+                }
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,80,0],[14,9,14,10,0],[15,13,15,33,0],[16,13,16,33,0],[17,9,17,10,0],[19,33,19,37,0],[19,38,19,42,0],[20,36,20,40,0],[20,41,20,45,0],[21,36,21,40,0],[21,41,21,45,0],[22,28,22,32,0],[22,33,22,37,0],[23,41,23,45,0],[23,46,23,50,0],[24,42,24,46,0],[24,47,24,51,0],[24,56,24,75,0],[25,34,25,38,0],[25,39,25,43,0],[28,9,28,10,0],[29,13,29,34,0],[30,13,30,35,0],[31,13,31,35,0],[32,13,32,31,0],[33,13,33,34,0],[35,13,35,30,0],[36,13,36,14,0],[37,17,37,41,0],[38,17,38,42,0],[39,17,39,44,0],[40,17,40,44,0],[42,17,42,49,0],[43,17,43,18,0],[44,21,44,28,0],[44,30,44,42,0],[44,43,44,45,0],[44,46,44,56,0],[45,21,45,22,0],[46,25,46,47,0],[47,25,47,57,0],[48,25,48,56,0],[49,25,49,59,0],[50,25,50,63,0],[51,21,51,22,0],[52,17,52,18,0],[53,17,53,53,0],[54,17,54,18,0],[55,21,55,28,0],[55,30,55,42,0],[55,43,55,45,0],[55,46,55,60,0],[56,21,56,22,0],[57,25,57,66,0],[58,25,58,68,0],[59,25,59,53,0],[60,21,60,22,0],[61,17,61,18,0],[62,17,62,52,0],[63,17,63,18,0],[64,21,64,28,0],[64,30,64,42,0],[64,43,64,45,0],[64,46,64,59,0],[65,21,65,22,0],[66,25,66,66,0],[67,25,67,53,0],[69,21,69,22,0],[70,17,70,18,0],[71,13,71,14,0],[72,13,72,43,0],[73,13,73,14,0],[74,17,74,24,0],[74,26,74,37,0],[74,38,74,40,0],[74,41,74,49,0],[75,17,75,18,0],[76,21,76,42,0],[77,17,77,18,0],[78,13,78,14,0],[79,9,79,10,0]]);
+    </script>
+  </body>
+</html>

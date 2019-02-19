@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\stores\selectcurrentcurrencypolicy.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using VirtoCommerce.Storefront.Infrastructure;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Security;
+using VirtoCommerce.Storefront.Model.Stores;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public static class SelectCurrentCurrencyPolicy
+    {
+        public static Currency GetCurrentCurrency(this HttpContext context, IEnumerable&lt;Currency&gt; currencies, Store store)
+        {          
+            //Try get default store currency first
+            var result = currencies.FirstOrDefault(x =&gt; x.Equals(store.DefaultCurrencyCode));
+            //Try get currency from request url  
+            StringValues currencyCode;
+            if (!context.Request.Query.TryGetValue(&quot;currency&quot;, out currencyCode))
+            {
+                //Next try get from claims
+                currencyCode = context.User.FindFirstValue(SecurityConstants.Claims.CurrencyClaimType);
+            }
+            //Get store default currency if currency not in the supported by stores list
+            if (!string.IsNullOrEmpty(currencyCode))
+            {
+                result = currencies.FirstOrDefault(x =&gt; x.Equals(currencyCode.First())) ?? result;
+            }
+            return result;
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,9,16,10,0],[18,13,18,94,0],[18,57,18,92,0],[21,13,21,82,0],[22,13,22,14,0],[24,17,24,104,0],[25,13,25,14,0],[27,13,27,53,0],[28,13,28,14,0],[29,17,29,99,0],[29,57,29,87,0],[30,13,30,14,0],[31,13,31,27,0],[32,9,32,10,0]]);
+    </script>
+  </body>
+</html>

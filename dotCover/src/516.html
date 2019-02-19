@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\api\apirecommendationscontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Recommendations;
+
+namespace VirtoCommerce.Storefront.Controllers.Api
+{
+    public class ApiRecommendationsController : StorefrontControllerBase
+    {
+        private readonly IRecommendationProviderFactory _providerFactory;
+        public ApiRecommendationsController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder,
+           IRecommendationProviderFactory providerFactory) : base(workContextAccessor, urlBuilder)
+        {
+            _providerFactory = providerFactory;
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; GetRecommendations([FromBody] RecommendationEvalContext evalContext)
+        {
+            var recommendationService = _providerFactory.GetProvider(evalContext.Provider);
+            if (recommendationService == null)
+            {
+                throw new NotSupportedException(evalContext.Provider);
+            }
+            evalContext.StoreId = WorkContext.CurrentStore.Id;
+            evalContext.UserId = WorkContext.CurrentUser.Id;
+            var result = await recommendationService.GetRecommendationsAsync(evalContext);
+
+            return Json(result);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,62,14,99,0],[15,9,15,10,0],[16,13,16,48,0],[17,9,17,10,0],[22,9,22,10,0],[23,13,23,92,0],[24,13,24,47,0],[25,13,25,14,0],[26,17,26,71,0],[28,13,28,63,0],[29,13,29,61,0],[30,13,30,91,0],[32,13,32,33,0],[33,9,33,10,0]]);
+    </script>
+  </body>
+</html>

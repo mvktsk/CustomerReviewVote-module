@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\converters\transactionconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using VirtoCommerce.LiquidThemeEngine.Objects;
+using StorefrontModel = VirtoCommerce.Storefront.Model.Order;
+
+namespace VirtoCommerce.LiquidThemeEngine.Converters
+{
+    public static class TransactionConverter
+    {
+        public static Transaction ToShopifyModel(this StorefrontModel.PaymentIn payment)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidTransaction(payment);
+        }
+    }
+
+    public partial class ShopifyModelConverter
+    {
+        public virtual Transaction ToLiquidTransaction(StorefrontModel.PaymentIn payment)
+        {
+            var result = new Transaction();
+            result.Amount = payment.Sum.Amount * 100;
+            result.CreatedAt = payment.CreatedDate ?? default(DateTime);
+            result.Gateway = payment.GatewayCode;
+            result.Id = payment.Id;
+            result.Kind = payment.OperationType;
+            result.Name = payment.Number;
+            result.Receipt = payment.OuterId;
+            result.Status = payment.Status;
+            result.StatusLabel = payment.Status;
+            result.PaymentDetails = payment.Purpose;
+            return result;
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,9,10,10,0],[11,13,11,57,0],[12,13,12,59,0],[13,9,13,10,0],[19,9,19,10,0],[20,13,20,44,0],[21,13,21,54,0],[22,13,22,73,0],[23,13,23,50,0],[24,13,24,36,0],[25,13,25,49,0],[26,13,26,42,0],[27,13,27,46,0],[28,13,28,44,0],[29,13,29,49,0],[30,13,30,53,0],[31,13,31,27,0],[32,9,32,10,0]]);
+    </script>
+  </body>
+</html>

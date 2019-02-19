@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\iqueryableextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Collections;
+
+namespace VirtoCommerce.Storefront.Model.Common
+{
+    public static class IQueryableExtensions
+    {
+        public static IOrderedQueryable&lt;T&gt; OrderBy&lt;T&gt;(this IQueryable&lt;T&gt; source, string property)
+        {
+            return ApplyOrder&lt;T&gt;(source, property, &quot;OrderBy&quot;);
+        }
+        public static IOrderedQueryable&lt;T&gt; OrderByDescending&lt;T&gt;(this IQueryable&lt;T&gt; source, string property)
+        {
+            return ApplyOrder&lt;T&gt;(source, property, &quot;OrderByDescending&quot;);
+        }
+        public static IOrderedQueryable&lt;T&gt; ThenBy&lt;T&gt;(this IOrderedQueryable&lt;T&gt; source, string property)
+        {
+            return ApplyOrder&lt;T&gt;(source, property, &quot;ThenBy&quot;);
+        }
+        public static IOrderedQueryable&lt;T&gt; ThenByDescending&lt;T&gt;(this IOrderedQueryable&lt;T&gt; source, string property)
+        {
+            return ApplyOrder&lt;T&gt;(source, property, &quot;ThenByDescending&quot;);
+        }
+
+
+        public static IOrderedQueryable&lt;T&gt; OrderBySortInfos&lt;T&gt;(this IQueryable&lt;T&gt; source, SortInfo[] sortInfos)
+        {
+            if (sortInfos.IsNullOrEmpty())
+            {
+                throw new ArgumentNullException(&quot;sortInfos&quot;);
+            }
+            IOrderedQueryable&lt;T&gt; retVal = null;
+            var firstSortInfo = sortInfos.First();
+            if (firstSortInfo.SortDirection == SortDirection.Descending)
+            {
+                retVal = source.OrderByDescending(firstSortInfo.SortColumn);
+            }
+            else
+            {
+                retVal = source.OrderBy(firstSortInfo.SortColumn);
+            }
+            return retVal.ThenBySortInfos(sortInfos.Skip(1).ToArray());
+        }
+
+        public static IOrderedQueryable&lt;T&gt; ThenBySortInfos&lt;T&gt;(this IOrderedQueryable&lt;T&gt; source, SortInfo[] sortInfos)
+        {
+            var retVal = source;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                foreach (var sortInfo in sortInfos)
+                {
+                    if (sortInfo.SortDirection == SortDirection.Descending)
+                    {
+                        retVal = retVal.ThenByDescending(sortInfo.SortColumn);
+                    }
+                    else
+                    {
+                        retVal = retVal.ThenBy(sortInfo.SortColumn);
+                    }
+                }
+            }
+            return retVal;
+        }
+
+        public static IOrderedQueryable&lt;T&gt; ApplyOrder&lt;T&gt;(IQueryable&lt;T&gt; source, string property, string methodName)
+        {
+            if (property == null)
+                throw new ArgumentNullException(&quot;property&quot;);
+
+            string[] props = property.Split(&#39;.&#39;);
+            Type type = source.ElementType;
+            ParameterExpression arg = Expression.Parameter(type, &quot;x&quot;);
+            Expression expr = arg;
+            foreach (string prop in props)
+            {
+                // use reflection (not ComponentModel) to mirror LINQ
+                PropertyInfo pi = type.GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                if (pi != null)
+                {
+                    expr = Expression.Property(expr, pi);
+                    type = pi.PropertyType;
+                }
+                else
+                {
+                    return source.OrderBy(x =&gt; 1);
+                }
+            }
+            Type delegateType = typeof(Func&lt;,&gt;).MakeGenericType(typeof(T), type);
+            LambdaExpression lambda = Expression.Lambda(delegateType, expr, arg);
+
+            object result = typeof(Queryable).GetMethods().Single(
+                    method =&gt; method.Name == methodName
+                            &amp;&amp; method.IsGenericMethodDefinition
+                            &amp;&amp; method.GetGenericArguments().Length == 2
+                            &amp;&amp; method.GetParameters().Length == 2)
+                    .MakeGenericMethod(typeof(T), type)
+                    .Invoke(null, new object[] { source, lambda });
+            return (IOrderedQueryable&lt;T&gt;)result;
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,14,10,0],[15,13,15,63,0],[16,9,16,10,0],[18,9,18,10,0],[19,13,19,73,0],[20,9,20,10,0],[22,9,22,10,0],[23,13,23,62,0],[24,9,24,10,0],[26,9,26,10,0],[27,13,27,72,0],[28,9,28,10,0],[32,9,32,10,0],[33,13,33,43,0],[34,13,34,14,0],[35,17,35,62,0],[37,13,37,48,0],[38,13,38,51,0],[39,13,39,73,0],[40,13,40,14,0],[41,17,41,77,0],[42,13,42,14,0],[44,13,44,14,0],[45,17,45,67,0],[46,13,46,14,0],[47,13,47,72,0],[48,9,48,10,0],[51,9,51,10,0],[52,13,52,33,0],[53,13,53,43,0],[54,13,54,14,0],[55,17,55,24,0],[55,26,55,38,0],[55,39,55,41,0],[55,42,55,51,0],[56,17,56,18,0],[57,21,57,76,0],[58,21,58,22,0],[59,25,59,79,0],[60,21,60,22,0],[62,21,62,22,0],[63,25,63,69,0],[64,21,64,22,0],[65,17,65,18,0],[66,13,66,14,0],[67,13,67,27,0],[68,9,68,10,0],[71,9,71,10,0],[72,13,72,34,0],[73,17,73,61,0],[75,13,75,50,0],[76,13,76,44,0],[77,13,77,71,0],[78,13,78,35,0],[79,13,79,20,0],[79,22,79,33,0],[79,34,79,36,0],[79,37,79,42,0],[80,13,80,14,0],[82,17,82,129,0],[83,17,83,32,0],[84,17,84,18,0],[85,21,85,58,0],[86,21,86,44,0],[87,17,87,18,0],[89,17,89,18,0],[90,21,90,51,0],[92,13,92,14,0],[93,13,93,82,0],[94,13,94,82,0],[96,13,102,68,0],[97,31,100,66,0],[103,13,103,49,0],[104,9,104,10,0]]);
+    </script>
+  </body>
+</html>

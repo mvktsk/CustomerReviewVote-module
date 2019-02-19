@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\exceptions\storefrontexception.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace VirtoCommerce.Storefront.Model.Common.Exceptions
+{
+    public class StorefrontException : Exception
+    {
+        public string View { get; set; }
+
+        public StorefrontException(string message)
+           : this(message, null)
+        {
+        }
+        public StorefrontException(string message, string view)
+            : this(message, null, view)
+        {
+        }
+
+        public StorefrontException(string message, Exception innerException, string view)
+            : base(message, innerException)
+        {
+            View = view;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,30,11,34,0],[11,35,11,39,0],[14,14,14,33,0],[15,9,15,10,0],[16,9,16,10,0],[18,15,18,40,0],[19,9,19,10,0],[20,9,20,10,0],[23,15,23,44,0],[24,9,24,10,0],[25,13,25,25,0],[26,9,26,10,0]]);
+    </script>
+  </body>
+</html>

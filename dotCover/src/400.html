@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\quote\quotecacheregion.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.Extensions.Primitives;
+using System;
+using System.Collections.Concurrent;
+using System.Threading;
+using VirtoCommerce.Storefront.Model.Common.Caching;
+using VirtoCommerce.Storefront.Model.Quote;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public class QuoteCacheRegion : CancellableCacheRegion&lt;QuoteCacheRegion&gt;
+    {
+        private static readonly ConcurrentDictionary&lt;QuoteRequest, CancellationTokenSource&gt; _quoteRegionLookup = new ConcurrentDictionary&lt;QuoteRequest, CancellationTokenSource&gt;();
+
+        public static IChangeToken CreateChangeToken(QuoteRequest qoute)
+        {
+            if (qoute == null)
+            {
+                throw new ArgumentNullException(nameof(qoute));
+            }
+            var cancellationTokenSource = _quoteRegionLookup.GetOrAdd(qoute, new CancellationTokenSource());
+            return new CompositeChangeToken(new[] { CreateChangeToken(), new CancellationChangeToken(cancellationTokenSource.Token) });
+        }
+
+        public static void ExpireQuote(QuoteRequest qoute)
+        {
+            if (_quoteRegionLookup.TryRemove(qoute, out CancellationTokenSource token))
+            {
+                token.Cancel();
+                token.Dispose();
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,180,0],[15,9,15,10,0],[16,13,16,31,0],[17,13,17,14,0],[18,17,18,64,0],[20,13,20,109,0],[21,13,21,136,0],[22,9,22,10,0],[25,9,25,10,0],[26,13,26,88,0],[27,13,27,14,0],[28,17,28,32,0],[29,17,29,33,0],[30,13,30,14,0],[31,9,31,10,0]]);
+    </script>
+  </body>
+</html>

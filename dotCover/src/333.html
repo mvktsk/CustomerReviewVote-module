@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\infrastructure\hapcookieauthenticationevents.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Infrastructure
+{
+    public class HapCookieAuthenticationEvents : CookieAuthenticationEvents
+    {
+        public override Task RedirectToLogin(RedirectContext&lt;CookieAuthenticationOptions&gt; context)
+        {
+            if (IsAjaxRequest(context.Request))
+            {
+                context.Response.Headers[&quot;Location&quot;] = context.RedirectUri;
+                context.Response.StatusCode = 401;
+            }
+            else
+            {
+                var storefrontUrlBuilder = context.HttpContext.RequestServices.GetRequiredService&lt;IStorefrontUrlBuilder&gt;();
+                var workContextAccessor = context.HttpContext.RequestServices.GetRequiredService&lt;IWorkContextAccessor&gt;();
+
+                var workContext = workContextAccessor?.WorkContext;
+
+                var path = storefrontUrlBuilder.ToAppAbsolute(&quot;/account/login&quot;, workContext?.CurrentStore, workContext?.CurrentLanguage);
+                var query = string.Empty;
+
+                var queryIndex = context.RedirectUri?.IndexOf(&#39;?&#39;) ?? -1;
+                if (queryIndex &gt;= 0)
+                {
+                    query = context.RedirectUri?.Substring(queryIndex);
+                }
+
+                var redirectUrl = $&quot;{path}{query}&quot;;
+                context.Response.Redirect(redirectUrl);
+            }
+
+            return Task.CompletedTask;
+        }
+
+
+        private static bool IsAjaxRequest(HttpRequest request)
+        {
+            return string.Equals(request.Query[&quot;X-Requested-With&quot;], &quot;XMLHttpRequest&quot;, StringComparison.Ordinal) ||
+                   string.Equals(request.Headers[&quot;X-Requested-With&quot;], &quot;XMLHttpRequest&quot;, StringComparison.Ordinal);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,10,0],[16,13,16,48,0],[17,13,17,14,0],[18,17,18,76,0],[19,17,19,51,0],[20,13,20,14,0],[22,13,22,14,0],[23,17,23,124,0],[24,17,24,122,0],[26,17,26,68,0],[28,17,28,138,0],[29,17,29,42,0],[31,17,31,74,0],[32,17,32,37,0],[33,17,33,18,0],[34,21,34,72,0],[35,17,35,18,0],[37,17,37,52,0],[38,17,38,56,0],[39,13,39,14,0],[41,13,41,39,0],[42,9,42,10,0],[46,9,46,10,0],[47,13,48,115,0],[49,9,49,10,0]]);
+    </script>
+  </body>
+</html>

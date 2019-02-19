@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\inventory\inventoryconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using VirtoCommerce.Storefront.Common;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Inventory;
+using inventoryDto = VirtoCommerce.Storefront.AutoRestClients.InventoryModuleApi.Models;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public static class InventoryConverter
+    {
+        public static ProductInventory ToInventory(this inventoryDto.InventoryInfo inventoryDto)
+        {
+            var result = new ProductInventory
+            {
+                AllowBackorder = inventoryDto.AllowBackorder,
+                AllowPreorder = inventoryDto.AllowPreorder,
+                BackorderAvailabilityDate = inventoryDto.BackorderAvailabilityDate,
+                FulfillmentCenterId = inventoryDto.FulfillmentCenterId,
+                InStockQuantity = inventoryDto.InStockQuantity,
+                PreorderAvailabilityDate = inventoryDto.PreorderAvailabilityDate,
+                ProductId = inventoryDto.ProductId,
+                ReservedQuantity = inventoryDto.ReservedQuantity,
+
+                Status = EnumUtility.SafeParse(inventoryDto.Status, InventoryStatus.Disabled)
+            };
+
+            return result;
+        }
+
+        public static FulfillmentCenter ToFulfillmentCenter(this inventoryDto.FulfillmentCenter centerDto)
+        {
+            var result = new FulfillmentCenter
+            {
+                Name = centerDto.Name,
+                Description = centerDto.Description,
+                GeoLocation = centerDto.GeoLocation,
+                Id = centerDto.Id
+            };
+            if (centerDto.Address != null)
+            {
+                result.Address = centerDto.Address.JsonConvert&lt;AutoRestClients.CoreModuleApi.Models.Address&gt;().ToAddress();
+            }
+            return result;
+        }
+
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,9,11,10,0],[12,13,24,15,0],[26,13,26,27,0],[27,9,27,10,0],[30,9,30,10,0],[31,13,37,15,0],[38,13,38,43,0],[39,13,39,14,0],[40,17,40,124,0],[41,13,41,14,0],[42,13,42,27,0],[43,9,43,10,0]]);
+    </script>
+  </body>
+</html>

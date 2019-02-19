@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\address.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model
+{
+    public partial class Address : ValueObject
+    {
+        public AddressType Type { get; set; }
+        public string Key { get; set; }
+        public string Name { get; set; }
+        public string Organization { get; set; }
+        public string CountryCode { get; set; }
+        public string CountryName { get; set; }
+        public string City { get; set; }
+        public string PostalCode { get; set; }
+        public string Zip { get; set; }
+        public string Line1 { get; set; }
+        public string Line2 { get; set; }
+        public string RegionId { get; set; }
+        public string RegionName { get; set; }
+        public string FirstName { get; set; }
+        public string MiddleName { get; set; }
+        public string LastName { get; set; }
+        [Phone]
+        public string Phone { get; set; }
+        [EmailAddress]
+        public string Email { get; set; }
+
+        public override string ToString()
+        {
+            var retVal = string.Join(&quot; &quot;, FirstName, LastName, Organization, Line1, City, RegionName, PostalCode, CountryName);
+            return retVal;
+        }
+
+        protected override IEnumerable&lt;object&gt; GetEqualityComponents()
+        {
+            //Key and Name properties don&#39;t participate in equality
+            yield return Type;
+            yield return Organization;
+            yield return CountryCode;
+            yield return CountryName;
+            yield return PostalCode;
+            yield return Zip;
+            yield return Line1;
+            yield return Line2;
+            yield return RegionId;
+            yield return RegionName;
+            yield return FirstName;
+            yield return MiddleName;
+            yield return LastName;
+            yield return Phone;
+            yield return Email;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,35,9,39,0],[9,40,9,44,0],[10,29,10,33,0],[10,34,10,38,0],[11,30,11,34,0],[11,35,11,39,0],[12,38,12,42,0],[12,43,12,47,0],[13,37,13,41,0],[13,42,13,46,0],[14,37,14,41,0],[14,42,14,46,0],[15,30,15,34,0],[15,35,15,39,0],[16,36,16,40,0],[16,41,16,45,0],[17,29,17,33,0],[17,34,17,38,0],[18,31,18,35,0],[18,36,18,40,0],[19,31,19,35,0],[19,36,19,40,0],[20,34,20,38,0],[20,39,20,43,0],[21,36,21,40,0],[21,41,21,45,0],[22,35,22,39,0],[22,40,22,44,0],[23,36,23,40,0],[23,41,23,45,0],[24,34,24,38,0],[24,39,24,43,0],[26,31,26,35,0],[26,36,26,40,0],[28,31,28,35,0],[28,36,28,40,0],[31,9,31,10,0],[32,13,32,128,0],[33,13,33,27,0],[34,9,34,10,0],[37,9,37,10,0],[39,13,39,31,0],[40,13,40,39,0],[41,13,41,38,0],[42,13,42,38,0],[43,13,43,37,0],[44,13,44,30,0],[45,13,45,32,0],[46,13,46,32,0],[47,13,47,35,0],[48,13,48,37,0],[49,13,49,36,0],[50,13,50,37,0],[51,13,51,35,0],[52,13,52,32,0],[53,13,53,32,0],[54,9,54,10,0]]);
+    </script>
+  </body>
+</html>

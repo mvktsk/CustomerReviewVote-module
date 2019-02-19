@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\quote\quoteworkcontextbuilderextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.Extensions.DependencyInjection;
+using PagedList.Core;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Customer;
+using VirtoCommerce.Storefront.Model.Quote.Services;
+using VirtoCommerce.Storefront.Model.Security;
+using VirtoCommerce.Storefront.Model.Stores;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public static class QuoteWorkContextBuilderExtensions
+    {
+        public static Task WithQuotesAsync(this IWorkContextBuilder builder, Func&lt;Model.Quote.QuoteRequest&gt; factory)
+        {
+            builder.WorkContext.CurrentQuoteRequest = new Lazy&lt;Model.Quote.QuoteRequest&gt;(factory);
+            return Task.CompletedTask;
+        }
+
+        public static Task WithQuotesAsync(this IWorkContextBuilder builder, Store store, User user, Currency currency, Language language)
+        {
+            var serviceProvider = builder.HttpContext.RequestServices;
+            var quoteRequestBuilder = serviceProvider.GetRequiredService&lt;IQuoteRequestBuilder&gt;();
+
+            Func&lt;Model.Quote.QuoteRequest&gt; factory = () =&gt;
+             {
+                 quoteRequestBuilder.GetOrCreateNewTransientQuoteRequestAsync(store, user, language, currency).GetAwaiter().GetResult();
+                 return quoteRequestBuilder.QuoteRequest;
+             };
+            return builder.WithQuotesAsync(factory);
+        }
+
+        public static Task WithUserQuotesAsync(this IWorkContextBuilder builder, IMutablePagedList&lt;Model.Quote.QuoteRequest&gt; quotes)
+        {
+            builder.WorkContext.CurrentUser.QuoteRequests = quotes;
+            return Task.CompletedTask;
+        }
+
+        public static Task WithUserQuotesAsync(this IWorkContextBuilder builder)
+        {
+            if (builder.WorkContext.CurrentUser != null)
+            {
+                var serviceProvider = builder.HttpContext.RequestServices;
+                var quoteService = serviceProvider.GetRequiredService&lt;IQuoteService&gt;();
+
+                Func&lt;int, int, IEnumerable&lt;SortInfo&gt;, IPagedList&lt;Model.Quote.QuoteRequest&gt;&gt; factory = (pageNumber, pageSize, sortInfos) =&gt;
+                {
+                    var quoteSearchCriteria = new Model.Quote.QuoteSearchCriteria
+                    {
+                        PageNumber = pageNumber,
+                        PageSize = pageSize,
+                        Sort = sortInfos?.ToString(),
+                        CustomerId = builder.WorkContext.CurrentUser.Id
+                    };
+                    return quoteService.SearchQuotes(quoteSearchCriteria);
+                };
+                return builder.WithUserQuotesAsync(new MutablePagedList&lt;Model.Quote.QuoteRequest&gt;(factory, 1, Model.Quote.QuoteSearchCriteria.DefaultPageSize));
+            }
+            return Task.CompletedTask;
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[20,9,20,10,0],[21,13,21,99,0],[22,13,22,39,0],[23,9,23,10,0],[26,9,26,10,0],[27,13,27,71,0],[28,13,28,98,0],[30,13,34,16,0],[31,14,31,15,0],[32,18,32,137,0],[33,18,33,58,0],[34,14,34,15,0],[35,13,35,53,0],[36,9,36,10,0],[39,9,39,10,0],[40,13,40,68,0],[41,13,41,39,0],[42,9,42,10,0],[45,9,45,10,0],[46,13,46,57,0],[47,13,47,14,0],[48,17,48,75,0],[49,17,49,88,0],[51,17,61,19,0],[52,17,52,18,0],[53,21,59,23,0],[60,21,60,75,0],[61,17,61,18,0],[62,17,62,161,0],[64,13,64,39,0],[65,9,65,10,0]]);
+    </script>
+  </body>
+</html>

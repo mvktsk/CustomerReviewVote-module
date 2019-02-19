@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\security\fulldistributorauthorizationhandler.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Security;
+
+namespace VirtoCommerce.Storefront.Domain.Security
+{
+    public class FullDistributorAuthorizationRequirement : IAuthorizationRequirement
+    {
+        public const string PolicyName = &quot;FullDistributor&quot;;
+
+        public bool FullDistributorPortalEnabled { get; }
+
+        public FullDistributorAuthorizationRequirement(bool fullDistributorPortalEnabled)
+        {
+            FullDistributorPortalEnabled = fullDistributorPortalEnabled;
+        }
+    }
+
+    public class FullDistributorAuthorizationHandler : AuthorizationHandler&lt;FullDistributorAuthorizationRequirement&gt;
+    {
+        private readonly IWorkContextAccessor _workContextAccessor;
+
+        public FullDistributorAuthorizationHandler(IWorkContextAccessor workContextAccessor)
+        {
+            _workContextAccessor = workContextAccessor;
+        }
+
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, FullDistributorAuthorizationRequirement requirement)
+        {
+            // Succeed if full distributor portal is enabled or if current user is not a distributor
+            if (requirement.FullDistributorPortalEnabled || !_workContextAccessor.WorkContext.CurrentUser.UserType.EqualsInvariant(UserType.Distributor))
+            {
+                context.Succeed(requirement);
+            }
+            else
+            {
+                context.Fail();
+            }
+
+            return Task.CompletedTask;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,52,13,56,0],[15,9,15,90,0],[16,9,16,10,0],[17,13,17,73,0],[18,9,18,10,0],[25,9,25,93,0],[26,9,26,10,0],[27,13,27,56,0],[28,9,28,10,0],[31,9,31,10,0],[33,13,33,154,0],[34,13,34,14,0],[35,17,35,46,0],[36,13,36,14,0],[38,13,38,14,0],[39,17,39,32,0],[40,13,40,14,0],[42,13,42,39,0],[43,9,43,10,0]]);
+    </script>
+  </body>
+</html>

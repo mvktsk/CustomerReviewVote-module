@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\productsearchcriteria.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using DotLiquid;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    [DataContract]
+    public partial class ProductSearchCriteria : Drop
+    {
+        [DataMember]
+        public string SortBy { get; set; }
+
+        [DataMember]
+        public string Keyword { get; set; }
+
+        [DataMember]
+        public int PageNumber { get; set; }
+
+        [DataMember]
+        public int PageSize { get; set; }
+
+        [DataMember]
+        public TagCollection CurrentTags { get; set; }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,32,11,36,0],[11,37,11,41,0],[14,33,14,37,0],[14,38,14,42,0],[17,33,17,37,0],[17,38,17,42,0],[20,31,20,35,0],[20,36,20,40,0],[23,44,23,48,0],[23,49,23,53,0]]);
+    </script>
+  </body>
+</html>

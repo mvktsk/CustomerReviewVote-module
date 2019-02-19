@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\api\apioutletscontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Linq;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Storefront.Domain.Customer;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Controllers.Api
+{
+    public class ApiOutletsController : StorefrontControllerBase
+    {
+        public ApiOutletsController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder)
+            : base(workContextAccessor, urlBuilder)
+        {
+        }
+
+        // POST: storefrontapi/outlets/current/{outletId}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ChangeOutlet(string outletId)
+        {
+            var outlet = WorkContext?.CurrentUser?.Contact?.Outlets?.FirstOrDefault(o =&gt; o.Id.EqualsInvariant(outletId));
+            if (outlet != null)
+            {
+                Response.Cookies.Append(HruCookies.CurrentOutletId, outlet.Id, new CookieOptions { IsEssential = true });
+            }
+
+            return Ok();
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,15,13,52,0],[14,9,14,10,0],[15,9,15,10,0],[21,9,21,10,0],[22,13,22,122,0],[22,90,22,120,0],[23,13,23,32,0],[24,13,24,14,0],[25,17,25,122,0],[26,13,26,14,0],[28,13,28,25,0],[29,9,29,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\filters\stringfilters.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using DotLiquid;
+using DotLiquid.Util;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.LiquidThemeEngine.Filters
+{
+    /// &lt;summary&gt;
+    /// String filters are used to manipulate outputs and variables of the string type.
+    /// https://docs.shopify.com/themes/liquid-documentation/filters/string-filters
+    /// &lt;/summary&gt;
+    public class StringFilters
+    {
+        private static readonly Regex TagSyntax = R.B(R.Q(@&quot;([A-Za-z0-9]+)_([A-Za-z0-9].+)&quot;));
+        private static readonly Regex WordReplaceSyntax = R.B(R.Q(@&quot;[^\w\s-]&quot;));
+        private static readonly Regex WordReplaceSyntax2 = R.B(R.Q(@&quot;[\s-]+&quot;));
+
+        /// &lt;summary&gt;
+        /// Converts a string into CamelCase.
+        /// {{ &#39;coming-soon&#39; | camelcase }}
+        /// Result - ComingSoon
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string Camelize(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+
+            string result = &quot;&quot;;
+
+            string[] strArray = input.Split(&#39;_&#39;, &#39;-&#39;);
+            foreach (string word in strArray)
+            {
+                result += word.Substring(0, 1).ToUpper() + word.Substring(1);
+            }
+            return result;
+        }
+
+        /// &lt;summary&gt;
+        /// Formats a string into a handle.
+        /// Input
+        ///{{ &#39;100% M &amp; Ms!!!&#39; | handleize }}
+        /// Output
+        /// 100-m-ms
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string Handleize(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+
+           return input.Handelize();
+        }
+
+        /// &lt;summary&gt;
+        /// Converts a string into an MD5 hash.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string Md5(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+
+            byte[] hash;
+            using (var md5 = MD5.Create())
+            {
+                hash = md5.ComputeHash(Encoding.UTF8.GetBytes(input));
+            }
+
+            return hash.ToHex(upperCase: false);
+        }
+
+        /// &lt;summary&gt;
+        /// Outputs the singular or plural version of a string based on the value of a number. The first parameter is the singular string and the second parameter is the plural string.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;singular&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;plural&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string Pluralize(int input, string singular, string plural)
+        {
+            return input == 1 ? singular : plural;
+        }
+
+
+        /// &lt;summary&gt;
+        /// Strips tabs, spaces, and newlines (all whitespace) from the left and right side of a string.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string Strip(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+
+            return input.Trim();
+        }
+
+        public static string Format(object input, string format)
+        {
+            if (input == null)
+                return null;
+            else if (string.IsNullOrWhiteSpace(format))
+                return input.ToString();
+
+            return string.Format(&quot;{0:&quot; + format + &quot;}&quot;, input);
+        }
+
+    }
+
+    public class RubyContractResolver : DefaultContractResolver
+    {
+        #region Methods
+        protected override string ResolvePropertyName(string propertyName)
+        {
+            return Template.NamingConvention.GetMemberName(propertyName);
+        }
+        #endregion
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[22,9,22,95,0],[23,9,23,81,0],[24,9,24,80,0],[34,9,34,10,0],[35,13,35,45,0],[36,13,36,14,0],[37,17,37,30,0],[40,13,40,32,0],[42,13,42,55,0],[43,13,43,20,0],[43,22,43,33,0],[43,34,43,36,0],[43,37,43,45,0],[44,13,44,14,0],[45,17,45,78,0],[46,13,46,14,0],[47,13,47,27,0],[48,9,48,10,0],[60,9,60,10,0],[61,13,61,45,0],[62,13,62,14,0],[63,17,63,30,0],[66,12,66,37,0],[67,9,67,10,0],[75,9,75,10,0],[76,13,76,45,0],[77,13,77,14,0],[78,17,78,30,0],[82,20,82,42,0],[83,13,83,14,0],[84,17,84,71,0],[85,13,85,14,0],[87,13,87,49,0],[88,9,88,10,0],[98,9,98,10,0],[99,13,99,51,0],[100,9,100,10,0],[109,9,109,10,0],[110,13,110,45,0],[111,13,111,14,0],[112,17,112,30,0],[115,13,115,33,0],[116,9,116,10,0],[119,9,119,10,0],[120,13,120,31,0],[121,17,121,29,0],[122,18,122,56,0],[123,17,123,41,0],[125,13,125,63,0],[126,9,126,10,0],[134,9,134,10,0],[135,13,135,74,0],[136,9,136,10,0]]);
+    </script>
+  </body>
+</html>

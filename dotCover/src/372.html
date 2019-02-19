@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\common\seoinfoconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using VirtoCommerce.Storefront.Model;
+using coreDto = VirtoCommerce.Storefront.AutoRestClients.CoreModuleApi.Models;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public static class SeoInfoConverter
+    {
+        public static SeoInfo ToSeoInfo(this coreDto.SeoInfo seoDto)
+        {
+            var retVal = new SeoInfo
+            {
+                MetaDescription = seoDto.MetaDescription,
+                MetaKeywords = seoDto.MetaKeywords,
+
+                Slug = seoDto.SemanticUrl,
+                Title = seoDto.PageTitle,
+                Language = string.IsNullOrEmpty(seoDto.LanguageCode) ? Language.InvariantLanguage : new Language(seoDto.LanguageCode)
+            };
+            return retVal;
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,9,9,10,0],[10,13,18,15,0],[19,13,19,27,0],[20,9,20,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\product.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using DotLiquid;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// Represents the product object
+    /// &lt;/summary&gt;
+    /// &lt;remarks&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/objects/product
+    /// &lt;/remarks&gt;
+    [DataContract]
+    public partial class Product : Drop
+    {
+        public Product()
+        {
+            Variants = new List&lt;Variant&gt;();
+            Properties = new List&lt;ProductProperty&gt;();
+        }
+
+        /// &lt;summary&gt;
+        /// Returns the value of product category ID
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string CategoryId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the value of product catalog ID
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string CatalogId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns true if a product is available for purchase.
+        /// Returns false if all of the products variants&#39; inventory_quantity values are zero or less,
+        /// and their inventory_policy is not set to &quot;Allow users to purchase this item,
+        /// even if it is no longer in stock.&quot;
+        /// &lt;/summary&gt;
+        [DataMember]
+        public bool Available { get; set; }
+
+         /// &lt;summary&gt;
+         ///  Returns true if a product is buyable
+         /// &lt;/summary&gt;
+        [DataMember]
+        public bool Buyable { get; set; }
+  
+        /// &lt;summary&gt;
+        ///  Returns true if a product is instock
+        /// &lt;/summary&gt;
+        [DataMember]
+        public bool InStock { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the compare at price. Use one of the money filters to return
+        /// the value in a monetary format.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal CompareAtPrice { get; set; }
+        [DataMember]
+        public decimal CompareAtPriceWithTax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the highest compare at price. Use one of the money filters to return
+        /// the value in a monetary format.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal CompareAtPriceMax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the lowest compare at price. Use one of the money filters to return
+        /// the value in a monetary format.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal CompareAtPriceMin { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns true if the compare_at_price_min is different from the compare_at_price_max.
+        /// Returns false if they are the same.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public bool CompareAtPriceVaries { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the description of the product. Alias for product.description.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Content { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the description of the product.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Description { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the collection of product descriptions: FullReview, QuickReview, etc.
+        /// &lt;/summary&gt;
+        public Descriptions Descriptions { get; set; }
+
+        /// &lt;summary&gt;
+        /// The main product image 
+        /// &lt;/summary&gt;
+        [DataMember]
+        public Image FeaturedImage { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the variant object of the first product variant that is available for purchase. 
+        /// In order for a variant to be available, its variant.inventory_quantity must be greater than zero or
+        /// variant.inventory_policy must be set to continue. 
+        /// A variant with no inventory_policy is considered available.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public Variant FirstAvailableVariant { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the handle of a product.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Handle { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the id of the product.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Id { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns an array of the product&#39;s images. Use the product_img_url filter to link to the product image.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public Image[] Images { get; set; }
+
+        public MetaFieldNamespacesCollection Metafields { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns an array of the product&#39;s options. (Color Size Material)
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string[] Options { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the price of the product. Use one of the money filters to return the value in a
+        /// monetary format.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal Price { get; set; }
+        [DataMember]
+        public decimal PriceWithTax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the highest price of the product. Use one of the money filters to return
+        /// the value in a monetary format.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal PriceMax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the lowest price of the product. Use one of the money filters to return
+        /// the value in a monetary format.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal PriceMin { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns true if the product&#39;s variants have varying prices.
+        /// Returns false if all of the product&#39;s variants have the same price.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public bool PriceVaries { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the variant object of the currently-selected variant if there is a valid
+        /// ?variant=query parameter in the URL. If there is no selected variant,
+        /// the first available variant is returned. In order for a variant to be available,
+        /// its variant.inventory_quantity must be greater than zero or variant.inventory_policy
+        /// must be set to continue. A variant with no inventory_management is considered available.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public Variant SelectedOrFirstAvailableVariant
+        {
+            get
+            {
+                return SelectedVariant ?? FirstAvailableVariant;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Returns the variant object of the currently-selected variant if there is a valid
+        /// ?variant= parameter in the URL. Returns nil if there is not.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public Variant SelectedVariant { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns an array of all of the product&#39;s tags. The tags are returned in alphabetical order.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string[] Tags { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the name of the custom product template assigned to the product, without the product.
+        /// prefix nor the .liquid suffix. Returns nil if a custom template is not assigned to the product.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string TemplateSuffix { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the title of the product.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Title { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the type of the product.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Type { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the relative URL of the product.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Url { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns an array the product&#39;s variants.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public IList&lt;Variant&gt; Variants { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns a collection of product properties
+        /// &lt;/summary&gt;
+        public IList&lt;ProductProperty&gt; Properties { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the vendor of the product. 
+        /// &lt;/summary&gt;
+        [DataMember]
+        public Vendor Vendor { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the sign of product can be added to quote request
+        /// &lt;/summary&gt;
+        [DataMember]
+        public bool IsQuotable { get; set; }
+
+        [DataMember]
+        public string TaxType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the collection of related products
+        /// &lt;/summary&gt;
+        public IMutablePagedList&lt;Product&gt; RelatedProducts { get; set; }
+
+
+        /// &lt;summary&gt;
+        /// Weight unit (for physical product only)
+        /// &lt;/summary&gt;
+        public string WeightUnit { get; set; }
+
+        /// &lt;summary&gt;
+        /// Weight of product (for physical product only)
+        /// &lt;/summary&gt;
+        public decimal? Weight { get; set; }
+
+        /// &lt;summary&gt;
+        /// Package type
+        /// &lt;/summary&gt;
+        public string PackageType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Package size
+        /// &lt;/summary&gt;
+        public int PackageSize { get; set; }
+        /// &lt;summary&gt;
+        /// Dimensions measure unit of size (for physical product only)
+        /// &lt;/summary&gt;
+        public string MeasureUnit { get; set; }
+
+        /// &lt;summary&gt;
+        /// Height of product size (for physical product only)
+        /// &lt;/summary&gt;
+        public decimal? Height { get; set; }
+
+        /// &lt;summary&gt;
+        /// Length of product size (for physical product only)
+        /// &lt;/summary&gt;
+        public decimal? Length { get; set; }
+
+        /// &lt;summary&gt;
+        /// Width of product size (for physical product only)
+        /// &lt;/summary&gt;
+        public decimal? Width { get; set; }
+
+        /// &lt;summary&gt;
+        /// All parent categories ids concatenated with &quot;/&quot;. E.g. (1/21/344)
+        /// &lt;/summary&gt;
+        public string Outline { get; set; }
+
+
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,9,17,25,0],[18,9,18,10,0],[19,13,19,44,0],[20,13,20,54,0],[21,9,21,10,0],[27,36,27,40,0],[27,41,27,45,0],[33,35,33,39,0],[33,40,33,44,0],[42,33,42,37,0],[42,38,42,42,0],[48,31,48,35,0],[48,36,48,40,0],[54,31,54,35,0],[54,36,54,40,0],[61,41,61,45,0],[61,46,61,50,0],[63,48,63,52,0],[63,53,63,57,0],[70,44,70,48,0],[70,49,70,53,0],[77,44,77,48,0],[77,49,77,53,0],[84,44,84,48,0],[84,49,84,53,0],[90,33,90,37,0],[90,38,90,42,0],[96,37,96,41,0],[96,42,96,46,0],[101,44,101,48,0],[101,49,101,53,0],[107,38,107,42,0],[107,43,107,47,0],[116,48,116,52,0],[116,53,116,57,0],[122,32,122,36,0],[122,37,122,41,0],[128,28,128,32,0],[128,33,128,37,0],[134,33,134,37,0],[134,38,134,42,0],[136,59,136,63,0],[136,64,136,68,0],[142,35,142,39,0],[142,40,142,44,0],[149,32,149,36,0],[149,37,149,41,0],[151,39,151,43,0],[151,44,151,48,0],[158,35,158,39,0],[158,40,158,44,0],[165,35,165,39,0],[165,40,165,44,0],[172,35,172,39,0],[172,40,172,44,0],[185,13,185,14,0],[186,17,186,65,0],[187,13,187,14,0],[195,42,195,46,0],[195,47,195,51,0],[201,32,201,36,0],[201,37,201,41,0],[208,40,208,44,0],[208,45,208,49,0],[214,31,214,35,0],[214,36,214,40,0],[220,30,220,34,0],[220,35,220,39,0],[226,29,226,33,0],[226,34,226,38,0],[232,42,232,46,0],[232,47,232,51,0],[237,52,237,56,0],[237,57,237,61,0],[243,32,243,36,0],[243,37,243,41,0],[249,34,249,38,0],[249,39,249,43,0],[252,33,252,37,0],[252,38,252,42,0],[257,61,257,65,0],[257,66,257,70,0],[263,36,263,40,0],[263,41,263,45,0],[268,34,268,38,0],[268,39,268,43,0],[273,37,273,41,0],[273,42,273,46,0],[278,34,278,38,0],[278,39,278,43,0],[282,37,282,41,0],[282,42,282,46,0],[287,34,287,38,0],[287,39,287,43,0],[292,34,292,38,0],[292,39,292,43,0],[297,33,297,37,0],[297,38,297,42,0],[302,33,302,37,0],[302,38,302,42,0]]);
+    </script>
+  </body>
+</html>

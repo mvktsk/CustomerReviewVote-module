@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\countries\filesystemcountriesservice.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Caching;
+using VirtoCommerce.Storefront.Model.Common.Caching;
+using VirtoCommerce.Storefront.Model.Common.Exceptions;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public class FileSystemCountriesService : ICountriesService
+    {
+        private readonly FileSystemCountriesOptions _options;
+        private readonly IStorefrontMemoryCache _memoryCache;
+        public FileSystemCountriesService(IStorefrontMemoryCache cacheManager, IOptions&lt;FileSystemCountriesOptions&gt; options)
+        {
+            _options = options.Value;
+            _memoryCache = cacheManager;
+        }
+        #region IKnowCountriesProvider members
+        public async Task&lt;IList&lt;Country&gt;&gt; GetCountriesAsync()
+        {
+            if (_options == null)
+            {
+                throw new StorefrontException(&quot;the path to countries json file not set&quot;);
+            }
+
+            var cacheKey = CacheKey.With(GetType(), &quot;GetCountries&quot;);
+            return await _memoryCache.GetOrCreateAsync(cacheKey, async (cacheEntry) =&gt;
+            {
+                List&lt;Country&gt; result = new List&lt;Country&gt;();
+
+                var regions = CultureInfo.GetCultures(CultureTypes.SpecificCultures)
+                    .Select(GetRegionInfo)
+                    .Where(r =&gt; r != null)
+                    .ToList();
+
+                if (_options != null)
+                {
+                    var countriesJson = await File.ReadAllTextAsync(_options.FilePath);
+                    var countriesDict = JsonConvert.DeserializeObject&lt;Dictionary&lt;string, JObject&gt;&gt;(countriesJson);
+
+                    result = countriesDict
+                        .Select(kvp =&gt; ParseCountry(kvp, regions))
+                        .Where(c =&gt; c.Code3 != null)
+                        .ToList();
+                }
+                return result;
+            });
+
+        }
+        #endregion
+
+        protected static RegionInfo GetRegionInfo(CultureInfo culture)
+        {
+            RegionInfo result = null;
+
+            try
+            {
+                result = new RegionInfo(culture.LCID);
+            }
+            catch
+            {
+                // ignored
+            }
+
+            return result;
+        }
+
+        protected static Country ParseCountry(KeyValuePair&lt;string, JObject&gt; pair, List&lt;RegionInfo&gt; regions)
+        {
+            var region = regions.FirstOrDefault(r =&gt; string.Equals(r.EnglishName, pair.Key, StringComparison.OrdinalIgnoreCase));
+
+            var country = new Country
+            {
+                Name = pair.Key,
+                Code2 = region?.TwoLetterISORegionName ?? string.Empty,
+                Code3 = region?.ThreeLetterISORegionName ?? string.Empty,
+                RegionType = pair.Value[&quot;label&quot;]?.ToString()
+            };
+
+            var provinceCodes = pair.Value[&quot;province_codes&quot;].ToObject&lt;Dictionary&lt;string, string&gt;&gt;();
+            if (provinceCodes != null &amp;&amp; provinceCodes.Any())
+            {
+                country.Regions = provinceCodes
+                    .Select(kvp =&gt; new CountryRegion { Name = kvp.Key, Code = kvp.Value })
+                    .ToArray();
+            }
+
+            return country;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[22,9,22,125,0],[23,9,23,10,0],[24,13,24,38,0],[25,13,25,41,0],[26,9,26,10,0],[29,9,29,10,0],[30,13,30,34,0],[31,13,31,14,0],[32,17,32,90,0],[35,13,35,69,0],[36,13,56,16,0],[37,13,37,14,0],[38,17,38,60,0],[40,17,43,31,0],[42,33,42,42,0],[45,17,45,38,0],[46,17,46,18,0],[47,21,47,88,0],[48,21,48,115,0],[50,21,53,35,0],[51,40,51,66,0],[52,37,52,52,0],[54,17,54,18,0],[55,17,55,31,0],[56,13,56,14,0],[58,9,58,10,0],[62,9,62,10,0],[63,13,63,38,0],[66,13,66,14,0],[67,17,67,55,0],[68,13,68,14,0],[69,13,69,18,0],[70,13,70,14,0],[72,13,72,14,0],[74,13,74,27,0],[75,9,75,10,0],[78,9,78,10,0],[79,13,79,130,0],[79,54,79,128,0],[81,13,87,15,0],[89,13,89,101,0],[90,13,90,62,0],[91,13,91,14,0],[92,17,94,32,0],[93,36,93,90,0],[95,13,95,14,0],[97,13,97,28,0],[98,9,98,10,0]]);
+    </script>
+  </body>
+</html>

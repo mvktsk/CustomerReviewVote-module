@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\stores\store.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model.Stores
+{
+    /// &lt;summary&gt;
+    /// Represent store - main ecommerce aggregate unit
+    /// &lt;/summary&gt;
+    public partial class Store : Entity, IHasSettings
+    {
+        public Store()
+        {
+            Languages = new List&lt;Language&gt;();
+            CurrenciesCodes = new List&lt;string&gt;();
+            SeoInfos = new List&lt;SeoInfo&gt;();
+            DynamicProperties = new List&lt;DynamicProperty&gt;();
+            Settings = new List&lt;SettingEntry&gt;();
+            AvailFulfillmentCenterIds = new List&lt;string&gt;();
+            TrustedGroups = new List&lt;string&gt;();
+        }
+
+        public string Name { get; set; }
+
+        public string Description { get; set; }
+
+        /// &lt;summary&gt;
+        /// Url of store storefront
+        /// &lt;/summary&gt;
+        public string Url { get; set; }
+
+        /// &lt;summary&gt;
+        /// Secure url of store, must use https protocol, required
+        /// &lt;/summary&gt;
+        public string SecureUrl { get; set; }
+
+        /// &lt;summary&gt;
+        /// State of store (open, closing, maintenance)
+        /// &lt;/summary&gt;
+        public StoreStatus StoreState { get; set; }
+
+        public int MinimumOrderItemsQuantity =&gt; Settings.GetSettingValue(&quot;Hru.Orders.MinimumOrderItemsQuantity&quot;, 0);
+
+        public string TimeZone { get; set; }
+
+        public string Country { get; set; }
+
+        public string Region { get; set; }
+
+        /// &lt;summary&gt;
+        /// Default Language culture name  of store ( example en-US )
+        /// &lt;/summary&gt;
+        public Language DefaultLanguage { get; set; }
+        /// &lt;summary&gt;
+        /// All supported languages
+        /// &lt;/summary&gt;
+        public IList&lt;Language&gt; Languages { get; set; }
+
+        /// &lt;summary&gt;
+        /// Default currency of store. 
+        /// Achtung ! Do not use Currency objects here, because Store object can be cached but Currency may be changed depend on request culture.
+        /// &lt;/summary&gt;
+        public string DefaultCurrencyCode { get; set; }
+        /// &lt;summary&gt;
+        /// List of all supported currencies codes
+        /// &lt;/summary&gt;
+        public IList&lt;string&gt; CurrenciesCodes { get; set; }
+
+        /// &lt;summary&gt;
+        /// Product catalog id assigned to store
+        /// &lt;/summary&gt;
+        public string Catalog { get; set; }
+
+        /// &lt;summary&gt;
+        /// Contact email of store
+        /// &lt;/summary&gt;
+        public string Email { get; set; }
+
+        /// &lt;summary&gt;
+        /// Administrator contact email of store
+        /// &lt;/summary&gt;
+        public string AdminEmail { get; set; }
+
+        /// &lt;summary&gt;
+        /// Store theme name
+        /// &lt;/summary&gt;
+        public string ThemeName { get; set; }
+
+        public IList&lt;DynamicProperty&gt; DynamicProperties { get; set; }
+
+        /// &lt;summary&gt;
+        /// All store seo informations for all languages
+        /// &lt;/summary&gt;
+        public IList&lt;SeoInfo&gt; SeoInfos { get; set; }
+
+        /// &lt;summary&gt;
+        /// All linked stores (their accounts can be reused here)
+        /// &lt;/summary&gt;
+        public IList&lt;string&gt; TrustedGroups { get; set; }
+
+        /// &lt;summary&gt;
+        /// Main (default)  fulfillment center
+        /// &lt;/summary&gt;
+        public string DefaultFulfillmentCenterId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Additional fulfillment centers
+        /// &lt;/summary&gt;
+        public IList&lt;string&gt; AvailFulfillmentCenterIds { get; set; }
+
+        public bool QuotesEnabled
+        {
+            get
+            {
+                return Settings.GetSettingValue(&quot;Quotes.EnableQuotes&quot;, false);
+            }
+        }
+
+        public bool SubscriptionEnabled
+        {
+            get
+            {
+                return Settings.GetSettingValue(&quot;Subscription.EnableSubscriptions&quot;, false);
+            }
+        }
+
+        public bool TaxCalculationEnabled
+        {
+            get
+            {
+                return Settings.GetSettingValue(&quot;Stores.TaxCalculationEnabled&quot;, true);
+            }
+        }
+
+        public bool CheckAvailability =&gt; Settings.GetSettingValue(&quot;Hap.Products.CheckAvailability&quot;, true);
+
+        #region IHasSettings Members
+
+        public IList&lt;SettingEntry&gt; Settings { get; set; }
+
+        #endregion
+
+        public SeoLinksType SeoLinksType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Checks if specified URL starts with store URL or store secure URL.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;url&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public bool IsStoreUrl(Uri url)
+        {
+            var result = false;
+
+            var requestAddress = url.ToString();
+
+            if (!string.IsNullOrEmpty(Url))
+            {
+                result = requestAddress.StartsWith(Url, StringComparison.InvariantCultureIgnoreCase);
+            }
+
+            if (!result &amp;&amp; !string.IsNullOrEmpty(SecureUrl))
+            {
+                result = requestAddress.StartsWith(SecureUrl, StringComparison.InvariantCultureIgnoreCase);
+            }
+
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,23,0],[13,9,13,10,0],[14,13,14,46,0],[15,13,15,50,0],[16,13,16,44,0],[17,13,17,61,0],[18,13,18,49,0],[19,13,19,60,0],[20,13,20,48,0],[21,9,21,10,0],[23,30,23,34,0],[23,35,23,39,0],[25,37,25,41,0],[25,42,25,46,0],[30,29,30,33,0],[30,34,30,38,0],[35,35,35,39,0],[35,40,35,44,0],[40,41,40,45,0],[40,46,40,50,0],[42,49,42,116,0],[44,34,44,38,0],[44,39,44,43,0],[46,33,46,37,0],[46,38,46,42,0],[48,32,48,36,0],[48,37,48,41,0],[53,43,53,47,0],[53,48,53,52,0],[57,44,57,48,0],[57,49,57,53,0],[63,45,63,49,0],[63,50,63,54,0],[67,48,67,52,0],[67,53,67,57,0],[72,33,72,37,0],[72,38,72,42,0],[77,31,77,35,0],[77,36,77,40,0],[82,36,82,40,0],[82,41,82,45,0],[87,35,87,39,0],[87,40,87,44,0],[89,59,89,63,0],[89,64,89,68,0],[94,42,94,46,0],[94,47,94,51,0],[99,46,99,50,0],[99,51,99,55,0],[104,52,104,56,0],[104,57,104,61,0],[109,58,109,62,0],[109,63,109,67,0],[114,13,114,14,0],[115,17,115,79,0],[116,13,116,14,0],[122,13,122,14,0],[123,17,123,92,0],[124,13,124,14,0],[130,13,130,14,0],[131,17,131,87,0],[132,13,132,14,0],[135,42,135,106,0],[139,47,139,51,0],[139,52,139,56,0],[143,44,143,48,0],[143,49,143,53,0],[151,9,151,10,0],[152,13,152,32,0],[154,13,154,49,0],[156,13,156,44,0],[157,13,157,14,0],[158,17,158,102,0],[159,13,159,14,0],[161,13,161,61,0],[162,13,162,14,0],[163,17,163,108,0],[164,13,164,14,0],[166,13,166,27,0],[167,9,167,10,0]]);
+    </script>
+  </body>
+</html>

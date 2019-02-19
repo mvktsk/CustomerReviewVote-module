@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\marketing\carouselbanner.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace VirtoCommerce.Storefront.Model.Marketing
+{
+    public class CarouselBanner
+    {
+        public bool IsActive { get; set; }
+        public string BackgroundImageUrl { get; set; }
+        public string OverlayImageUrl { get; set; }
+        public string Label { get; set; }
+        public string Title { get; set; }
+        public string Subtitle { get; set; }
+        public string ButtonTitle { get; set; }
+        public string ButtonLink { get; set; }
+        public bool HasOwner { get; set; }
+
+        public string Code
+        {
+            get
+            {
+                return HasOwner ? ButtonLink.Substring(ButtonLink.LastIndexOf(&#39;/&#39;)) : null;
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[5,32,5,36,0],[5,37,5,41,0],[6,44,6,48,0],[6,49,6,53,0],[7,41,7,45,0],[7,46,7,50,0],[8,31,8,35,0],[8,36,8,40,0],[9,31,9,35,0],[9,36,9,40,0],[10,34,10,38,0],[10,39,10,43,0],[11,37,11,41,0],[11,42,11,46,0],[12,36,12,40,0],[12,41,12,45,0],[13,32,13,36,0],[13,37,13,41,0],[18,13,18,14,0],[19,17,19,92,0],[20,13,20,14,0]]);
+    </script>
+  </body>
+</html>
