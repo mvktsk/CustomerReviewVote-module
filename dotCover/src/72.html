@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\variant.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using DotLiquid;
+using System.Runtime.Serialization;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// Represents product variant object
+    /// &lt;/summary&gt;
+    /// &lt;remarks&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/objects/variant
+    /// &lt;/remarks&gt;
+    [DataContract]
+    public partial class Variant : Drop
+    {
+        public Variant()
+        {
+        }
+
+        /// &lt;summary&gt;
+        /// Returns the value of variant category ID
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string CategoryId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the value of variant catalog ID
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string CatalogId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns true if the variant is available to be purchased, or false if it not. 
+        /// In order for a variant to be available, its variant.inventory_quantity must be
+        /// greater than zero or variant.inventory_policy must be set to continue. 
+        /// A variant with no variant.inventory_management is also considered available.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public bool Available { get; set; }
+
+        /// &lt;summary&gt;
+        ///  Returns true if a product is buyable
+        /// &lt;/summary&gt;
+        [DataMember]
+        public bool Buyable { get; set; }
+  
+        /// &lt;summary&gt;
+        ///  Returns true if a product is instock
+        /// &lt;/summary&gt;
+        [DataMember]
+        public bool InStock { get; set; }
+        /// &lt;summary&gt;
+        /// Returns the variant&#39;s barcode.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Barcode { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the variant&#39;s compare at price. Use one of the money filters to return
+        /// the value in a monetary format.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal CompareAtPrice { get; set; }
+        [DataMember]
+        public decimal CompareAtPriceWithTax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the variant&#39;s unique id.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Id { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the image object associated to the variant.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public Image FeaturedImage { get; set; }
+
+        public Image Image { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the variant&#39;s inventory tracking service.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string InventoryManagement { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the string continue if the &quot;Allow users to purchase this item,
+        /// even if it is no longer in stock.&quot;
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string InventoryPolicy { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the variant&#39;s inventory quantity.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public long InventoryQuantity { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the array of product variant options
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string[] Options { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the value of the variant&#39;s first option.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Option1
+        {
+            get
+            {
+                if (this.Options == null) return null;
+                return this.Options.Length &gt;= 1 ? this.Options[0] : null;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Returns the value of the variant&#39;s second option.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Option2
+        {
+            get
+            {
+                if (this.Options == null) return null;
+                return this.Options.Length &gt;= 2 ? this.Options[1] : null;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Returns the value of the variant&#39;s third option.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Option3
+        {
+            get
+            {
+                if (this.Options == null) return null;
+                return this.Options.Length &gt;= 3 ? this.Options[2] : null;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Returns the variant&#39;s price. Use one of the money filters to return the value in a monetary format.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal Price { get; set; }
+        [DataMember]
+        public decimal PriceWithTax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns true if the variant is currently selected by the ?variant= URL parameter.
+        /// Returns false if the variant is not selected by a URL parameter.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public bool Selected { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the variant&#39;s SKU.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Sku { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the concatenation of all the variant&#39;s option values, joined by a /.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Title { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns product variant URL
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Url { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the variant&#39;s weight in grams. Use the weight_with_unit filter to convert it
+        /// to the shop&#39;s weight format or the weight unit configured on the variant.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal Weight { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the unit for the weight configured on the variant. Works well paired with
+        /// the weight_in_unit attribute and the weight_with_unit filter.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string WeightUnit { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the weight of the product converted to the unit configured on the variant.
+        /// Works well paired with the weight_unit attribute and the weight_with_unit filter.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string WeightInUnit { get; set; }
+        
+        /// &lt;summary&gt;
+        /// Package type
+        /// &lt;/summary&gt;
+        public string PackageType { get; set; }
+        /// &lt;summary&gt;
+        /// Dimensions measure unit of size (for physical product only)
+        /// &lt;/summary&gt;
+        public string MeasureUnit { get; set; }
+
+        /// &lt;summary&gt;
+        /// Height of product size (for physical product only)
+        /// &lt;/summary&gt;
+        public decimal? Height { get; set; }
+
+        /// &lt;summary&gt;
+        /// Length of product size (for physical product only)
+        /// &lt;/summary&gt;
+        public decimal? Length { get; set; }
+
+        /// &lt;summary&gt;
+        /// Width of product size (for physical product only)
+        /// &lt;/summary&gt;
+        public decimal? Width { get; set; }
+
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,25,0],[16,9,16,10,0],[17,9,17,10,0],[23,36,23,40,0],[23,41,23,45,0],[29,35,29,39,0],[29,40,29,44,0],[38,33,38,37,0],[38,38,38,42,0],[44,31,44,35,0],[44,36,44,40,0],[50,31,50,35,0],[50,36,50,40,0],[55,33,55,37,0],[55,38,55,42,0],[62,41,62,45,0],[62,46,62,50,0],[64,48,64,52,0],[64,53,64,57,0],[70,28,70,32,0],[70,33,70,37,0],[76,38,76,42,0],[76,43,76,47,0],[78,30,78,34,0],[78,35,78,39,0],[84,45,84,49,0],[84,50,84,54,0],[91,41,91,45,0],[91,46,91,50,0],[97,41,97,45,0],[97,46,97,50,0],[103,35,103,39,0],[103,40,103,44,0],[112,13,112,14,0],[113,17,113,42,0],[113,43,113,55,0],[114,17,114,74,0],[115,13,115,14,0],[125,13,125,14,0],[126,17,126,42,0],[126,43,126,55,0],[127,17,127,74,0],[128,13,128,14,0],[138,13,138,14,0],[139,17,139,42,0],[139,43,139,55,0],[140,17,140,74,0],[141,13,141,14,0],[148,32,148,36,0],[148,37,148,41,0],[150,39,150,43,0],[150,44,150,48,0],[157,32,157,36,0],[157,37,157,41,0],[163,29,163,33,0],[163,34,163,38,0],[169,31,169,35,0],[169,36,169,40,0],[175,29,175,33,0],[175,34,175,38,0],[182,33,182,37,0],[182,38,182,42,0],[189,36,189,40,0],[189,41,189,45,0],[196,38,196,42,0],[196,43,196,47,0],[201,37,201,41,0],[201,42,201,46,0],[205,37,205,41,0],[205,42,205,46,0],[210,34,210,38,0],[210,39,210,43,0],[215,34,215,38,0],[215,39,215,43,0],[220,33,220,37,0],[220,38,220,42,0]]);
+    </script>
+  </body>
+</html>

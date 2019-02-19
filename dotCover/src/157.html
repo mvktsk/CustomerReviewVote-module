@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\staticcontent\contentitem.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace VirtoCommerce.Storefront.Model.StaticContent
+{
+    public abstract class ContentItem : IHasLanguage
+    {
+        protected ContentItem()
+        {
+        }
+
+        public virtual string Type =&gt; &quot;page&quot;;
+
+        public string Author { get; set; }
+
+        public DateTime CreatedDate { get; set; }
+
+        public DateTime? PublishedDate { get; set; }
+
+        public string Title { get; set; }
+
+        /// &lt;summary&gt;
+        /// Relative content url
+        /// &lt;/summary&gt;
+        public string Url { get; set; }
+
+        public string Permalink { get; set; }
+
+        /// &lt;summary&gt;
+        /// Represent alternative urls which will be used for redirection to main url
+        /// &lt;/summary&gt;
+        public IList&lt;string&gt; Aliases { get; set; } = new List&lt;string&gt;();
+        public IList&lt;string&gt; AliasesUrls { get; set; } = new List&lt;string&gt;();
+
+        public List&lt;string&gt; Tags { get; set; } = new List&lt;string&gt;();
+
+        public List&lt;string&gt; Categories { get; set; } = new List&lt;string&gt;();
+
+        public string Category { get; set; }
+
+        public bool IsPublished { get; set; } = true;
+
+        /// &lt;summary&gt;
+        /// Content file name without extension
+        /// &lt;/summary&gt;
+        public string Name { get; set; }
+
+        /// &lt;summary&gt;
+        /// Relative storage path in storage system (/blogs/page1)
+        /// &lt;/summary&gt;
+        public string StoragePath { get; set; }
+
+        public string Content { get; set; }
+
+        /// &lt;summary&gt;
+        /// Liquid layout from store theme used as master page for page rendering. If its null will be used default layout.
+        /// &lt;/summary&gt;
+        public string Layout { get; set; }
+
+        public string FileName { get; set; }
+
+        public Language Language { get; set; }
+
+        public int Priority { get; set; }
+
+        public string Description { get; set; }
+
+        /// &lt;summary&gt;
+        /// Limits anonymous access to the page. Set true to block anonymous access. Set false to grant anonymous access.  Default value is false. 
+        /// &lt;/summary&gt;
+        public bool Authorize { get; set; }
+
+        public IDictionary&lt;string, IEnumerable&lt;string&gt;&gt; MetaInfo { get; set; }
+
+        public virtual void LoadContent(string content, IDictionary&lt;string, IEnumerable&lt;string&gt;&gt; metaInfoMap)
+        {
+            if (metaInfoMap != null)
+            {
+                foreach (var setting in metaInfoMap)
+                {
+                    var settingValue = setting.Value.FirstOrDefault();
+                    switch (setting.Key.ToLower())
+                    {
+                        case &quot;permalink&quot;:
+                            Permalink = settingValue;
+                            break;
+
+                        case &quot;aliases&quot;:
+                            Aliases = setting.Value.ToList();
+                            break;
+
+                        case &quot;title&quot;:
+                            Title = settingValue;
+                            break;
+
+                        case &quot;author&quot;:
+                            Author = settingValue;
+                            break;
+
+                        case &quot;published&quot;:
+                            bool isPublished;
+                            IsPublished = bool.TryParse(settingValue, out isPublished) ? isPublished : true;
+                            break;
+
+                        case &quot;date&quot;:
+                            DateTime date;
+                            PublishedDate = CreatedDate = DateTime.TryParse(settingValue, out date) ? date : new DateTime();
+                            break;
+                        case &quot;tags&quot;:
+                            Tags = setting.Value.ToList();
+                            break;
+
+                        case &quot;categories&quot;:
+                            Categories = setting.Value.ToList();
+                            break;
+
+                        case &quot;category&quot;:
+                            Category = settingValue;
+                            break;
+
+                        case &quot;layout&quot;:
+                            Layout = settingValue;
+                            break;
+
+                        case &quot;priority&quot;:
+                            int priority;
+                            Priority = int.TryParse(settingValue, out priority) ? priority : 0;
+                            break;
+
+                        case &quot;description&quot;:
+                            Description = settingValue;
+                            break;
+
+                        case &quot;authorize&quot;:
+                            bool isAuthorize;
+                            Authorize = bool.TryParse(settingValue, out isAuthorize) ? isAuthorize : false;
+                            break;
+                    }
+                }
+            }
+
+            MetaInfo = metaInfoMap;
+            Content = content;
+            if (Title == null)
+            {
+                Title = Name;
+            }
+        }
+
+        public override string ToString()
+        {
+            return Url ?? Name;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,9,9,32,0],[10,9,10,10,0],[11,9,11,10,0],[13,39,13,45,0],[15,32,15,36,0],[15,37,15,41,0],[17,39,17,43,0],[17,44,17,48,0],[19,42,19,46,0],[19,47,19,51,0],[21,31,21,35,0],[21,36,21,40,0],[26,29,26,33,0],[26,34,26,38,0],[28,35,28,39,0],[28,40,28,44,0],[33,40,33,44,0],[33,45,33,49,0],[33,54,33,72,0],[34,44,34,48,0],[34,49,34,53,0],[34,58,34,76,0],[36,36,36,40,0],[36,41,36,45,0],[36,50,36,68,0],[38,42,38,46,0],[38,47,38,51,0],[38,56,38,74,0],[40,34,40,38,0],[40,39,40,43,0],[42,35,42,39,0],[42,40,42,44,0],[42,49,42,53,0],[47,30,47,34,0],[47,35,47,39,0],[52,37,52,41,0],[52,42,52,46,0],[54,33,54,37,0],[54,38,54,42,0],[59,32,59,36,0],[59,37,59,41,0],[61,34,61,38,0],[61,39,61,43,0],[63,36,63,40,0],[63,41,63,45,0],[65,31,65,35,0],[65,36,65,40,0],[67,37,67,41,0],[67,42,67,46,0],[72,33,72,37,0],[72,38,72,42,0],[74,68,74,72,0],[74,73,74,77,0],[77,9,77,10,0],[78,13,78,37,0],[79,13,79,14,0],[80,17,80,24,0],[80,26,80,37,0],[80,38,80,40,0],[80,41,80,52,0],[81,17,81,18,0],[82,21,82,71,0],[83,21,83,51,0],[86,29,86,54,0],[87,29,87,35,0],[90,29,90,62,0],[91,29,91,35,0],[94,29,94,50,0],[95,29,95,35,0],[98,29,98,51,0],[99,29,99,35,0],[103,29,103,109,0],[104,29,104,35,0],[108,29,108,125,0],[109,29,109,35,0],[111,29,111,59,0],[112,29,112,35,0],[115,29,115,65,0],[116,29,116,35,0],[119,29,119,53,0],[120,29,120,35,0],[123,29,123,51,0],[124,29,124,35,0],[128,29,128,96,0],[129,29,129,35,0],[132,29,132,56,0],[133,29,133,35,0],[137,29,137,108,0],[138,29,138,35,0],[140,17,140,18,0],[141,13,141,14,0],[143,13,143,36,0],[144,13,144,31,0],[145,13,145,31,0],[146,13,146,14,0],[147,17,147,30,0],[148,13,148,14,0],[149,9,149,10,0],[152,9,152,10,0],[153,13,153,32,0],[154,9,154,10,0]]);
+    </script>
+  </body>
+</html>

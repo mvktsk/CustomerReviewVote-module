@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\transaction.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Threading.Tasks;
+using DotLiquid;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// Represent order transaction 
+    /// https://help.shopify.com/themes/liquid/objects/transaction
+    /// &lt;/summary&gt;
+    [DataContract]
+    public partial class Transaction : Drop
+    {
+        /// &lt;summary&gt;
+        /// Returns a unique numeric identifier for the transaction.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Id { get; set; }
+        /// &lt;summary&gt;
+        /// Returns the amount of the transaction. Use one of the money filters to return the value in a monetary format.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal Amount { get; set; }
+        /// &lt;summary&gt;
+        /// Returns the name of the transaction.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Name { get; set; }
+        /// &lt;summary&gt;
+        /// Returns the status of the transaction.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Status { get; set; }
+        /// &lt;summary&gt;
+        /// Returns the translated output of a transaction&#39;s status.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string StatusLabel { get; set; }
+        /// &lt;summary&gt;
+        /// Returns the timestamp of when the transaction was created. Use the date filter to format the timestamp.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public DateTime CreatedAt { get; set; }
+        /// &lt;summary&gt;
+        /// Returns text with information from the payment gateway about the payment receipt. This includes whether the payment was a test case and an authorization code if one was included in the transaction.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Receipt { get; set; }
+        /// &lt;summary&gt;
+        /// Returns the type of transaction. There are five transaction types:
+        // authorization is the reserving of money that the customer has agreed to pay.
+        // capture is the transfer of the money that was reserved during the authorization stage.
+        // sale is a combination of authorization and capture, performed in one step.
+        // void is the cancellation of a pending authorization or capture.
+        // refund is the partial or full refund of the captured money to the customer.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Kind { get; set; }
+        /// &lt;summary&gt;
+        /// Returns the name of the payment gateway used for the transaction.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Gateway { get; set; }
+        /// &lt;summary&gt;
+        /// The payment_details object contains additional properties related to the payment method used in the transaction.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string PaymentDetails { get; set; }
+        [DataMember]
+        public string CreditCardNumber { get; set; }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[22,28,22,32,0],[22,33,22,37,0],[27,33,27,37,0],[27,38,27,42,0],[32,30,32,34,0],[32,35,32,39,0],[37,32,37,36,0],[37,37,37,41,0],[42,37,42,41,0],[42,42,42,46,0],[47,37,47,41,0],[47,42,47,46,0],[52,33,52,37,0],[52,38,52,42,0],[62,30,62,34,0],[62,35,62,39,0],[67,33,67,37,0],[67,38,67,42,0],[72,40,72,44,0],[72,45,72,49,0],[74,42,74,46,0],[74,47,74,51,0]]);
+    </script>
+  </body>
+</html>

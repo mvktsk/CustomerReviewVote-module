@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\interaction\usersession.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace VirtoCommerce.Storefront.Model.Interaction
+{
+    public class UserSession
+    {
+        public DateTime? LoadTime { get; set; }
+
+        public DateTime? UnloadTime { get; set; }
+
+        public string Language { get; set; }
+
+        public string Platform { get; set; }
+
+        public string Port { get; set; }
+
+        public Client ClientStart { get; set; }
+
+        public Page Page { get; set; }
+
+        public string Endpoint { get; set; }
+
+        public UserEvent[] Interactions { get; set; }
+
+        public Client ClientEnd { get; set; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,37,11,41,0],[11,42,11,46,0],[13,39,13,43,0],[13,44,13,48,0],[15,34,15,38,0],[15,39,15,43,0],[17,34,17,38,0],[17,39,17,43,0],[19,30,19,34,0],[19,35,19,39,0],[21,37,21,41,0],[21,42,21,46,0],[23,28,23,32,0],[23,33,23,37,0],[25,34,25,38,0],[25,39,25,43,0],[27,43,27,47,0],[27,48,27,52,0],[29,35,29,39,0],[29,40,29,44,0]]);
+    </script>
+  </body>
+</html>

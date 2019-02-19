@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\quote\quoterequesttotals.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model.Quote
+{
+    public partial class QuoteRequestTotals
+    {
+        public QuoteRequestTotals()
+        {
+        }
+
+        public QuoteRequestTotals(Currency currency)
+        {
+            OriginalSubTotalExlTax = new Money(currency);
+            SubTotalExlTax = new Money(currency);
+            ShippingTotal = new Money(currency);
+            DiscountTotal = new Money(currency);
+            TaxTotal = new Money(currency);
+            AdjustmentQuoteExlTax = new Money(currency);
+            GrandTotalExlTax = new Money(currency);
+            GrandTotalInclTax = new Money(currency);
+        }
+
+        public Money OriginalSubTotalExlTax { get; set; }
+
+        public Money SubTotalExlTax { get; set; }
+
+        public Money ShippingTotal { get; set; }
+
+        public Money DiscountTotal { get; set; }
+
+        public Money TaxTotal { get; set; }
+
+        public Money AdjustmentQuoteExlTax { get; set; }
+
+        public Money GrandTotalExlTax { get; set; }
+
+        public Money GrandTotalInclTax { get; set; }      
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[7,9,7,36,0],[8,9,8,10,0],[9,9,9,10,0],[11,9,11,53,0],[12,9,12,10,0],[13,13,13,58,0],[14,13,14,50,0],[15,13,15,49,0],[16,13,16,49,0],[17,13,17,44,0],[18,13,18,57,0],[19,13,19,52,0],[20,13,20,53,0],[21,9,21,10,0],[23,47,23,51,0],[23,52,23,56,0],[25,39,25,43,0],[25,44,25,48,0],[27,38,27,42,0],[27,43,27,47,0],[29,38,29,42,0],[29,43,29,47,0],[31,33,31,37,0],[31,38,31,42,0],[33,46,33,50,0],[33,51,33,55,0],[35,41,35,45,0],[35,46,35,50,0],[37,42,37,46,0],[37,47,37,51,0]]);
+    </script>
+  </body>
+</html>

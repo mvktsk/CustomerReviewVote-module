@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\emailnotificationbase.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+
+namespace VirtoCommerce.Storefront.Model.Common
+{
+    public abstract class EmailNotificationBase : ValueObject
+    {
+        public EmailNotificationBase(string storeId, Language language)
+        {
+            Type = GetType().Name;
+            StoreId = storeId;
+            Language = language;
+        }
+
+        public string Type { get; private set; }
+        public string StoreId { get; set; }
+        public Language Language { get; set; }
+        public string Recipient { get; set; }
+        public string Sender { get; set; }
+
+        public virtual IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt; GetNotificationParameters()
+        {
+            yield return new KeyValuePair&lt;string, string&gt;(nameof(Sender), Sender);
+            yield return new KeyValuePair&lt;string, string&gt;(nameof(Recipient), Recipient);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[7,9,7,72,0],[8,9,8,10,0],[9,13,9,35,0],[10,13,10,31,0],[11,13,11,33,0],[12,9,12,10,0],[14,30,14,34,0],[14,35,14,47,0],[15,33,15,37,0],[15,38,15,42,0],[16,36,16,40,0],[16,41,16,45,0],[17,35,17,39,0],[17,40,17,44,0],[18,32,18,36,0],[18,37,18,41,0],[21,9,21,10,0],[22,13,22,83,0],[23,13,23,89,0],[24,9,24,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\errorcontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common.Exceptions;
+
+namespace VirtoCommerce.Storefront.Controllers
+{
+    public class ErrorController : Controller
+    {
+        protected WorkContext WorkContext { get; }
+
+        public ErrorController(IWorkContextAccessor workContextAccessor)
+        {
+            WorkContext = workContextAccessor.WorkContext;
+        }
+
+        public IActionResult Error(int? errCode)
+        {
+            var exceptionFeature = base.HttpContext.Features.Get&lt;IExceptionHandlerFeature&gt;();
+            if (exceptionFeature != null &amp;&amp; exceptionFeature.Error is StorefrontException storefrontException &amp;&amp; storefrontException.View != null)
+            {
+                return View(storefrontException.View);
+            }
+            if (errCode == 404 || errCode == 500)
+            {
+                return View(errCode.ToString());
+            }
+            return View();
+        }
+
+        public IActionResult AccessDenied()
+        {
+            return View(&quot;access_denied&quot;, WorkContext);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,45,10,49,0],[12,9,12,73,0],[13,9,13,10,0],[14,13,14,59,0],[15,9,15,10,0],[18,9,18,10,0],[19,13,19,94,0],[20,13,20,147,0],[21,13,21,14,0],[22,17,22,55,0],[24,13,24,50,0],[25,13,25,14,0],[26,17,26,49,0],[28,13,28,27,0],[29,9,29,10,0],[32,9,32,10,0],[33,13,33,55,0],[34,9,34,10,0]]);
+    </script>
+  </body>
+</html>

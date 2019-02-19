@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\cart\shoppingcart.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Storefront.Model.Cart.Services;
+using VirtoCommerce.Storefront.Model.Cart.ValidationErrors;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Marketing;
+using VirtoCommerce.Storefront.Model.Security;
+using VirtoCommerce.Storefront.Model.Subscriptions;
+
+namespace VirtoCommerce.Storefront.Model.Cart
+{
+    public partial class ShoppingCart : Entity, IDiscountable, IValidatable, IHasLanguage, ITaxable, ICacheKey, IModifiable
+    {
+        public ShoppingCart(Currency currency, Language language)
+        {
+            Currency = currency;
+            Language = language;
+            HandlingTotal = new Money(currency);
+            HandlingTotalWithTax = new Money(currency);
+            DiscountAmount = new Money(currency);
+            Total = new Money(currency);
+            SubTotal = new Money(currency);
+            SubTotalWithTax = new Money(currency);
+            ShippingPrice = new Money(currency);
+            ShippingPriceWithTax = new Money(currency);
+            ShippingTotal = new Money(currency);
+            ShippingTotalWithTax = new Money(currency);
+            PaymentPrice = new Money(currency);
+            PaymentPriceWithTax = new Money(currency);
+            PaymentTotal = new Money(currency);
+            PaymentTotalWithTax = new Money(currency);
+            HandlingTotal = new Money(currency);
+            HandlingTotalWithTax = new Money(currency);
+            DiscountTotal = new Money(currency);
+            DiscountTotalWithTax = new Money(currency);
+            TaxTotal = new Money(currency);
+
+            Addresses = new List&lt;Address&gt;();
+            Discounts = new List&lt;Discount&gt;();
+            Items = new List&lt;LineItem&gt;();
+            Payments = new List&lt;Payment&gt;();
+            Shipments = new List&lt;Shipment&gt;();
+            TaxDetails = new List&lt;TaxDetail&gt;();
+            DynamicProperties = new List&lt;DynamicProperty&gt;();
+            ValidationErrors = new List&lt;ValidationError&gt;();
+            AvailablePaymentMethods = new List&lt;PaymentMethod&gt;();
+            IsValid = true;
+        }
+
+        public DateTime? CreatedDate { get; set; }
+
+        public DateTime? ModifiedDate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shopping cart name
+        /// &lt;/summary&gt;
+        public string Name { get; set; }
+
+
+        public string Status { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of store id
+        /// &lt;/summary&gt;
+        public string StoreId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of channel id
+        /// &lt;/summary&gt;
+        public string ChannelId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the sign that shopping cart contains line items which require shipping
+        /// &lt;/summary&gt;
+        public bool HasPhysicalProducts { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the flag of shopping cart is anonymous
+        /// &lt;/summary&gt;
+        public bool IsAnonymous { get; set; }
+
+        public User Customer { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shopping cart customer id
+        /// &lt;/summary&gt;
+        public string CustomerId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shopping cart customer name
+        /// &lt;/summary&gt;
+        public string CustomerName { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shopping cart organization id
+        /// &lt;/summary&gt;
+        public string OrganizationId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the shopping cart coupon
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;
+        /// Coupon object
+        /// &lt;/value&gt;
+        public Coupon Coupon { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the flag of shopping cart is recurring
+        /// &lt;/summary&gt;
+        public bool IsRecuring { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shopping cart text comment
+        /// &lt;/summary&gt;
+        public string Comment { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of volumetric weight
+        /// &lt;/summary&gt;
+        public decimal VolumetricWeight { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of weight unit
+        /// &lt;/summary&gt;
+        public string WeightUnit { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shopping cart weight
+        /// &lt;/summary&gt;
+        public decimal Weight { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of measurement unit
+        /// &lt;/summary&gt;
+        public string MeasureUnit { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of height
+        /// &lt;/summary&gt;
+        public decimal Height { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of length
+        /// &lt;/summary&gt;
+        public decimal Length { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of width
+        /// &lt;/summary&gt;
+        public decimal Width { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets the value of shopping cart total cost
+        /// SubTotal + ShippingSubTotal + TaxTotal + PaymentSubTotal + FeeTotal - DiscountTotal;
+        /// &lt;/summary&gt;
+        public Money Total { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets the value of shopping cart subtotal
+        /// Items.Sum(x =&gt; x.ListPrice * x.Quantity);
+        /// &lt;/summary&gt;
+        public Money SubTotal { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets the value of shopping cart subtotal with taxes
+        /// Items.Sum(x =&gt; x.ListPriceWithTax * x.Quantity);
+        /// &lt;/summary&gt;
+        public Money SubTotalWithTax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets the value of sum shipping cost without discount
+        /// Shipments.Sum(x =&gt; x.Price);
+        /// &lt;/summary&gt;
+        public Money ShippingPrice { get; set; }
+
+        /// &lt;summary&gt;
+        /// Shipments.Sum(x =&gt; x.PriceWithTax);
+        /// &lt;/summary&gt;
+        public Money ShippingPriceWithTax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets the value of shipping total cost
+        /// Shipments.Sum(x =&gt; x.Total)
+        /// &lt;/summary&gt;
+        public Money ShippingTotal { get; set; }
+
+        /// &lt;summary&gt;
+        /// Shipments.Sum(x =&gt; x.TotalWithTax)
+        /// &lt;/summary&gt;
+        public Money ShippingTotalWithTax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Payments.Sum(x =&gt; x.Price)
+        /// &lt;/summary&gt;
+        public Money PaymentPrice { get; set; }
+
+        /// &lt;summary&gt;
+        /// Payments.Sum(x =&gt; x.PriceWithTax)
+        /// &lt;/summary&gt;
+        public Money PaymentPriceWithTax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Payments.Sum(x =&gt; x.Total)
+        /// &lt;/summary&gt;
+        public virtual Money PaymentTotal { get; set; }
+
+        /// &lt;summary&gt;
+        /// Payments.Sum(x =&gt; x.TotalWithTax)
+        /// &lt;/summary&gt;
+        public virtual Money PaymentTotalWithTax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets the value of shopping cart items total extended price (product price includes all kinds of discounts)
+        /// &lt;/summary&gt;
+        public Money ExtendedPriceTotal
+        {
+            get
+            {
+                var extendedPriceTotal = Items.Sum(i =&gt; i.ExtendedPrice.Amount);
+                return new Money(extendedPriceTotal, Currency);
+            }
+        }
+
+        public Money ExtendedPriceTotalWithTax
+        {
+            get
+            {
+                var extendedPriceWithTaxTotal = Items.Sum(i =&gt; i.ExtendedPriceWithTax.Amount);
+                return new Money(extendedPriceWithTaxTotal, Currency);
+            }
+        }
+
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of handling total cost
+        /// &lt;/summary&gt;
+        public Money HandlingTotal { get; set; }
+        public Money HandlingTotalWithTax { get; set; }
+
+        public Money DiscountAmount { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets the value of total discount amount
+        /// Items.Sum(x =&gt; x.DiscountTotal) + Shipments.Sum(x =&gt; x.DiscountAmount) + Payments.Sum(x =&gt; x.DiscountAmount) + DiscountAmount
+        /// &lt;/summary&gt;
+        public Money DiscountTotal { get; set; }
+
+        /// &lt;summary&gt;
+        /// Items.Sum(x =&gt; x.DiscountTotalWithTax) + Shipments.Sum(x =&gt; x.DiscountAmountWithTax) + Payments.Sum(x =&gt; x.DiscountAmountWithTax) + DiscountAmountWithTax
+        /// &lt;/summary&gt;
+        public Money DiscountTotalWithTax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the collection of shopping cart addresses
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;
+        /// Collection of Address objects
+        /// &lt;/value&gt;
+        public IList&lt;Address&gt; Addresses { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shopping cart line items
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;
+        /// Collection of LineItem objects
+        /// &lt;/value&gt;
+        public IList&lt;LineItem&gt; Items { get; set; }
+
+        public int ItemsCount =&gt; Items.Count;
+
+        /// &lt;summary&gt;
+        /// Gets or sets shopping cart items quantity (sum of each line item quantity * items count) without not-standard items.
+        /// Some products SKU starts from &#39;non-standard&#39;. For example &#39;Ozone_gift_card&#39;
+        /// &lt;/summary&gt;
+        public int ItemsQuantity =&gt; Items.Count(x =&gt; x.Sku.ToLower().Contains(&quot;non-standard&quot;) == false);
+
+        /// &lt;summary&gt;
+        /// Gets or sets the collection of shopping cart payments
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;
+        /// Collection of Payment objects
+        /// &lt;/value&gt;
+        public IList&lt;Payment&gt; Payments { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the collection of shopping cart shipments
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;
+        /// Collection of Shipment objects
+        /// &lt;/value&gt;
+        public IList&lt;Shipment&gt; Shipments { get; set; }
+
+
+        /// &lt;summary&gt;
+        /// Used for dynamic properties management, contains object type string
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Used for dynamic properties management, contains object type string&lt;/value&gt;
+
+        public string ObjectType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Dynamic properties collections
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Dynamic properties collections&lt;/value&gt;
+        public IList&lt;DynamicProperty&gt; DynamicProperties { get; set; }
+
+
+        public IList&lt;PaymentMethod&gt; AvailablePaymentMethods { get; set; }
+
+        public LineItem RecentlyAddedItem
+        {
+            get
+            {
+                return Items.OrderByDescending(i =&gt; i.CreatedDate).FirstOrDefault();
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// If the cart is issued as an order by subscription  this property contains the future subscription payment plan
+        /// &lt;/summary&gt;
+        public PaymentPlan PaymentPlan { get; set; }
+
+        public IList&lt;PromotionReward&gt; GiftRewards { get; set; } = new List&lt;PromotionReward&gt;();
+
+        public string EstimatedDeliveryDate =&gt; DynamicProperties.GetDynamicPropertyValue(&quot;Estimated delivery date&quot;);
+
+        /// &lt;summary&gt;
+        /// Gets or sets an outlet ID for a shopping cart
+        /// &lt;/summary&gt;
+        public string OutletId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets an outlet name for a shopping cart
+        /// &lt;/summary&gt;
+        public string OutletName { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets an outlet distributor ID
+        /// &lt;/summary&gt;
+        public string OutletDisId { get; set; }
+
+        #region IValidatable Members
+        public bool IsValid { get; set; }
+        public IList&lt;ValidationError&gt; ValidationErrors { get; set; }
+        #endregion
+
+        #region IDiscountable Members
+        public IList&lt;Discount&gt; Discounts { get; }
+
+        public Currency Currency { get; }
+
+        public void ApplyRewards(IEnumerable&lt;PromotionReward&gt; rewards)
+        {
+            GiftRewards = rewards.Where(r =&gt; r.IsValid &amp;&amp; r.RewardType == PromotionRewardType.GiftReward).ToList();
+
+            Discounts.Clear();
+            DiscountAmount = new Money(Currency);
+            DiscountTotal = new Money(Currency);
+
+            var cartRewards = rewards.Where(x =&gt; x.RewardType == PromotionRewardType.CartSubtotalReward);
+            foreach (var reward in cartRewards)
+            {
+                //When a discount is applied to the cart subtotal, the tax calculation has already been applied, and is reflected in the tax subtotal.
+                //Therefore, a discount applying to the cart subtotal will occur after tax.
+                //For instance, if the cart subtotal is $100, and $15 is the tax subtotal, a cart - wide discount of 10 % will yield a total of $105($100 subtotal – $10 discount + $15 tax on the original $100).
+                if (reward.IsValid)
+                {
+                    var discount = reward.ToDiscountModel(ExtendedPriceTotal);
+                    Discounts.Add(discount);
+                    //Use rounded amount for whole cart discount
+                    DiscountAmount += discount.Amount.Amount;
+                    DiscountTotal = DiscountAmount;
+                    Total = new Money(ExtendedPriceTotal.Amount - discount.Amount.Amount, Currency);
+
+                }
+            }
+
+            var lineItemRewards = rewards.Where(x =&gt; x.RewardType == PromotionRewardType.CatalogItemAmountReward);
+            foreach (var lineItem in Items)
+            {
+                lineItem.ApplyRewards(lineItemRewards);
+            }
+
+            var shipmentRewards = rewards.Where(x =&gt; x.RewardType == PromotionRewardType.ShipmentReward);
+            foreach (var shipment in Shipments)
+            {
+                shipment.ApplyRewards(shipmentRewards);
+            }
+
+            var paymentRewards = rewards.Where(x =&gt; x.RewardType == PromotionRewardType.PaymentReward);
+            foreach (var payment in Payments)
+            {
+                payment.ApplyRewards(paymentRewards);
+            }
+
+            if (Coupon != null &amp;&amp; !string.IsNullOrEmpty(Coupon.Code))
+            {
+                Coupon.AppliedSuccessfully = rewards.Any(x =&gt; x.IsValid &amp;&amp; x.Coupon != null);
+            }
+
+        }
+        #endregion
+
+
+        #region ITaxable Members
+        /// &lt;summary&gt;
+        /// Gets or sets the value of total shipping tax amount
+        /// &lt;/summary&gt;
+        public Money TaxTotal { get; set; }
+
+        public decimal TaxPercentRate { get; private set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shipping tax type
+        /// &lt;/summary&gt;
+        public string TaxType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the collection of line item tax details lines
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;
+        /// Collection of TaxDetail objects
+        /// &lt;/value&gt;
+        public IList&lt;TaxDetail&gt; TaxDetails { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets shopping cart type - Cart, Wishlist
+        /// &lt;/summary&gt;
+        public string Type { get; set; }
+
+        public Money VatTotal
+        {
+            get
+            {
+                var sumAmount = Items.Sum(x =&gt; x.Vat.Amount * x.Quantity);
+                return new Money(sumAmount, Currency);
+            }
+        }
+
+        public Money EmptiesDepositTotal
+        {
+            get
+            {
+                var nonEmptyEmptiesDeposit = Items.Where(d =&gt; d.EmptiesDeposit != null);
+                var sumAmount = nonEmptyEmptiesDeposit.IsNullOrEmpty() ? 0 : nonEmptyEmptiesDeposit.Sum(x =&gt; x.EmptiesDeposit.Amount * x.Quantity);
+                return new Money(sumAmount, Currency);
+            }
+        }
+
+        public void ApplyTaxRates(IEnumerable&lt;TaxRate&gt; taxRates)
+        {
+            TaxPercentRate = 0m;
+            foreach (var lineItem in Items)
+            {
+                //Get percent rate from line item
+                if (TaxPercentRate == 0)
+                {
+                    TaxPercentRate = lineItem.TaxPercentRate;
+                }
+                lineItem.ApplyTaxRates(taxRates);
+            }
+            foreach (var shipment in Shipments)
+            {
+                shipment.ApplyTaxRates(taxRates);
+            }
+            foreach (var payment in Payments)
+            {
+                payment.ApplyTaxRates(taxRates);
+            }
+        }
+        #endregion
+
+        #region IHasLanguage Members
+        public Language Language { get; set; }
+        #endregion
+
+        #region ICacheKey
+        public override string GetCacheKey()
+        {
+            return string.Join(&quot;:&quot;, &quot;Cart&quot;, Id, Type, Name, CustomerId);
+        }
+        #endregion
+
+        public override string ToString()
+        {
+            var cartId = Id ?? &quot;transient&quot;;
+            var customer = Customer != null ? Customer.ToString() : &quot;undefined&quot;;
+
+            return $&quot;Cart #{cartId}-{Name} {customer}&quot;;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,66,0],[16,9,16,10,0],[17,13,17,33,0],[18,13,18,33,0],[19,13,19,49,0],[20,13,20,56,0],[21,13,21,50,0],[22,13,22,41,0],[23,13,23,44,0],[24,13,24,51,0],[25,13,25,49,0],[26,13,26,56,0],[27,13,27,49,0],[28,13,28,56,0],[29,13,29,48,0],[30,13,30,55,0],[31,13,31,48,0],[32,13,32,55,0],[33,13,33,49,0],[34,13,34,56,0],[35,13,35,49,0],[36,13,36,56,0],[37,13,37,44,0],[39,13,39,45,0],[40,13,40,46,0],[41,13,41,42,0],[42,13,42,44,0],[43,13,43,46,0],[44,13,44,48,0],[45,13,45,61,0],[46,13,46,60,0],[47,13,47,65,0],[48,13,48,28,0],[49,9,49,10,0],[51,40,51,44,0],[51,45,51,49,0],[53,41,53,45,0],[53,46,53,50,0],[58,30,58,34,0],[58,35,58,39,0],[61,32,61,36,0],[61,37,61,41,0],[66,33,66,37,0],[66,38,66,42,0],[71,35,71,39,0],[71,40,71,44,0],[76,43,76,47,0],[76,48,76,52,0],[81,35,81,39,0],[81,40,81,44,0],[83,32,83,36,0],[83,37,83,41,0],[88,36,88,40,0],[88,41,88,45,0],[93,38,93,42,0],[93,43,93,47,0],[98,40,98,44,0],[98,45,98,49,0],[106,32,106,36,0],[106,37,106,41,0],[111,34,111,38,0],[111,39,111,43,0],[116,33,116,37,0],[116,38,116,42,0],[121,43,121,47,0],[121,48,121,52,0],[126,36,126,40,0],[126,41,126,45,0],[131,33,131,37,0],[131,38,131,42,0],[136,37,136,41,0],[136,42,136,46,0],[141,33,141,37,0],[141,38,141,42,0],[146,33,146,37,0],[146,38,146,42,0],[151,32,151,36,0],[151,37,151,41,0],[157,30,157,34,0],[157,35,157,39,0],[163,33,163,37,0],[163,38,163,42,0],[169,40,169,44,0],[169,45,169,49,0],[175,38,175,42,0],[175,43,175,47,0],[180,45,180,49,0],[180,50,180,54,0],[186,38,186,42,0],[186,43,186,47,0],[191,45,191,49,0],[191,50,191,54,0],[196,37,196,41,0],[196,42,196,46,0],[201,44,201,48,0],[201,49,201,53,0],[206,45,206,49,0],[206,50,206,54,0],[211,52,211,56,0],[211,57,211,61,0],[219,13,219,14,0],[220,17,220,81,0],[220,57,220,79,0],[221,17,221,64,0],[222,13,222,14,0],[228,13,228,14,0],[229,17,229,95,0],[229,64,229,93,0],[230,17,230,71,0],[231,13,231,14,0],[238,38,238,42,0],[238,43,238,47,0],[239,45,239,49,0],[239,50,239,54,0],[241,39,241,43,0],[241,44,241,48,0],[247,38,247,42,0],[247,43,247,47,0],[252,45,252,49,0],[252,50,252,54,0],[260,43,260,47,0],[260,48,260,52,0],[268,40,268,44,0],[268,45,268,49,0],[270,34,270,45,0],[276,37,276,104,0],[276,54,276,103,0],[284,42,284,46,0],[284,47,284,51,0],[292,44,292,48,0],[292,49,292,53,0],[300,36,300,40,0],[300,41,300,45,0],[306,59,306,63,0],[306,64,306,68,0],[309,63,309,67,0],[309,68,309,72,0],[314,13,314,14,0],[315,17,315,85,0],[315,53,315,66,0],[316,13,316,14,0],[322,42,322,46,0],[322,47,322,51,0],[324,53,324,57,0],[324,58,324,62,0],[324,67,324,94,0],[326,48,326,116,0],[331,34,331,38,0],[331,39,331,43,0],[336,36,336,40,0],[336,41,336,45,0],[341,37,341,41,0],[341,42,341,46,0],[344,31,344,35,0],[344,36,344,40,0],[345,58,345,62,0],[345,63,345,67,0],[349,44,349,48,0],[351,36,351,40,0],[354,9,354,10,0],[355,13,355,116,0],[355,46,355,105,0],[357,13,357,31,0],[358,13,358,50,0],[359,13,359,49,0],[361,13,361,106,0],[361,50,361,104,0],[362,13,362,20,0],[362,22,362,32,0],[362,33,362,35,0],[362,36,362,47,0],[363,13,363,14,0],[367,17,367,36,0],[368,17,368,18,0],[369,21,369,79,0],[370,21,370,45,0],[372,21,372,62,0],[373,21,373,52,0],[374,21,374,101,0],[376,17,376,18,0],[377,13,377,14,0],[379,13,379,115,0],[379,54,379,113,0],[380,13,380,20,0],[380,22,380,34,0],[380,35,380,37,0],[380,38,380,43,0],[381,13,381,14,0],[382,17,382,56,0],[383,13,383,14,0],[385,13,385,106,0],[385,54,385,104,0],[386,13,386,20,0],[386,22,386,34,0],[386,35,386,37,0],[386,38,386,47,0],[387,13,387,14,0],[388,17,388,56,0],[389,13,389,14,0],[391,13,391,104,0],[391,53,391,102,0],[392,13,392,20,0],[392,22,392,33,0],[392,34,392,36,0],[392,37,392,45,0],[393,13,393,14,0],[394,17,394,54,0],[395,13,395,14,0],[397,13,397,70,0],[398,13,398,14,0],[399,17,399,94,0],[399,63,399,92,0],[400,13,400,14,0],[402,9,402,10,0],[410,33,410,37,0],[410,38,410,42,0],[412,41,412,45,0],[412,46,412,58,0],[417,33,417,37,0],[417,38,417,42,0],[425,46,425,50,0],[425,51,425,55,0],[430,30,430,34,0],[430,35,430,39,0],[435,13,435,14,0],[436,17,436,75,0],[436,48,436,73,0],[437,17,437,55,0],[438,13,438,14,0],[444,13,444,14,0],[445,17,445,89,0],[445,63,445,87,0],[446,17,446,148,0],[446,110,446,146,0],[447,17,447,55,0],[448,13,448,14,0],[452,9,452,10,0],[453,13,453,33,0],[454,13,454,20,0],[454,22,454,34,0],[454,35,454,37,0],[454,38,454,43,0],[455,13,455,14,0],[457,17,457,41,0],[458,17,458,18,0],[459,21,459,62,0],[460,17,460,18,0],[461,17,461,50,0],[462,13,462,14,0],[463,13,463,20,0],[463,22,463,34,0],[463,35,463,37,0],[463,38,463,47,0],[464,13,464,14,0],[465,17,465,50,0],[466,13,466,14,0],[467,13,467,20,0],[467,22,467,33,0],[467,34,467,36,0],[467,37,467,45,0],[468,13,468,14,0],[469,17,469,49,0],[470,13,470,14,0],[471,9,471,10,0],[475,36,475,40,0],[475,41,475,45,0],[480,9,480,10,0],[481,13,481,73,0],[482,9,482,10,0],[486,9,486,10,0],[487,13,487,44,0],[488,13,488,81,0],[490,13,490,56,0],[491,9,491,10,0]]);
+    </script>
+  </body>
+</html>

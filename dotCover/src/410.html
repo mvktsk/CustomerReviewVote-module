@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\staticcontent\linklistserviceimpl.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
+using VirtoCommerce.Storefront.AutoRestClients.ContentModuleApi;
+using VirtoCommerce.Storefront.Extensions;
+using VirtoCommerce.Storefront.Infrastructure;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Caching;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Common.Caching;
+using VirtoCommerce.Storefront.Model.LinkList.Services;
+using VirtoCommerce.Storefront.Model.Services;
+using VirtoCommerce.Storefront.Model.Stores;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public class MenuLinkListServiceImpl : IMenuLinkListService
+    {
+        private readonly IMenu _cmsApi;
+        private readonly ICatalogService _catalogService;
+        private readonly IStorefrontMemoryCache _memoryCache;
+        private readonly IApiChangesWatcher _apiChangesWatcher;
+        public MenuLinkListServiceImpl(IMenu cmsApi, ICatalogService catalogService, IStorefrontMemoryCache memoryCache, IApiChangesWatcher apiChangesWatcher)
+        {
+            _cmsApi = cmsApi;
+            _catalogService = catalogService;
+            _memoryCache = memoryCache;
+            _apiChangesWatcher = apiChangesWatcher;
+        }
+        public IList&lt;MenuLinkList&gt; LoadAllStoreLinkLists(Store store, Language language)
+        {
+            return LoadAllStoreLinkListsAsync(store, language).GetAwaiter().GetResult();
+        }
+
+        public async Task&lt;IList&lt;MenuLinkList&gt;&gt; LoadAllStoreLinkListsAsync(Store store, Language language)
+        {
+            if (store == null)
+            {
+                throw new ArgumentNullException(nameof(store));
+            }
+            var cacheKey = CacheKey.With(GetType(), &quot;LoadAllStoreLinkLists&quot;, store.Id, language.CultureName);
+            return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =&gt;
+            {
+                cacheEntry.AddExpirationToken(StaticContentCacheRegion.CreateChangeToken());
+                cacheEntry.AddExpirationToken(_apiChangesWatcher.CreateChangeToken());
+
+                var result = new List&lt;MenuLinkList&gt;();
+                var listsDto = await _cmsApi.GetListsAsync(store.Id);
+                if (listsDto != null)
+                {
+                    result.AddRange(listsDto.Select(x =&gt; x.ToMenuLinkList()));
+                }
+
+                result = result.GroupBy(x =&gt; x.Name).Select(x =&gt; x.FindWithLanguage(language)).Where(x =&gt; x != null).ToList().ToList();
+
+                var allMenuLinks = result.SelectMany(x =&gt; x.MenuLinks).ToList();
+                var productLinks = allMenuLinks.OfType&lt;ProductMenuLink&gt;().ToList();
+                var categoryLinks = allMenuLinks.OfType&lt;CategoryMenuLink&gt;().ToList();
+
+                Task&lt;Product[]&gt; productsLoadingTask = null;
+                Task&lt;Category[]&gt; categoriesLoadingTask = null;
+
+                //Parallel loading associated objects
+                var productIds = productLinks.Select(x =&gt; x.AssociatedObjectId).ToArray();
+                if (productIds.Any())
+                {
+                    productsLoadingTask = _catalogService.GetProductsAsync(productIds, ItemResponseGroup.ItemSmall);
+                }
+                var categoriesIds = categoryLinks.Select(x =&gt; x.AssociatedObjectId).ToArray();
+                if (categoriesIds.Any())
+                {
+                    categoriesLoadingTask = _catalogService.GetCategoriesAsync(categoriesIds, CategoryResponseGroup.Info | CategoryResponseGroup.WithImages | CategoryResponseGroup.WithSeo | CategoryResponseGroup.WithOutlines);
+                }
+                //Populate link by associated product
+                if (productsLoadingTask != null)
+                {
+                    var products = await productsLoadingTask;
+                    foreach (var productLink in productLinks)
+                    {
+                        productLink.Product = products.FirstOrDefault(x =&gt; x.Id == productLink.AssociatedObjectId);
+                    }
+                }
+                //Populate link by associated category
+                if (categoriesLoadingTask != null)
+                {
+                    var categories = await categoriesLoadingTask;
+                    foreach (var categoryLink in categoryLinks)
+                    {
+                        categoryLink.Category = categories.FirstOrDefault(x =&gt; x.Id == categoryLink.AssociatedObjectId);
+                    }
+                }
+
+                return result.ToList();
+            });
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[26,9,26,159,0],[27,9,27,10,0],[28,13,28,30,0],[29,13,29,46,0],[30,13,30,40,0],[31,13,31,52,0],[32,9,32,10,0],[34,9,34,10,0],[35,13,35,89,0],[36,9,36,10,0],[39,9,39,10,0],[40,13,40,31,0],[41,13,41,14,0],[42,17,42,64,0],[44,13,44,110,0],[45,13,97,16,0],[46,13,46,14,0],[47,17,47,93,0],[48,17,48,87,0],[50,17,50,55,0],[51,17,51,70,0],[52,17,52,38,0],[53,17,53,18,0],[54,21,54,79,0],[54,58,54,76,0],[55,17,55,18,0],[57,17,57,136,0],[57,46,57,52,0],[57,66,57,94,0],[57,107,57,116,0],[59,17,59,81,0],[59,59,59,70,0],[60,17,60,84,0],[61,17,61,86,0],[63,17,63,60,0],[64,17,64,63,0],[67,17,67,91,0],[67,59,67,79,0],[68,17,68,38,0],[69,17,69,18,0],[70,21,70,117,0],[71,17,71,18,0],[72,17,72,95,0],[72,63,72,83,0],[73,17,73,41,0],[74,17,74,18,0],[75,21,75,227,0],[76,17,76,18,0],[78,17,78,49,0],[79,17,79,18,0],[80,21,80,62,0],[81,21,81,28,0],[81,30,81,45,0],[81,46,81,48,0],[81,49,81,61,0],[82,21,82,22,0],[83,25,83,116,0],[83,76,83,114,0],[84,21,84,22,0],[85,17,85,18,0],[87,17,87,51,0],[88,17,88,18,0],[89,21,89,66,0],[90,21,90,28,0],[90,30,90,46,0],[90,47,90,49,0],[90,50,90,63,0],[91,21,91,22,0],[92,25,92,121,0],[92,80,92,119,0],[93,21,93,22,0],[94,17,94,18,0],[96,17,96,40,0],[97,13,97,14,0],[98,9,98,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\api\apiinventorycontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Inventory;
+using VirtoCommerce.Storefront.Model.Inventory.Services;
+
+namespace VirtoCommerce.Storefront.Controllers.Api
+{
+    public class ApiInventoryController : StorefrontControllerBase
+    {
+        private readonly IInventoryService _inventoryService;
+
+        public ApiInventoryController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder, IInventoryService inventoryService)
+            : base(workContextAccessor, urlBuilder)
+        {
+            _inventoryService = inventoryService;
+        }
+
+        // POST: storefrontapi/fulfillmentcenters/search
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; SearchFulfillmentCenters([FromBody] FulfillmentCenterSearchCriteria criteria)
+        {
+            if (criteria != null)
+            {
+                var result = await _inventoryService.SearchFulfillmentCentersAsync(criteria);
+                return Json(new { TotalCount = result.TotalItemCount, Results = result.ToArray() });
+            }
+            return Ok();
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,15,16,52,0],[17,9,17,10,0],[18,13,18,50,0],[19,9,19,10,0],[25,9,25,10,0],[26,13,26,34,0],[27,13,27,14,0],[28,17,28,94,0],[29,17,29,101,0],[31,13,31,25,0],[32,9,32,10,0]]);
+    </script>
+  </body>
+</html>

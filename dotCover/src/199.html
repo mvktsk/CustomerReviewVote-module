@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\order\paymentin.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model.Order
+{
+    /// &lt;summary&gt;
+    /// Represent incoming payment operation
+    /// &lt;/summary&gt;
+    public partial class PaymentIn
+    {
+        public PaymentIn(Currency currency)
+        {
+            Currency = currency;
+            Sum = new Money(currency);
+            Tax = new Money(currency);
+            ChildrenOperations = new List&lt;Operation&gt;();
+            DynamicProperties = new List&lt;DynamicProperty&gt;();
+            DiscountAmount = new Money(currency);
+            Price = new Money(currency);
+        }
+
+        /// &lt;summary&gt;
+        /// Customer organization
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Customer organization&lt;/value&gt;
+        public string OrganizationName { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets OrganizationId
+        /// &lt;/summary&gt;
+        public string OrganizationId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets CustomerName
+        /// &lt;/summary&gt;
+        public string CustomerName { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets CustomerId
+        /// &lt;/summary&gt;
+        public string CustomerId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Payment purpose text
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Payment purpose text&lt;/value&gt;
+        public string Purpose { get; set; }
+
+        /// &lt;summary&gt;
+        /// Payment gateway code used for link with gateway provider realization
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Payment gateway code used for link with gateway provider realization&lt;/value&gt;
+        public string GatewayCode { get; set; }
+        public string PaymentMethodType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Expected date of receipt of payment
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Expected date of receipt of payment&lt;/value&gt;
+        public DateTime? IncomingDate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Outer id used for link with payment in external systems
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Outer id used for link with payment in external systems&lt;/value&gt;
+        public string OuterId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Operation type string representation (CustomerOrder, Shipment etc)
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Operation type string representation (CustomerOrder, Shipment etc)&lt;/value&gt;
+        public string OperationType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Unique user friendly document number (generate automatically based on special algorithm realization)
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Unique user friendly document number (generate automatically based on special algorithm realization)&lt;/value&gt;
+        public string Number { get; set; }
+
+        /// &lt;summary&gt;
+        /// Flag can be used to refer to a specific order status in a variety of user scenarios with combination of Status
+        /// (Order completion, Shipment send etc)
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Flag can be used to refer to a specific order status in a variety of user scenarios with combination of Status
+        /// (Order completion, Shipment send etc)
+        /// &lt;/value&gt;
+        public bool? IsApproved { get; set; }
+
+        /// &lt;summary&gt;
+        /// Current operation status may have any values defined by concrete business process
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Current operation status may have any values defined by concrete business process&lt;/value&gt;
+        public string Status { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets Comment
+        /// &lt;/summary&gt;
+        public string Comment { get; set; }
+
+        /// &lt;summary&gt;
+        /// Currecy code
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Currecy code&lt;/value&gt;
+        public Currency Currency { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets TaxIncluded
+        /// &lt;/summary&gt;
+        public bool? TaxIncluded { get; set; }
+
+        /// &lt;summary&gt;
+        /// Money amount without tax
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Money amount without tax&lt;/value&gt;
+        public Money Sum { get; set; }
+
+        /// &lt;summary&gt;
+        /// Tax total
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Tax total&lt;/value&gt;
+        public Money Tax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets IsCancelled
+        /// &lt;/summary&gt;
+        public bool? IsCancelled { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets CancelledDate
+        /// &lt;/summary&gt;
+        public DateTime? CancelledDate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets CancelReason
+        /// &lt;/summary&gt;
+        public string CancelReason { get; set; }
+
+        /// &lt;summary&gt;
+        /// Used for construct hierarchy of operation and represent parent operation id
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Used for construct hierarchy of operation and represent parent operation id&lt;/value&gt;
+        public string ParentOperationId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets ChildrenOperations
+        /// &lt;/summary&gt;
+        public IList&lt;Operation&gt; ChildrenOperations { get; set; }
+
+        /// &lt;summary&gt;
+        /// Used for dynamic properties management, contains object type string
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Used for dynamic properties management, contains object type string&lt;/value&gt;
+        public string ObjectType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Dynamic properties collections
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Dynamic properties collections&lt;/value&gt;
+        public IList&lt;DynamicProperty&gt; DynamicProperties { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets CreatedDate
+        /// &lt;/summary&gt;
+        public DateTime? CreatedDate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets ModifiedDate
+        /// &lt;/summary&gt;
+        public DateTime? ModifiedDate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets CreatedBy
+        /// &lt;/summary&gt;
+        public string CreatedBy { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets ModifiedBy
+        /// &lt;/summary&gt;
+        public string ModifiedBy { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets Id
+        /// &lt;/summary&gt;
+        public string Id { get; set; }
+
+        public BankCardInfo BankCardInfo { get; set; }
+
+        public Address BillingAddress { get; set; }
+
+        public decimal TaxPercentRate { get; set; }
+        public Money DiscountAmount { get; set; }
+        public Money Price { get; set; }
+
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,44,0],[13,9,13,10,0],[14,13,14,33,0],[15,13,15,39,0],[16,13,16,39,0],[17,13,17,56,0],[18,13,18,61,0],[19,13,19,50,0],[20,13,20,41,0],[21,9,21,10,0],[27,42,27,46,0],[27,47,27,51,0],[32,40,32,44,0],[32,45,32,49,0],[37,38,37,42,0],[37,43,37,47,0],[42,36,42,40,0],[42,41,42,45,0],[48,33,48,37,0],[48,38,48,42,0],[54,37,54,41,0],[54,42,54,46,0],[55,43,55,47,0],[55,48,55,52,0],[61,41,61,45,0],[61,46,61,50,0],[67,33,67,37,0],[67,38,67,42,0],[73,39,73,43,0],[73,44,73,48,0],[79,32,79,36,0],[79,37,79,41,0],[88,35,88,39,0],[88,40,88,44,0],[94,32,94,36,0],[94,37,94,41,0],[99,33,99,37,0],[99,38,99,42,0],[105,36,105,40,0],[105,41,105,45,0],[110,36,110,40,0],[110,41,110,45,0],[116,28,116,32,0],[116,33,116,37,0],[122,28,122,32,0],[122,33,122,37,0],[127,36,127,40,0],[127,41,127,45,0],[132,42,132,46,0],[132,47,132,51,0],[137,38,137,42,0],[137,43,137,47,0],[143,43,143,47,0],[143,48,143,52,0],[148,54,148,58,0],[148,59,148,63,0],[154,36,154,40,0],[154,41,154,45,0],[160,59,160,63,0],[160,64,160,68,0],[165,40,165,44,0],[165,45,165,49,0],[170,41,170,45,0],[170,46,170,50,0],[175,35,175,39,0],[175,40,175,44,0],[180,36,180,40,0],[180,41,180,45,0],[185,28,185,32,0],[185,33,185,37,0],[187,44,187,48,0],[187,49,187,53,0],[189,41,189,45,0],[189,46,189,50,0],[191,41,191,45,0],[191,46,191,50,0],[192,39,192,43,0],[192,44,192,48,0],[193,30,193,34,0],[193,35,193,39,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\pathutils.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using Microsoft.Extensions.Primitives;
+
+namespace VirtoCommerce.Storefront.Model.Common
+{
+    public static class PathUtils
+    {
+        private static readonly char[] _invalidFileNameChars = Path.GetInvalidFileNameChars().Where(c =&gt; c != Path.DirectorySeparatorChar &amp;&amp; c != Path.AltDirectorySeparatorChar).ToArray();
+
+        private static readonly char[] _invalidFilterChars = _invalidFileNameChars.Where(c =&gt; c != &#39;*&#39; &amp;&amp; c != &#39;|&#39; &amp;&amp; c != &#39;?&#39;).ToArray();
+
+        private static readonly char[] _pathSeparators = new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+
+        public static bool HasInvalidPathChars(string path)
+        {
+            return path.IndexOfAny(_invalidFileNameChars) != -1;
+        }
+
+        public static bool HasInvalidFilterChars(string path)
+        {
+            return path.IndexOfAny(_invalidFilterChars) != -1;
+        }
+
+        public static string EnsureTrailingSlash(string path)
+        {
+            if (!string.IsNullOrEmpty(path) &amp;&amp;
+                path[path.Length - 1] != Path.DirectorySeparatorChar)
+            {
+                return path + Path.DirectorySeparatorChar;
+            }
+
+            return path;
+        }
+
+        public static bool PathNavigatesAboveRoot(string path)
+        {
+            var tokenizer = new StringTokenizer(path, _pathSeparators);
+            var depth = 0;
+
+            foreach (var segment in tokenizer)
+            {
+                if (segment.Equals(&quot;.&quot;) || segment.Equals(&quot;&quot;))
+                {
+                    continue;
+                }
+                else if (segment.Equals(&quot;..&quot;))
+                {
+                    depth--;
+
+                    if (depth == -1)
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    depth++;
+                }
+            }
+
+            return false;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,189,0],[12,106,12,177,0],[14,9,14,139,0],[14,95,14,127,0],[16,9,16,128,0],[19,9,19,10,0],[20,13,20,65,0],[21,9,21,10,0],[24,9,24,10,0],[25,13,25,63,0],[26,9,26,10,0],[29,9,29,10,0],[30,13,31,70,0],[32,13,32,14,0],[33,17,33,59,0],[36,13,36,25,0],[37,9,37,10,0],[40,9,40,10,0],[41,13,41,72,0],[42,13,42,27,0],[44,13,44,20,0],[44,22,44,33,0],[44,34,44,36,0],[44,37,44,46,0],[45,13,45,14,0],[46,17,46,63,0],[47,17,47,18,0],[48,21,48,30,0],[50,22,50,47,0],[51,17,51,18,0],[52,21,52,29,0],[54,21,54,37,0],[55,21,55,22,0],[56,25,56,37,0],[58,17,58,18,0],[60,17,60,18,0],[61,21,61,29,0],[62,17,62,18,0],[63,13,63,14,0],[65,13,65,26,0],[66,9,66,10,0]]);
+    </script>
+  </body>
+</html>

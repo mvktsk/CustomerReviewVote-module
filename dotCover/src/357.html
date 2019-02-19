@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\extensions\pathstringextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Http;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Stores;
+
+namespace VirtoCommerce.Storefront.Extensions
+{
+    public static class PathStringExtensions
+    {
+        private static readonly Regex _storeLangeExpr = new Regex(@&quot;^/\b\S+\b/[a-zA-Z]{2}-[a-zA-Z]{2}/&quot;);
+        public static PathString GetStoreAndLangSegment(this PathString path)
+        {
+            var matches = _storeLangeExpr.Match(path);
+            return matches.Success ? matches.Value : &quot;/&quot;;
+        }
+
+        public static PathString TrimStoreAndLangSegment(this PathString path, Store store, Language language)
+        {
+            if (store == null)
+            {
+                throw new ArgumentNullException(nameof(store));
+            }
+            if (language == null)
+            {
+                throw new ArgumentNullException(nameof(language));
+            }
+
+            //need to remove store and language if it already exist in path           
+            path = Regex.Replace(path, @&quot;^/\b&quot; + store.Id + @&quot;\b(/|\z)&quot;, &quot;/&quot;, RegexOptions.IgnoreCase);
+            path = Regex.Replace(path, @&quot;/\b&quot; + language.CultureName + @&quot;\b(/|\z)&quot;, &quot;/&quot;, RegexOptions.IgnoreCase);
+            return path;
+        }
+
+        public static PathString AddStoreAndLangSegment(this PathString path, Store store, Language language)
+        {
+            if (store == null)
+            {
+                throw new ArgumentNullException(nameof(store));
+            }
+            if (language == null)
+            {
+                throw new ArgumentNullException(nameof(language));
+            }
+
+            var result = new PathString();
+
+            //add store to path
+            result = result.Add(new PathString(&quot;/&quot; + store.Id));
+            //add language to path
+            result = result.Add(new PathString(&quot;/&quot; + language.CultureName));
+
+            //need to remove store and language if it already exist in the path
+            result = result.Add(new PathString(path.TrimStoreAndLangSegment(store, language)));
+
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,9,11,106,0],[13,9,13,10,0],[14,13,14,55,0],[15,13,15,58,0],[16,9,16,10,0],[19,9,19,10,0],[20,13,20,31,0],[21,13,21,14,0],[22,17,22,64,0],[24,13,24,34,0],[25,13,25,14,0],[26,17,26,67,0],[30,13,30,104,0],[31,13,31,115,0],[32,13,32,25,0],[33,9,33,10,0],[36,9,36,10,0],[37,13,37,31,0],[38,13,38,14,0],[39,17,39,64,0],[41,13,41,34,0],[42,13,42,14,0],[43,17,43,67,0],[46,13,46,43,0],[49,13,49,65,0],[51,13,51,77,0],[54,13,54,96,0],[56,13,56,27,0],[57,9,57,10,0]]);
+    </script>
+  </body>
+</html>

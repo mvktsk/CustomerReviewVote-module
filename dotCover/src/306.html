@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\routing\mapstorefrontroutebuilderextension.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Routing.Constraints;
+using Microsoft.Extensions.DependencyInjection;
+using VirtoCommerce.Storefront.Controllers;
+using VirtoCommerce.Storefront.Controllers.Api;
+
+namespace VirtoCommerce.Storefront.Routing
+{
+    /// &lt;summary&gt;
+    /// Provides extension methods for &lt;see cref=&quot;IRouteBuilder&quot;/&gt; to add routes.
+    /// &lt;/summary&gt;
+    public static class MapStorefrontRouteBuilderExtension
+    {
+        public static void MapStorefrontRoutes(this IRouteBuilder routes)
+        {
+            #region Storefront API routes
+
+            // API cart
+            routes.MapStorefrontRoute(&quot;API.GetCart&quot;, &quot;storefrontapi/cart&quot;, defaults: new { controller = &quot;ApiCart&quot;, action = &quot;GetCart&quot; });
+            routes.MapStorefrontRoute(&quot;API.Cart.GetCartItemsCount&quot;, &quot;storefrontapi/cart/itemscount&quot;, defaults: new { controller = &quot;ApiCart&quot;, action = &quot;GetCartItemsCount&quot; });
+            routes.MapStorefrontRoute(&quot;API.Cart.GetCartItemsCountAndAmount&quot;, &quot;storefrontapi/cart/itemscountandamount&quot;, defaults: new { controller = &quot;ApiCart&quot;, action = &quot;GetCartItemsCountAndAmount&quot; });
+            routes.MapStorefrontRoute(&quot;API.Cart.AddItemToCart&quot;, &quot;storefrontapi/cart/items&quot;, defaults: new { controller = &quot;ApiCart&quot;, action = &quot;AddItemToCart&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Cart.ChangeCartItem&quot;, &quot;storefrontapi/cart/items&quot;, defaults: new { controller = &quot;ApiCart&quot;, action = &quot;ChangeCartItem&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;PUT&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Cart.ChangeCartItemPrice&quot;, &quot;storefrontapi/cart/items/price&quot;, defaults: new { controller = &quot;ApiCart&quot;, action = &quot;ChangeCartItemPrice&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;PUT&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Cart.RemoveCartItem&quot;, &quot;storefrontapi/cart/items&quot;, defaults: new { controller = &quot;ApiCart&quot;, action = &quot;RemoveCartItem&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;DELETE&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Cart.ClearCart&quot;, &quot;storefrontapi/cart/clear&quot;, defaults: new { controller = &quot;ApiCart&quot;, action = &quot;ClearCart&quot; });
+            routes.MapStorefrontRoute(&quot;API.Cart.GetCartShipmentAvailShippingMethods&quot;, &quot;storefrontapi/cart/shipments/{shipmentId}/shippingmethods&quot;, defaults: new { controller = &quot;ApiCart&quot;, action = &quot;GetCartShipmentAvailShippingMethods&quot; });
+            routes.MapStorefrontRoute(&quot;API.Cart.GetCartAvailPaymentMethods&quot;, &quot;storefrontapi/cart/paymentmethods&quot;, defaults: new { controller = &quot;ApiCart&quot;, action = &quot;GetCartAvailPaymentMethods&quot; });
+            routes.MapStorefrontRoute(&quot;API.Cart.AddCartCoupon&quot;, &quot;storefrontapi/cart/coupons/{couponCode}&quot;, defaults: new { controller = &quot;ApiCart&quot;, action = &quot;AddCartCoupon&quot; });
+            routes.MapStorefrontRoute(&quot;API.Cart.RemoveCartCoupon&quot;, &quot;storefrontapi/cart/coupons&quot;, defaults: new { controller = &quot;ApiCart&quot;, action = &quot;RemoveCartCoupon&quot; });
+            routes.MapStorefrontRoute(&quot;API.Cart.AddOrUpdateCartShipment&quot;, &quot;storefrontapi/cart/shipments&quot;, defaults: new { controller = &quot;ApiCart&quot;, action = &quot;AddOrUpdateCartShipment&quot; });
+            routes.MapStorefrontRoute(&quot;API.Cart.AddOrUpdateCartPayment&quot;, &quot;storefrontapi/cart/payments&quot;, defaults: new { controller = &quot;ApiCart&quot;, action = &quot;AddOrUpdateCartPayment&quot; });
+            routes.MapStorefrontRoute(&quot;API.Cart.CreateOrder&quot;, &quot;storefrontapi/cart/createorder&quot;, defaults: new { controller = &quot;ApiCart&quot;, action = &quot;CreateOrder&quot; });
+            routes.MapStorefrontRoute(&quot;API.Cart.UpdatePaymentPlan&quot;, &quot;storefrontapi/cart/paymentPlan&quot;, new { controller = &quot;ApiCart&quot;, action = &quot;AddOrUpdateCartPaymentPlan&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Cart.DeletePaymentPlan&quot;, &quot;storefrontapi/cart/paymentPlan&quot;, new { controller = &quot;ApiCart&quot;, action = &quot;DeleteCartPaymentPlan&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;DELETE&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Cart.SubmitComment&quot;, &quot;storefrontapi/cart/comment&quot;, new { controller = &quot;ApiCart&quot;, action = &quot;UpdateCartComment&quot; });
+            routes.MapStorefrontRoute(&quot;API.Cart.SaveCart&quot;, &quot;storefrontapi/cart&quot;, new { controller = &quot;ApiCart&quot;, action = &quot;SaveCart&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Cart.GetAvailableDeliveryDates&quot;, &quot;storefrontapi/cart/deliverydates&quot;, new { controller = &quot;ApiCart&quot;, action = nameof(ApiCartController.GetAvailableDeliveryDates) });
+            routes.MapStorefrontRoute(&quot;API.Cart.UpdateCartDynamicProperties&quot;, &quot;storefrontapi/cart/dynamicproperties&quot;, new { controller = &quot;ApiCart&quot;, action = &quot;UpdateCartDynamicProperties&quot; });
+
+            // API orders
+            routes.MapStorefrontRoute(&quot;API.Orders.GetOrders&quot;, &quot;storefrontapi/orders&quot;, new { controller = &quot;ApiOrders&quot;, action = nameof(ApiOrdersController.GetOrders) });
+            
+            // API templates
+            routes.MapStorefrontRoute(&quot;CartTemplates.GetTemplates&quot;, &quot;storefrontapi/templates&quot;, defaults: new { controller = &quot;ApiTemplates&quot;, action = nameof(ApiTemplatesController.GetTemplates) });
+            routes.MapStorefrontRoute(&quot;CartTemplates.UpdateTemplate&quot;, &quot;storefrontapi/templates/{id}&quot;, defaults: new { controller = &quot;ApiTemplates&quot;, action = nameof(ApiTemplatesController.UpdateTemplate) }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;PUT&quot;) }));
+            routes.MapStorefrontRoute(&quot;CartTemplates.DeleteTemplate&quot;, &quot;storefrontapi/templates/{id}&quot;, defaults: new { controller = &quot;ApiTemplates&quot;, action = nameof(ApiTemplatesController.DeleteTemplate) }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;DELETE&quot;) }));
+            routes.MapStorefrontRoute(&quot;CartTemplates.ChangeTemplateItem&quot;, &quot;storefrontapi/templates/{id}/items&quot;, defaults: new { controller = &quot;ApiTemplates&quot;, action = nameof(ApiTemplatesController.ChangeTemplateItem) }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;PUT&quot;) }));
+            routes.MapStorefrontRoute(&quot;CartTemplates.RemoveTemplateItem&quot;, &quot;storefrontapi/templates/{id}/items&quot;, defaults: new { controller = &quot;ApiTemplates&quot;, action = nameof(ApiTemplatesController.RemoveTemplateItem) }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;DELETE&quot;) }));
+
+            // API lists
+            routes.MapStorefrontRoute(&quot;API.Lists.GetListByName&quot;, &quot;storefrontapi/lists/{listName}/{type}&quot;, defaults: new { controller = &quot;ApiLists&quot;, action = &quot;GetListByName&quot; });
+            routes.MapStorefrontRoute(&quot;API.Lists.AddItemToList&quot;, &quot;storefrontapi/lists/items&quot;, defaults: new { controller = &quot;ApiLists&quot;, action = &quot;AddItemToList&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Lists.RemoveItemFromList&quot;, &quot;storefrontapi/lists/{listName}/{type}/items/{lineItemId}&quot;, defaults: new { controller = &quot;ApiLists&quot;, action = &quot;RemoveItemFromList&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;DELETE&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Lists.GetListsWithProduct&quot;, &quot;storefrontapi/lists/getlistswithproduct&quot;, defaults: new { controller = &quot;ApiLists&quot;, action = &quot;GetListsWithProduct&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Lists.SearchLists&quot;, &quot;storefrontapi/lists/search&quot;, defaults: new { controller = &quot;ApiLists&quot;, action = &quot;SearchLists&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Lists.CreateList&quot;, &quot;storefrontapi/lists/{listName}/{type}/create&quot;, defaults: new { controller = &quot;ApiLists&quot;, action = &quot;CreateList&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Lists.DeleteListsByIds&quot;, &quot;storefrontapi/lists/deletelistsbyids&quot;, defaults: new { controller = &quot;ApiLists&quot;, action = &quot;DeleteListsByIds&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;DELETE&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Lists.MergeWithCurrentCart&quot;, &quot;storefrontapi/lists/{listName}/{type}/mergewithcurrentcart&quot;, defaults: new { controller = &quot;ApiLists&quot;, action = &quot;MergeWithCurrentCart&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+
+            // Catalog API
+            routes.MapStorefrontRoute(&quot;API.Catalog.SearchProducts&quot;, &quot;storefrontapi/catalog/search&quot;, defaults: new { controller = &quot;ApiCatalog&quot;, action = &quot;SearchProducts&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Catalog.GetProductsByIds&quot;, &quot;storefrontapi/products&quot;, defaults: new { controller = &quot;ApiCatalog&quot;, action = &quot;GetProductsByIds&quot; });
+            routes.MapStorefrontRoute(&quot;API.Catalog.SearchCategories&quot;, &quot;storefrontapi/categories/search&quot;, defaults: new { controller = &quot;ApiCatalog&quot;, action = &quot;SearchCategories&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Catalog.GetCategoriesByIds&quot;, &quot;storefrontapi/categories&quot;, defaults: new { controller = &quot;ApiCatalog&quot;, action = &quot;GetCategoriesByIds&quot; });
+            routes.MapStorefrontRoute(&quot;API.Catalog.SearchBrands&quot;, &quot;storefrontapi/brands&quot;, defaults: new { controller = &quot;ApiCatalog&quot;, action = &quot;SearchBrands&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Catalog.GetTypes&quot;, &quot;storefrontapi/product/types&quot;, defaults: new { controller = &quot;ApiCatalog&quot;, action = &quot;GetTypes&quot; });
+            routes.MapStorefrontRoute(&quot;API.Catalog.GetAvailabilityOfProducts&quot;, &quot;storefrontapi/products/availability&quot;, defaults: new { controller = &quot;ApiCatalog&quot;, action = nameof(ApiCatalogController.GetAvailabilityOfProducts) }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+
+            // Common storefront API
+            routes.MapStorefrontRoute(&quot;API.Common.GetCountries&quot;, &quot;storefrontapi/countries&quot;, defaults: new { controller = &quot;ApiCommon&quot;, action = &quot;GetCountries&quot; });
+            routes.MapStorefrontRoute(&quot;API.Common.GetCountryRegions&quot;, &quot;storefrontapi/countries/{countryCode}/regions&quot;, defaults: new { controller = &quot;ApiCommon&quot;, action = &quot;GetCountryRegions&quot; });
+            routes.MapStorefrontRoute(&quot;API.Common.Feedback&quot;, &quot;storefrontapi/feedback&quot;, defaults: new { controller = &quot;ApiCommon&quot;, action = &quot;Feedback&quot; });
+
+            // Pricing API
+            routes.MapStorefrontRoute(&quot;API.Pricing.GetActualProductPrices&quot;, &quot;storefrontapi/pricing/actualprices&quot;, defaults: new { controller = &quot;ApiPricing&quot;, action = &quot;GetActualProductPrices&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+
+            // Marketing API
+            routes.MapStorefrontRoute(&quot;API.Marketing.GetDynamicContent&quot;, &quot;storefrontapi/marketing/dynamiccontent/{placeName}&quot;, defaults: new { controller = &quot;ApiMarketing&quot;, action = nameof(ApiMarketingController.GetDynamicContent) });
+            routes.MapStorefrontRoute(&quot;API.Marketing.GetTrends&quot;, &quot;storefrontapi/marketing/trends&quot;, defaults: new { controller = &quot;ApiMarketing&quot;, action = nameof(ApiMarketingController.GetTrends) });
+            routes.MapStorefrontRoute(&quot;API.Marketing.GetTrend&quot;, &quot;storefrontapi/marketing/trends/{code}&quot;, defaults: new { controller = &quot;ApiMarketing&quot;, action = nameof(ApiMarketingController.GetTrend) });
+            routes.MapStorefrontRoute(&quot;API.Marketing.GetPromotions&quot;, &quot;storefrontapi/marketing/promotions&quot;, defaults: new { controller = &quot;ApiMarketing&quot;, action = nameof(ApiMarketingController.GetPromotions) });
+            routes.MapStorefrontRoute(&quot;API.Marketing.GetPromotion&quot;, &quot;storefrontapi/marketing/promotions/{code}&quot;, defaults: new { controller = &quot;ApiMarketing&quot;, action = nameof(ApiMarketingController.GetPromotion) });
+            routes.MapStorefrontRoute(&quot;API.Marketing.SearchSuggested&quot;, &quot;storefrontapi/marketing/suggestedtrend&quot;, defaults: new { controller = &quot;ApiMarketing&quot;, action = nameof(ApiMarketingController.SearchSuggestedTrend) });
+            routes.MapStorefrontRoute(&quot;API.Marketing.GetCarouselBanners&quot;, &quot;storefrontapi/marketing/carouselbanners&quot;, defaults: new { controller = &quot;ApiMarketing&quot;, action = nameof(ApiMarketingController.GetCarouselBanners) });
+
+            // Recommendations API
+            routes.MapStorefrontRoute(&quot;API.Recommendations.GetRecommendations&quot;, &quot;storefrontapi/recommendations&quot;, defaults: new { controller = &quot;ApiRecommendations&quot;, action = &quot;GetRecommendations&quot; });
+
+            // User actions and events API
+            routes.MapStorefrontRoute(&quot;API.UserActions.SaveEventInfo&quot;, &quot;storefrontapi/useractions/eventinfo&quot;, new { controller = &quot;ApiUserActions&quot;, action = &quot;SaveEventInfo&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+
+            // Account API
+            routes.MapStorefrontRoute(&quot;API.Account.GetCurrentUser&quot;, &quot;storefrontapi/account&quot;, new { controller = &quot;ApiAccount&quot;, action = &quot;GetCurrentUser&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;GET&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Account.GetUserById&quot;, &quot;storefrontapi/account/{userId}&quot;, new { controller = &quot;ApiAccount&quot;, action = &quot;GetUserById&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;GET&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Account.UpdateAccount&quot;, &quot;storefrontapi/account&quot;, new { controller = &quot;ApiAccount&quot;, action = &quot;UpdateAccount&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Account.ChangePassword&quot;, &quot;storefrontapi/account/password&quot;, new { controller = &quot;ApiAccount&quot;, action = &quot;ChangePassword&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Account.UpdateAddresses&quot;, &quot;storefrontapi/account/addresses&quot;, new { controller = &quot;ApiAccount&quot;, action = &quot;UpdateAddresses&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Account.OrganizationUsersSearch&quot;, &quot;storefrontapi/account/organization/users/search&quot;, new { controller = &quot;ApiAccount&quot;, action = &quot;SearchOrganizationUsersAsync&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Account.GetCustomerOrganization&quot;, &quot;storefrontapi/account/organization/current&quot;, new { controller = &quot;ApiAccount&quot;, action = &quot;GetCustomerOrganization&quot; });
+            routes.MapStorefrontRoute(&quot;API.Account.CreateUserInvitation&quot;, &quot;storefrontapi/account/invitation&quot;, new { controller = &quot;ApiAccount&quot;, action = &quot;CreateUserInvitation&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Account.UpdateOrganization&quot;, &quot;storefrontapi/account/organization&quot;, new { controller = &quot;ApiAccount&quot;, action = &quot;UpdateOrganization&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;PUT&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Account.CreateOrganization&quot;, &quot;storefrontapi/account/organization&quot;, new { controller = &quot;ApiAccount&quot;, action = &quot;RegisterOrganization&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Account.RegisterNewUser&quot;, &quot;storefrontapi/account/user&quot;, new { controller = &quot;ApiAccount&quot;, action = &quot;RegisterUser&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Account.LockUser&quot;, &quot;storefrontapi/account/{userId}/lock&quot;, new { controller = &quot;ApiAccount&quot;, action = &quot;LockUser&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Account.UnlockUser&quot;, &quot;storefrontapi/account/{userId}/unlock&quot;, new { controller = &quot;ApiAccount&quot;, action = &quot;UnlockUser&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Account.DeleteUser&quot;, &quot;storefrontapi/account/{userId}&quot;, new { controller = &quot;ApiAccount&quot;, action = &quot;DeleteUser&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;DELETE&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Account.ChangeLanguage&quot;, &quot;storefrontapi/account/settings&quot;, new { controller = &quot;ApiAccount&quot;, action = nameof(ApiAccountController.ChangeLanguage) }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+
+            // Quote requests API
+            routes.MapStorefrontRoute(&quot;API.QuoteRequest.Search&quot;, &quot;storefrontapi/quoterequests/search&quot;, new { controller = &quot;ApiQuoteRequest&quot;, action = &quot;QuoteSearch&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.QuoteRequest.GetItemsCount&quot;, &quot;storefrontapi/quoterequests/{number}/itemscount&quot;, defaults: new { controller = &quot;ApiQuoteRequest&quot;, action = &quot;GetItemsCount&quot; });
+            routes.MapStorefrontRoute(&quot;API.QuoteRequest.Get&quot;, &quot;storefrontapi/quoterequests/{number}&quot;, defaults: new { controller = &quot;ApiQuoteRequest&quot;, action = &quot;Get&quot; });
+            routes.MapStorefrontRoute(&quot;API.QuoteRequest.GetCurrent&quot;, &quot;storefrontapi/quoterequest/current&quot;, defaults: new { controller = &quot;ApiQuoteRequest&quot;, action = &quot;GetCurrent&quot; });
+            routes.MapStorefrontRoute(&quot;API.QuoteRequest.AddItem&quot;, &quot;storefrontapi/quoterequests/current/items&quot;, defaults: new { controller = &quot;ApiQuoteRequest&quot;, action = &quot;AddItem&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.QuoteRequest.RemoveItem&quot;, &quot;storefrontapi/quoterequests/{number}/items/{itemId}&quot;, defaults: new { controller = &quot;ApiQuoteRequest&quot;, action = &quot;RemoveItem&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;DELETE&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.QuoteRequest.Update&quot;, &quot;storefrontapi/quoterequests/{number}&quot;, defaults: new { controller = &quot;ApiQuoteRequest&quot;, action = &quot;Update&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;PUT&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.QuoteRequest.Submit&quot;, &quot;storefrontapi/quoterequests/{number}/submit&quot;, defaults: new { controller = &quot;ApiQuoteRequest&quot;, action = &quot;Submit&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.QuoteRequest.Reject&quot;, &quot;storefrontapi/quoterequests/{number}/reject&quot;, defaults: new { controller = &quot;ApiQuoteRequest&quot;, action = &quot;Reject&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.QuoteRequest.CalculateTotals&quot;, &quot;storefrontapi/quoterequests/{number}/totals&quot;, defaults: new { controller = &quot;ApiQuoteRequest&quot;, action = &quot;CalculateTotals&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.QuoteRequest.Confirm&quot;, &quot;storefrontapi/quoterequests/{number}/confirm&quot;, defaults: new { controller = &quot;ApiQuoteRequest&quot;, action = &quot;Confirm&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+
+            // Order API
+            routes.MapStorefrontRoute(&quot;API.Orders&quot;, &quot;storefrontapi/orders/search&quot;, new { controller = &quot;ApiOrder&quot;, action = &quot;SearchCustomerOrders&quot; });
+            routes.MapStorefrontRoute(&quot;API.OrderByNumber&quot;, &quot;storefrontapi/orders/{orderNumber}&quot;, new { controller = &quot;ApiOrder&quot;, action = &quot;GetCustomerOrder&quot; });
+            routes.MapStorefrontRoute(&quot;API.Orders.GetNewPaymentData&quot;, &quot;storefrontapi/orders/{orderNumber}/newpaymentdata&quot;, new { controller = &quot;ApiOrder&quot;, action = &quot;GetNewPaymentData&quot; });
+            routes.MapStorefrontRoute(&quot;API.Orders.CancelPayment&quot;, &quot;storefrontapi/orders/{orderNumber}/payments/{paymentNumber}/cancel&quot;, new { controller = &quot;ApiOrder&quot;, action = &quot;CancelPayment&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Orders.ProcessPayment&quot;, &quot;storefrontapi/orders/{orderNumber}/payments/{paymentNumber}/process&quot;, new { controller = &quot;ApiOrder&quot;, action = &quot;ProcessOrderPayment&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Orders.AddOrUpdateOrderPayment&quot;, &quot;storefrontapi/orders/{orderNumber}/payments&quot;, new { controller = &quot;ApiOrder&quot;, action = &quot;AddOrUpdateOrderPayment&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Orders.GetInvoicePdf&quot;, &quot;storefrontapi/orders/{orderNumber}/invoice&quot;, new { controller = &quot;ApiOrder&quot;, action = &quot;GetInvoicePdf&quot; });
+            routes.MapStorefrontRoute(&quot;API.Orders.Reorder&quot;, &quot;storefrontapi/orders/{orderNumber}/reorder&quot;, new { controller = &quot;ApiOrder&quot;, action = &quot;Reorder&quot; });
+            routes.MapStorefrontRoute(&quot;API.Orders.Export&quot;, &quot;storefrontapi/orders/{id}/export&quot;, new {controller = &quot;ApiOrder&quot;, action = nameof(ApiOrderController.ExportOrder)});
+            routes.MapStorefrontRoute(&quot;API.Orders.BulkExport&quot;, &quot;storefrontapi/orders/export/bulk&quot;, new { controller = &quot;ApiOrder&quot;, action = nameof(ApiOrderController.BulkExportOrders) });
+
+            // Subscriptions API
+            routes.MapStorefrontRoute(&quot;API.Subscriptions&quot;, &quot;storefrontapi/subscriptions/search&quot;, defaults: new { controller = &quot;ApiSubscription&quot;, action = &quot;SearchCustomerSubscriptions&quot; });
+            routes.MapStorefrontRoute(&quot;API.SubscriptionByNumber&quot;, &quot;storefrontapi/subscriptions/{number}&quot;, defaults: new { controller = &quot;ApiSubscription&quot;, action = &quot;GetCustomerSubscription&quot; });
+            routes.MapStorefrontRoute(&quot;API.CancelSubscription&quot;, &quot;storefrontapi/subscriptions/{number}/cancel&quot;, defaults: new { controller = &quot;ApiSubscription&quot;, action = &quot;CancelSubscription&quot; });
+
+            // Blog API
+            routes.MapStorefrontRoute(&quot;API.Blog.Search&quot;, &quot;storefrontapi/blog/{blogName}/search&quot;, defaults: new { controller = &quot;ApiBlog&quot;, action = &quot;Search&quot; });
+
+            // Inventory API
+            routes.MapStorefrontRoute(&quot;API.Inventory.Search&quot;, &quot;storefrontapi/fulfillmentcenters/search&quot;, defaults: new { controller = &quot;ApiInventory&quot;, action = &quot;SearchFulfillmentCenters&quot; });
+
+            // Distributor
+            routes.MapStorefrontRoute(&quot;API.Distributor.GetProductAvailabilities&quot;, &quot;storefrontapi/distributor/productavailabilities&quot;, defaults: new { controller = &quot;ApiDistributor&quot;, action = &quot;GetProductAvailabilities&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;GET&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Distributor.UpdateProductAvailabilities&quot;, &quot;storefrontapi/distributor/productavailabilities&quot;, defaults: new { controller = &quot;ApiDistributor&quot;, action = &quot;UpdateProductAvailabilities&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Distributor.Orders&quot;, &quot;storefrontapi/distributor/orders&quot;, defaults: new { controller = &quot;ApiDistributor&quot;, action = &quot;Orders&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;GET&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Distributor.ConfirmOrder&quot;, &quot;storefrontapi/distributor/orders/{orderNumber}/confirm&quot;, defaults: new { controller = &quot;ApiDistributor&quot;, action = nameof(ApiDistributorController.ConfirmOrder) }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;PUT&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Distributor.RejectOrder&quot;, &quot;storefrontapi/distributor/orders/{orderNumber}/reject&quot;, defaults: new { controller = &quot;ApiDistributor&quot;, action = nameof(ApiDistributorController.RejectOrder) }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;PUT&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Distributor.UpdateOrder&quot;, &quot;storefrontapi/distributor/orders/{orderNumber}&quot;, defaults: new { controller = &quot;ApiDistributor&quot;, action = &quot;UpdateOrder&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;PUT&quot;) }));
+
+            // Dispatcher
+            routes.MapStorefrontRoute(&quot;API.Dispatcher.GetDispatcherOrders&quot;, &quot;storefrontapi/dispatcher/orders&quot;, defaults: new { controller = &quot;ApiDispatcher&quot;, action = &quot;GetDispatcherOrders&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;GET&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Dispatcher.ConfirmOrder&quot;, &quot;storefrontapi/dispatcher/orders/{orderId}/confirm&quot;, defaults: new { controller = &quot;ApiDispatcher&quot;, action = &quot;ConfirmOrder&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.DelayOrderDelivery&quot;, &quot;storefrontapi/dispatcher/orders/{orderId}/delay&quot;, defaults: new { controller = &quot;ApiDispatcher&quot;, action = &quot;DelayOrderDelivery&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+
+            // Customer Order api
+            routes.MapStorefrontRoute(&quot;API.Orders.AcceptOrder&quot;, &quot;storefrontapi/customer/orders/{orderId}/accept&quot;, defaults: new { controller = &quot;ApiOrders&quot;, action = &quot;AcceptOrder&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Orders.CancelOrder&quot;, &quot;storefrontapi/customer/orders/{orderId}/cancel&quot;, defaults: new { controller = &quot;ApiOrders&quot;, action = &quot;CancelOrder&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            
+            // Customer balance api
+            routes.MapStorefrontRoute(&quot;API.Balance.GetBalance&quot;, &quot;storefrontapi/balance&quot;, defaults: new { controller = &quot;ApiBalance&quot;, action = &quot;GetBalance&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;GET&quot;) }));
+            routes.MapStorefrontRoute(&quot;API.Balance.ExportBalanceHistory&quot;, &quot;storefrontapi/balance/export&quot;, defaults: new { controller = &quot;ApiBalance&quot;, action = &quot;ExportBalanceHistory&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;GET&quot;) }));
+
+            // Outlets API
+            routes.MapStorefrontRoute(&quot;API.Outlets.ChangeOutlet&quot;, &quot;storefrontapi/outlets/current/{outletId}&quot;, defaults: new { controller = &quot;ApiOutlets&quot;, action = &quot;ChangeOutlet&quot; });
+
+            #endregion
+
+            // Distributor
+            routes.MapStorefrontRoute(&quot;Distributor.GetOrderDetails&quot;, &quot;distributor/order/{orderNumber}&quot;, defaults: new { controller = &quot;Distributor&quot;, action = nameof(DistributorController.GetOrderDetails) });
+            routes.MapStorefrontRoute(&quot;Distributor.NewOrders&quot;, &quot;distributor/new-orders&quot;, defaults: new { controller = &quot;Distributor&quot;, action = nameof(DistributorController.NewOrders) });
+            routes.MapStorefrontRoute(&quot;Distributor.PreviousOrders&quot;, &quot;distributor/previous-orders&quot;, defaults: new { controller = &quot;Distributor&quot;, action = nameof(DistributorController.PreviousOrders) });
+            routes.MapStorefrontRoute(&quot;Distributor.Catalogue&quot;, &quot;distributor/products&quot;, defaults: new { controller = &quot;Distributor&quot;, action = nameof(DistributorController.Products) });
+
+            // Dispatcher
+            routes.MapStorefrontRoute(&quot;Dispatcher.GetDispatcherOrders &quot;, &quot;dispatcher/orders&quot;, defaults: new { controller = &quot;Dispatcher&quot;, action = &quot;GetDispatcherOrders&quot; });
+
+            // Monitoring
+            routes.MapStorefrontRoute(&quot;Monitoring.ApplicationTest&quot;, &quot;applicationtest&quot;, defaults: new { controller = &quot;Monitoring&quot;, action = nameof(MonitoringController.ApplicationTest) });
+
+            // Errors
+            routes.MapStorefrontRoute(&quot;AccessDenied&quot;, &quot;error/AccessDenied&quot;, defaults: new { controller = &quot;Error&quot;, action = &quot;AccessDenied&quot; });
+            routes.MapStorefrontRoute(&quot;Error&quot;, &quot;error/{errCode}&quot;, defaults: new { controller = &quot;Error&quot;, action = &quot;Error&quot; });
+            routes.MapRoute(&quot;NoWorkContextErrors&quot;, &quot;error/{errCode}&quot;, defaults: new { controller = &quot;Error&quot;, action = &quot;Error&quot; });
+            routes.MapStorefrontRoute(&quot;StoreMaintenance&quot;, &quot;common/maintenance&quot;, defaults: new { controller = &quot;Common&quot;, action = &quot;Maintenance&quot; });
+            routes.MapStorefrontRoute(&quot;NoTheme&quot;, &quot;common/notheme&quot;, defaults: new { controller = &quot;Common&quot;, action = &quot;NoTheme&quot; });
+
+            // Account
+            routes.MapStorefrontRoute(&quot;Account&quot;, &quot;account&quot;, defaults: new { controller = &quot;Account&quot;, action = &quot;GetAccount&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;GET&quot;) }));
+            routes.MapStorefrontRoute(&quot;Account.GetOrderDetails&quot;, &quot;account/order/{number}&quot;, defaults: new { controller = &quot;Account&quot;, action = &quot;GetOrderDetails&quot; });
+            routes.MapStorefrontRoute(&quot;Account.UpdateAddress&quot;, &quot;account/addresses/{id?}&quot;, defaults: new { controller = &quot;Account&quot;, action = &quot;UpdateAddress&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;Account.GetAddresses&quot;, &quot;account/addresses&quot;, defaults: new { controller = &quot;Account&quot;, action = &quot;GetAddresses&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;GET&quot;) }));
+            routes.MapStorefrontRoute(&quot;Account.Register&quot;, &quot;account/register&quot;, defaults: new { controller = &quot;Account&quot;, action = &quot;Register&quot; });
+            routes.MapStorefrontRoute(&quot;Account.Login&quot;, &quot;account/login&quot;, defaults: new { controller = &quot;Account&quot;, action = &quot;Login&quot; });
+            routes.MapStorefrontRoute(&quot;Account.Logout&quot;, &quot;account/logout&quot;, defaults: new { controller = &quot;Account&quot;, action = &quot;Logout&quot; });
+            routes.MapStorefrontRoute(&quot;Account.ForgotPassword&quot;, &quot;account/forgotpassword&quot;, defaults: new { controller = &quot;Account&quot;, action = &quot;ForgotPassword&quot; });
+            routes.MapStorefrontRoute(&quot;Account.ResetPassword&quot;, &quot;account/resetpassword&quot;, defaults: new { controller = &quot;Account&quot;, action = &quot;ResetPassword&quot; });
+            routes.MapStorefrontRoute(&quot;Account.ChangePassword&quot;, &quot;account/password&quot;, defaults: new { controller = &quot;Account&quot;, action = &quot;ChangePassword&quot; });
+            routes.MapStorefrontRoute(&quot;Account.ExternalLogin&quot;, &quot;account/externallogin&quot;, defaults: new { controller = &quot;Account&quot;, action = &quot;ExternalLogin&quot; });
+            routes.MapStorefrontRoute(&quot;Account.ExternalLoginCallback&quot;, &quot;account/externallogincallback&quot;, defaults: new { controller = &quot;Account&quot;, action = &quot;ExternalLoginCallback&quot; });
+            routes.MapStorefrontRoute(&quot;Account.ImpersonateUser&quot;, &quot;account/impersonate/{userId}&quot;, defaults: new { controller = &quot;Account&quot;, action = &quot;ImpersonateUser&quot; });
+            routes.MapStorefrontRoute(&quot;Account.ConfirmEmail&quot;, &quot;account/confirmemail&quot;, defaults: new { controller = &quot;Account&quot;, action = &quot;ConfirmEmail&quot; });
+            routes.MapStorefrontRoute(&quot;Account.ConfirmInvitation&quot;, &quot;account/confirminvitation&quot;, defaults: new { controller = &quot;Account&quot;, action = &quot;ConfirmInvitation&quot; });
+            routes.MapStorefrontRoute(&quot;Account.ForgotLogin&quot;, &quot;account/forgotlogin&quot;, defaults: new { controller = &quot;Account&quot;, action = &quot;ForgotLogin&quot; });
+            routes.MapStorefrontRoute(&quot;Account.AcceptInvitation&quot;, &quot;account/activate&quot;, defaults: new { controller = &quot;Account&quot;, action = nameof(AccountController.ResetPassword), activateAccount = true });
+            routes.MapStorefrontRoute(&quot;Account.ResendInvite&quot;, &quot;account/requestinvitationlink&quot;, defaults: new { controller = &quot;Account&quot;, action = nameof(AccountController.RequestInvitationLink) }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;Account.Settings&quot;, &quot;account/settings&quot;, defaults: new { controller = &quot;Account&quot;, action = nameof(AccountController.AccountSettings) });
+
+            // Cart
+            routes.MapStorefrontRoute(&quot;Cart.Index&quot;, &quot;cart&quot;, defaults: new { controller = &quot;Cart&quot;, action = &quot;Index&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;GET&quot;) }));
+            routes.MapStorefrontRoute(&quot;Cart.Checkout&quot;, &quot;cart/checkout&quot;, defaults: new { controller = &quot;Cart&quot;, action = &quot;Checkout&quot; });
+            routes.MapStorefrontRoute(&quot;Cart.ExternalPaymentCallback&quot;, &quot;cart/externalpaymentcallback&quot;, defaults: new { controller = &quot;Cart&quot;, action = &quot;ExternalPaymentCallback&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;GET&quot;, &quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;Cart.Thanks&quot;, &quot;cart/thanks/{orderNumber}&quot;, defaults: new { controller = &quot;Cart&quot;, action = &quot;Thanks&quot; });
+            routes.MapStorefrontRoute(&quot;Cart.PaymentForm&quot;, &quot;cart/checkout/paymentform&quot;, defaults: new { controller = &quot;Cart&quot;, action = &quot;PaymentForm&quot; });
+            routes.MapStorefrontRoute(&quot;Cart.OrderConfirmation&quot;, &quot;cart/order_confirmation&quot;, defaults: new { controller = &quot;Cart&quot;, action = &quot;OrderConfirmation&quot; });
+
+            // Orders
+            routes.MapStorefrontRoute(&quot;Orders.PreviousOrders&quot;, &quot;orders&quot;, defaults: new { controller = &quot;Orders&quot;, action = &quot;PreviousOrders&quot; });
+            routes.MapStorefrontRoute(&quot;Orders.Reorder&quot;, &quot;orders/reorder/{number}&quot;, defaults: new { controller = &quot;Orders&quot;, action = &quot;Reorder&quot; });
+
+            // Carts
+            routes.MapStorefrontRoute(&quot;Templates.GetTemplates&quot;, &quot;templates&quot;, defaults: new { controller = &quot;Templates&quot;, action = nameof(TemplatesController.GetTemplates) });
+
+            // Cart (Shopify compatible)
+            routes.MapStorefrontRoute(&quot;ShopifyCart.Cart&quot;, &quot;cart&quot;, defaults: new { controller = &quot;ShopifyCompatibility&quot;, action = &quot;Cart&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;ShopifyCart.CartJs&quot;, &quot;cart.js&quot;, defaults: new { controller = &quot;ShopifyCompatibility&quot;, action = &quot;CartJs&quot; });
+            routes.MapStorefrontRoute(&quot;ShopifyCart.Add&quot;, &quot;cart/add&quot;, defaults: new { controller = &quot;ShopifyCompatibility&quot;, action = &quot;Add&quot; });
+            routes.MapStorefrontRoute(&quot;ShopifyCart.AddJs&quot;, &quot;cart/add.js&quot;, defaults: new { controller = &quot;ShopifyCompatibility&quot;, action = &quot;AddJs&quot; });
+            routes.MapStorefrontRoute(&quot;ShopifyCart.Change&quot;, &quot;cart/change&quot;, defaults: new { controller = &quot;ShopifyCompatibility&quot;, action = &quot;Change&quot; });
+            routes.MapStorefrontRoute(&quot;ShopifyCart.ChangeJs&quot;, &quot;cart/change.js&quot;, defaults: new { controller = &quot;ShopifyCompatibility&quot;, action = &quot;ChangeJs&quot; });
+            routes.MapStorefrontRoute(&quot;ShopifyCart.Clear&quot;, &quot;cart/clear&quot;, defaults: new { controller = &quot;ShopifyCompatibility&quot;, action = &quot;Clear&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;GET&quot;) }));
+            routes.MapStorefrontRoute(&quot;ShopifyCart.ClearJs&quot;, &quot;cart/clear.js&quot;, defaults: new { controller = &quot;ShopifyCompatibility&quot;, action = &quot;ClearJs&quot; });
+            routes.MapStorefrontRoute(&quot;ShopifyCart.UpdateJs&quot;, &quot;cart/update.js&quot;, defaults: new { controller = &quot;ShopifyCompatibility&quot;, action = &quot;UpdateJs&quot; });
+
+            // Collections (Shopify compatible)
+            routes.MapStorefrontRoute(&quot;Shopify.Collections&quot;, &quot;collections&quot;, defaults: new { controller = &quot;ShopifyCompatibility&quot;, action = &quot;Collections&quot; });
+
+            // QuoteRequest
+            routes.MapStorefrontRoute(&quot;QuoteRequest.CurrentQuoteRequest&quot;, &quot;quoterequest&quot;, defaults: new { controller = &quot;QuoteRequest&quot;, action = &quot;CurrentQuoteRequest&quot; });
+            routes.MapStorefrontRoute(&quot;Account.QuoteRequests&quot;, &quot;account/quoterequests&quot;, defaults: new { controller = &quot;QuoteRequest&quot;, action = &quot;QuoteRequests&quot; });
+            routes.MapStorefrontRoute(&quot;Account.QuoteRequestByNumber&quot;, &quot;quoterequest/{number}&quot;, defaults: new { controller = &quot;QuoteRequest&quot;, action = &quot;QuoteRequestByNumber&quot; });
+
+            // Bulk order
+            routes.MapStorefrontRoute(&quot;BulkOrder.Index&quot;, &quot;bulkorder&quot;, defaults: new { controller = &quot;BulkOrder&quot;, action = &quot;Index&quot; });
+            routes.MapStorefrontRoute(&quot;BulkOrder.AddFieldItems&quot;, &quot;bulkorder/addfielditems&quot;, defaults: new { controller = &quot;BulkOrder&quot;, action = &quot;AddFieldItems&quot; });
+            routes.MapStorefrontRoute(&quot;BulkOrder.AddCsvItems&quot;, &quot;bulkorder/addcsvitems&quot;, defaults: new { controller = &quot;BulkOrder&quot;, action = &quot;AddCsvItems&quot; });
+
+            // CatalogSearch
+            routes.MapStorefrontRoute(&quot;CatalogSearch.CategoryBrowsing&quot;, &quot;search/{categoryId}&quot;, defaults: new { controller = &quot;CatalogSearch&quot;, action = &quot;CategoryBrowsing&quot; });
+            routes.MapStorefrontRoute(&quot;CatalogSearch.SearchProducts&quot;, &quot;search&quot;, defaults: new { controller = &quot;CatalogSearch&quot;, action = &quot;SearchProducts&quot; });
+            routes.MapStorefrontRoute(&quot;CatalogSearch.Brands&quot;, &quot;brands&quot;, defaults: new { controller = &quot;CatalogSearch&quot;, action = &quot;Brands&quot; });
+            routes.MapStorefrontRoute(&quot;CatalogSearch.Brand&quot;, &quot;brand/{brandName}&quot;, defaults: new { controller = &quot;CatalogSearch&quot;, action = &quot;Brand&quot; });
+            routes.MapStorefrontRoute(&quot;CatalogSearch.AllProducts&quot;, &quot;catalog&quot;, defaults: new { controller = &quot;CatalogSearch&quot;, action = nameof(CatalogSearchController.AllProducts) });
+
+            // Common
+            routes.MapStorefrontRoute(&quot;Common.SetCurrency&quot;, &quot;common/setcurrency/{currency}&quot;, defaults: new { controller = &quot;Common&quot;, action = &quot;SetCurrency&quot; });
+            routes.MapStorefrontRoute(&quot;Common.ContactUsPost&quot;, &quot;contact/{viewName?}&quot;, defaults: new { controller = &quot;Common&quot;, action = &quot;ContactForm&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;POST&quot;) }));
+            routes.MapStorefrontRoute(&quot;Common.NoStore&quot;, &quot;common/nostore&quot;, defaults: new { controller = &quot;Common&quot;, action = &quot;NoStore&quot; });
+            routes.MapStorefrontRoute(&quot;Common.Maintenance&quot;, &quot;maintenance&quot;, defaults: new { controller = &quot;Common&quot;, action = &quot;Maintenance&quot; });
+            routes.MapStorefrontRoute(&quot;Common.ResetCache&quot;, &quot;common/resetcache&quot;, defaults: new { controller = &quot;Common&quot;, action = &quot;ResetCache&quot; });
+            routes.MapStorefrontRoute(&quot;Common.Contact&quot;, &quot;common/contact&quot;, defaults: new { controller = &quot;Common&quot;, action = nameof(CommonController.Contact) });
+
+            // Sitemap
+            routes.MapStorefrontRoute(&quot;Sitemap.GetSitemapIndex&quot;, &quot;sitemap.xml&quot;, defaults: new { controller = &quot;Sitemap&quot;, action = &quot;GetSitemapIndex&quot; });
+            routes.MapStorefrontRoute(&quot;Sitemap.GetSitemap&quot;, &quot;sitemap/{sitemapPath}&quot;, defaults: new { controller = &quot;Sitemap&quot;, action = &quot;GetSitemap&quot; });
+
+            // Category routes
+            routes.MapStorefrontRoute(&quot;Category.BrowseCategory&quot;, &quot;category/{categoryId}&quot;, defaults: new { controller = &quot;CatalogSearch&quot;, action = &quot;CategoryBrowsing&quot; });
+
+            // Product routes
+            routes.MapStorefrontRoute(&quot;Product.GetProduct&quot;, &quot;product/{productId}&quot;, defaults: new { controller = &quot;Product&quot;, action = &quot;ProductDetails&quot; });
+            routes.MapStorefrontRoute(&quot;Product.Compare&quot;, &quot;compare&quot;, defaults: new { controller = &quot;Product&quot;, action = &quot;Compare&quot; });
+
+            // Vendor routes
+            routes.MapStorefrontRoute(&quot;Vendor.GetVendor&quot;, &quot;vendor/{vendorId}&quot;, defaults: new { controller = &quot;Vendor&quot;, action = &quot;VendorDetails&quot; });
+
+            // Inventory routes
+            routes.MapStorefrontRoute(&quot;Inventory.GetFulfillmentCenter&quot;, &quot;fulfillmentcenter/{id}&quot;, defaults: new { controller = &quot;Inventory&quot;, action = &quot;FulfillmentCenterDetails&quot; });
+
+            // Marketing
+            routes.MapStorefrontRoute(&quot;Marketing.Trends&quot;, &quot;trends&quot;, defaults: new { controller = &quot;Marketing&quot;, action = nameof(MarketingController.Trends) });
+            routes.MapStorefrontRoute(&quot;Marketing.Trend&quot;, &quot;trends/{id}&quot;, defaults: new { controller = &quot;Marketing&quot;, action = nameof(MarketingController.Trend) });
+            routes.MapStorefrontRoute(&quot;Marketing.Promotions&quot;, &quot;promotions&quot;, defaults: new { controller = &quot;Marketing&quot;, action = nameof(MarketingController.Promotions) });
+            routes.MapStorefrontRoute(&quot;Marketing.Promotion&quot;, &quot;promotions/{id}&quot;, defaults: new { controller = &quot;Marketing&quot;, action = nameof(MarketingController.Promotion) });
+
+            // Assets
+            routes.MapStorefrontRoute(&quot;ThemeLocalization&quot;, &quot;themes/localization.json&quot;, defaults: new { controller = &quot;Asset&quot;, action = &quot;GetThemeLocalizationJson&quot; });
+            routes.MapStorefrontRoute(&quot;ThemeAssets&quot;, &quot;themes/assets/{*path}&quot;, defaults: new { controller = &quot;Asset&quot;, action = &quot;GetThemeAssets&quot; });
+            routes.MapStorefrontRoute(&quot;StaticContentAssets&quot;, &quot;assets/{*path}&quot;, defaults: new { controller = &quot;Asset&quot;, action = &quot;GetStaticContentAssets&quot; });
+
+            // Static content (no cms)
+            routes.MapStorefrontRoute(&quot;Pages.GetPage&quot;, &quot;pages/{*page}&quot;, defaults: new { controller = &quot;StaticContent&quot;, action = &quot;GetContentPageByName&quot; });
+
+            // Blog
+            routes.MapStorefrontRoute(&quot;Blogs.GetDefaultBlog&quot;, &quot;blog&quot;, defaults: new { controller = &quot;StaticContent&quot;, action = &quot;GetBlog&quot; });
+            routes.MapStorefrontRoute(&quot;Blogs.GetDefaultBlogWithFilterByCategory&quot;, &quot;blog/category/{category}&quot;, defaults: new { controller = &quot;StaticContent&quot;, action = &quot;GetBlog&quot; });
+            routes.MapStorefrontRoute(&quot;Blogs.GetDefaultBlogWithFilterByTag&quot;, &quot;blog/tag/{tag}&quot;, defaults: new { controller = &quot;StaticContent&quot;, action = &quot;GetBlog&quot; });
+            routes.MapStorefrontRoute(&quot;Blogs.GetBlogByName&quot;, &quot;blogs/{blog}&quot;, defaults: new { controller = &quot;StaticContent&quot;, action = &quot;GetBlog&quot; });
+            routes.MapStorefrontRoute(&quot;Blogs.GetBlogWithFilterByCategory&quot;, &quot;blogs/{blogname}/category/{category}&quot;, defaults: new { controller = &quot;StaticContent&quot;, action = &quot;GetBlog&quot; });
+            routes.MapStorefrontRoute(&quot;Blogs.GetBlogWithFilterByTag&quot;, &quot;blogs/{blogname}/tag/{tag}&quot;, defaults: new { controller = &quot;StaticContent&quot;, action = &quot;GetBlog&quot; });
+            routes.MapStorefrontRoute(&quot;StaticContent.Search&quot;, &quot;content/search&quot;, defaults: new { controller = &quot;StaticContent&quot;, action = &quot;Search&quot; });
+
+            routes.MapStorefrontRoute(&quot;StaticContent.BlogByName.RssFeed&quot;, &quot;blogs/{blogname}/{rss}&quot;, defaults: new { controller = &quot;StaticContent&quot;, action = &quot;BlogRssFeed&quot; }, constraints: new { rss = @&quot;(rss|feed)&quot; });
+            routes.MapStorefrontRoute(&quot;StaticContent.Blog.RssFeed&quot;, &quot;blog/{rss}&quot;, defaults: new { controller = &quot;StaticContent&quot;, action = &quot;BlogRssFeed&quot; }, constraints: new { rss = @&quot;(rss|feed)&quot; });
+
+            // Invoices
+            routes.MapStorefrontRoute(&quot;API.Invoices.GetInvoices&quot;, &quot;storefrontapi/invoices&quot;, defaults: new { controller = &quot;ApiInvoices&quot;, action = &quot;GetInvoices&quot; }, constraints: new RouteValueDictionary(new { httpMethod = new HttpMethodRouteConstraint(&quot;GET&quot;) }));
+
+            //Register slug route based on dynamic data
+            //It a default route and must be always on end of routes
+            routes.MapSlugRoute(&quot;{*path}&quot;, defaults: new { controller = &quot;Home&quot;, action = &quot;Index&quot; });
+        }
+
+        public static IRouteBuilder MapStorefrontRoute(
+            this IRouteBuilder routeBuilder,
+            string name,
+            string template)
+        {
+            return MapStorefrontRoute(routeBuilder, name, template, defaults: null);
+        }
+
+        public static IRouteBuilder MapStorefrontRoute(
+            this IRouteBuilder routeBuilder,
+            string name,
+            string template,
+            object defaults)
+        {
+            return MapStorefrontRoute(routeBuilder, name, template, defaults, constraints: null);
+        }
+
+        public static IRouteBuilder MapStorefrontRoute(
+            this IRouteBuilder routeBuilder,
+            string name,
+            string template,
+            object defaults,
+            object constraints)
+        {
+            return MapStorefrontRoute(routeBuilder, name, template, defaults, constraints, dataTokens: null);
+        }
+
+        public static IRouteBuilder MapStorefrontRoute(
+            this IRouteBuilder routeBuilder,
+            string name,
+            string template,
+            object defaults,
+            object constraints,
+            object dataTokens)
+        {
+            if (routeBuilder.DefaultHandler == null)
+            {
+                throw new RouteCreationException($&quot;Must be set { nameof(IRouteBuilder) }&quot;);
+            }
+
+            var inlineConstraintResolver = routeBuilder
+                .ServiceProvider
+                .GetRequiredService&lt;IInlineConstraintResolver&gt;();
+
+            routeBuilder.Routes.Add(new StorefrontRoute(
+                routeBuilder.DefaultHandler,
+                name,
+                template,
+                new RouteValueDictionary(defaults),
+                new RouteValueDictionary(constraints),
+                new RouteValueDictionary(dataTokens),
+                inlineConstraintResolver));
+
+            return routeBuilder;
+        }
+
+        public static IRouteBuilder MapSlugRoute(
+           this IRouteBuilder routeBuilder,
+           string template,
+           object defaults)
+        {
+            if (routeBuilder.DefaultHandler == null)
+            {
+                throw new RouteCreationException($&quot;Must be set { nameof(IRouteBuilder) }&quot;);
+            }
+
+            var inlineConstraintResolver = routeBuilder
+                .ServiceProvider
+                .GetRequiredService&lt;IInlineConstraintResolver&gt;();
+
+            routeBuilder.Routes.Add(new SlugRoute(
+                routeBuilder.DefaultHandler,
+                template,
+                new RouteValueDictionary(defaults),
+                inlineConstraintResolver));
+
+            return routeBuilder;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,9,16,10,0],[20,13,20,138,0],[21,13,21,174,0],[22,13,22,201,0],[23,13,23,260,0],[24,13,24,261,0],[25,13,25,277,0],[26,13,26,264,0],[27,13,27,153,0],[28,13,28,238,0],[29,13,29,196,0],[30,13,30,176,0],[31,13,31,169,0],[32,13,32,185,0],[33,13,33,182,0],[34,13,34,163,0],[35,13,35,273,0],[36,13,36,270,0],[37,13,37,157,0],[38,13,38,234,0],[39,13,39,207,0],[40,13,40,191,0],[43,13,43,169,0],[46,13,46,197,0],[47,13,47,304,0],[48,13,48,307,0],[49,13,49,318,0],[50,13,50,321,0],[53,13,53,176,0],[54,13,54,263,0],[55,13,55,306,0],[56,13,56,289,0],[57,13,57,260,0],[58,13,58,276,0],[59,13,59,282,0],[60,13,60,310,0],[63,13,63,272,0],[64,13,64,171,0],[65,13,65,279,0],[66,13,66,177,0],[67,13,67,260,0],[68,13,68,160,0],[69,13,69,328,0],[72,13,72,162,0],[73,13,73,194,0],[74,13,74,153,0],[77,13,77,294,0],[80,13,80,234,0],[81,13,81,198,0],[82,13,82,203,0],[83,13,83,210,0],[84,13,84,215,0],[85,13,85,223,0],[86,13,86,225,0],[89,13,89,198,0],[92,13,92,275,0],[95,13,95,254,0],[96,13,96,257,0],[97,13,97,253,0],[98,13,98,264,0],[99,13,99,267,0],[100,13,100,304,0],[101,13,101,195,0],[102,13,102,278,0],[103,13,103,275,0],[104,13,104,278,0],[105,13,105,259,0],[106,13,106,257,0],[107,13,107,263,0],[108,13,108,258,0],[109,13,109,291,0],[112,13,112,267,0],[113,13,113,200,0],[114,13,114,169,0],[115,13,115,181,0],[116,13,116,281,0],[117,13,117,299,0],[118,13,118,273,0],[119,13,119,281,0],[120,13,120,281,0],[121,13,121,299,0],[122,13,122,284,0],[125,13,125,150,0],[126,13,126,160,0],[127,13,127,187,0],[128,13,128,295,0],[129,13,129,303,0],[130,13,130,292,0],[131,13,131,172,0],[132,13,132,160,0],[133,13,133,176,0],[134,13,134,187,0],[137,13,137,188,0],[138,13,138,193,0],[139,13,139,193,0],[142,13,142,159,0],[145,13,145,190,0],[148,13,148,318,0],[149,13,149,325,0],[150,13,150,267,0],[151,13,151,332,0],[152,13,152,329,0],[153,13,153,291,0],[156,13,156,290,0],[157,13,157,295,0],[158,13,158,294,0],[161,13,161,282,0],[162,13,162,282,0],[165,13,165,256,0],[166,13,166,283,0],[169,13,169,181,0],[174,13,174,207,0],[175,13,175,186,0],[176,13,176,201,0],[177,13,177,183,0],[180,13,180,172,0],[183,13,183,188,0],[186,13,186,142,0],[187,13,187,125,0],[188,13,188,129,0],[189,13,189,146,0],[190,13,190,129,0],[193,13,193,224,0],[194,13,194,162,0],[195,13,195,258,0],[196,13,196,249,0],[197,13,197,142,0],[198,13,198,133,0],[199,13,199,136,0],[200,13,200,160,0],[201,13,201,157,0],[202,13,202,154,0],[203,13,203,157,0],[204,13,204,181,0],[205,13,205,168,0],[206,13,206,154,0],[207,13,207,169,0],[208,13,208,151,0],[209,13,209,203,0],[210,13,210,295,0],[211,13,211,173,0],[214,13,214,216,0],[215,13,215,133,0],[216,13,216,284,0],[217,13,217,141,0],[218,13,218,151,0],[219,13,219,161,0],[222,13,222,142,0],[223,13,223,145,0],[226,13,226,173,0],[229,13,229,238,0],[230,13,230,146,0],[231,13,231,141,0],[232,13,232,148,0],[233,13,233,150,0],[234,13,234,157,0],[235,13,235,245,0],[236,13,236,154,0],[237,13,237,157,0],[240,13,240,156,0],[243,13,243,170,0],[244,13,244,162,0],[245,13,245,176,0],[248,13,248,133,0],[249,13,249,163,0],[250,13,250,157,0],[253,13,253,173,0],[254,13,254,156,0],[255,13,255,140,0],[256,13,256,149,0],[257,13,257,181,0],[260,13,260,159,0],[261,13,261,250,0],[262,13,262,136,0],[263,13,263,141,0],[264,13,264,145,0],[265,13,265,159,0],[268,13,268,151,0],[269,13,269,151,0],[272,13,272,168,0],[275,13,275,153,0],[276,13,276,131,0],[279,13,279,147,0],[282,13,282,180,0],[285,13,285,158,0],[286,13,286,161,0],[287,13,287,170,0],[288,13,288,173,0],[291,13,291,165,0],[292,13,292,146,0],[293,13,293,155,0],[296,13,296,154,0],[299,13,299,139,0],[300,13,300,179,0],[301,13,301,164,0],[302,13,302,146,0],[303,13,303,184,0],[304,13,304,169,0],[305,13,305,148,0],[307,13,307,215,0],[308,13,308,197,0],[311,13,311,261,0],[315,13,315,101,0],[316,9,316,10,0],[322,9,322,10,0],[323,13,323,85,0],[324,9,324,10,0],[331,9,331,10,0],[332,13,332,98,0],[333,9,333,10,0],[341,9,341,10,0],[342,13,342,110,0],[343,9,343,10,0],[352,9,352,10,0],[353,13,353,53,0],[354,13,354,14,0],[355,17,355,92,0],[358,13,360,66,0],[362,13,369,44,0],[371,13,371,33,0],[372,9,372,10,0],[378,9,378,10,0],[379,13,379,53,0],[380,13,380,14,0],[381,17,381,92,0],[384,13,386,66,0],[388,13,392,44,0],[394,13,394,33,0],[395,9,395,10,0]]);
+    </script>
+  </body>
+</html>

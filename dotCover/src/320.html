@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\middleware\workcontextbuildmiddleware.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using VirtoCommerce.Storefront.Domain;
+using VirtoCommerce.Storefront.Domain.Security;
+using VirtoCommerce.Storefront.Infrastructure;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Security;
+
+namespace VirtoCommerce.Storefront.Middleware
+{
+    public class WorkContextBuildMiddleware
+    {
+        private readonly IConfiguration _configuration;
+        private readonly RequestDelegate _next;
+        private readonly IHostingEnvironment _hostingEnvironment;
+        private readonly StorefrontOptions _options;
+        private readonly IWorkContextAccessor _workContextAccessor;
+        private readonly Dictionary&lt;string, object&gt; _applicationSettings;
+        private readonly PasswordOptions _passwordOptions;
+
+        public WorkContextBuildMiddleware(RequestDelegate next, IHostingEnvironment hostingEnvironment,
+                                          IOptions&lt;StorefrontOptions&gt; options, IWorkContextAccessor workContextAccessor, IConfiguration configuration,
+                                          IOptions&lt;IdentityOptions&gt; identityOptions)
+        {
+            _next = next;
+            _hostingEnvironment = hostingEnvironment;
+            _workContextAccessor = workContextAccessor;
+            _options = options.Value;
+            _configuration = configuration;
+            _passwordOptions = identityOptions.Value?.Password;
+
+            //Load a user-defined  settings from the special section.
+            //All of these settings are accessible from the themes and through access to WorkContext.ApplicationSettings property
+            //Trim of the VirtoCommerce:AppSettings added for backward compatibility with old themes
+            _applicationSettings = _configuration.GetSection(&quot;VirtoCommerce:AppSettings&quot;)
+                .AsEnumerable()
+                .Where(x =&gt; x.Value != null)
+                .ToDictionary(x =&gt; x.Key.Replace(&quot;VirtoCommerce:AppSettings:&quot;, &quot;&quot;), x =&gt; (object)x.Value);
+
+            // Read ApplicationInsightsInstrumentationKey from APPINSIGHTS_INSTRUMENTATIONKEY
+            var applicationInsightsKey = System.Environment.GetEnvironmentVariable(&quot;APPINSIGHTS_INSTRUMENTATIONKEY&quot;);
+            if (!string.IsNullOrEmpty(applicationInsightsKey))
+            {
+                _applicationSettings.Add(&quot;ApplicationInsightsInstrumentationKey&quot;, applicationInsightsKey);
+            }
+
+            if (_passwordOptions != null)
+            {
+                _applicationSettings.Add(&quot;PasswordOptions:RequiredLength&quot;, _passwordOptions.RequiredLength);
+                _applicationSettings.Add(&quot;PasswordOptions:RequiredUniqueChars&quot;, _passwordOptions.RequiredUniqueChars);
+                _applicationSettings.Add(&quot;PasswordOptions:RequireNonAlphanumeric&quot;, _passwordOptions.RequireNonAlphanumeric);
+                _applicationSettings.Add(&quot;PasswordOptions:RequireDigit&quot;, _passwordOptions.RequireDigit);
+                _applicationSettings.Add(&quot;PasswordOptions:RequireLowercase&quot;, _passwordOptions.RequireLowercase);
+                _applicationSettings.Add(&quot;PasswordOptions:RequireUppercase&quot;, _passwordOptions.RequireUppercase);
+            }
+        }
+
+        public async Task Invoke(HttpContext context)
+        {
+            //Do not process for exist exception 
+            var exceptionFeature = context.Features.Get&lt;IExceptionHandlerFeature&gt;();
+            if (exceptionFeature != null)
+            {
+                await _next(context);
+                return;
+            }
+
+            var builder = new WorkContextBuilder(context);
+            var workContext = builder.WorkContext;
+            _workContextAccessor.WorkContext = workContext;
+
+            workContext.ApplicationSettings = _applicationSettings;
+            //The important to preserve the order of initialization
+            await builder.WithCountriesAsync();
+
+            await builder.WithStoresAsync(_options.DefaultStore);
+            await builder.WithCurrentUserAsync();
+
+            if (builder.WorkContext.IsForbidden)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                await context.Response.WriteAsync(string.Empty);
+            }
+            else if (builder.WorkContext.RedirectUrl != null)
+            {
+                context.Response.Redirect(builder.WorkContext.RedirectUrl);
+            }
+            else
+            {
+                await builder.WithCurrenciesAsync(workContext.CurrentLanguage, workContext.CurrentStore);
+
+                await builder.WithCatalogsAsync();
+                await builder.WithDefaultShoppingCartAsync(&quot;default&quot;, workContext.CurrentStore, workContext.CurrentUser, workContext.CurrentCurrency, workContext.CurrentLanguage);
+                await builder.WithMenuLinksAsync(workContext.CurrentStore, workContext.CurrentLanguage);
+                await builder.WithPagesAsync(workContext.CurrentStore, workContext.CurrentLanguage);
+                await builder.WithBlogsAsync(workContext.CurrentStore, workContext.CurrentLanguage);
+                await builder.WithPricelistsAsync();
+
+                if (workContext.CurrentStore.QuotesEnabled)
+                {
+                    //await builder.WithQuotesAsync(workContext.CurrentStore, workContext.CurrentUser, workContext.CurrentCurrency, workContext.CurrentLanguage); // HAP: not used
+                    //await builder.WithUserQuotesAsync(); // HAP: not used
+                }
+
+                await builder.WithUserOrdersAsync();
+                
+                //await builder.WithUserSubscriptionsAsync(); // HAP: not used
+                await builder.WithVendorsAsync(workContext.CurrentStore, workContext.CurrentLanguage);
+                await builder.WithFulfillmentCentersAsync();
+
+                workContext.AvailableRoles = SecurityConstants.Roles.AllRoles;
+
+                await _next(context);
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[29,9,31,85,0],[32,9,32,10,0],[33,13,33,26,0],[34,13,34,54,0],[35,13,35,56,0],[36,13,36,38,0],[37,13,37,44,0],[38,13,38,64,0],[43,13,46,107,0],[45,29,45,44,0],[46,36,46,83,0],[46,90,46,105,0],[49,13,49,118,0],[50,13,50,63,0],[51,13,51,14,0],[52,17,52,107,0],[53,13,53,14,0],[55,13,55,42,0],[56,13,56,14,0],[57,17,57,109,0],[58,17,58,119,0],[59,17,59,125,0],[60,17,60,105,0],[61,17,61,113,0],[62,17,62,113,0],[63,13,63,14,0],[64,9,64,10,0],[67,9,67,10,0],[69,13,69,85,0],[70,13,70,42,0],[71,13,71,14,0],[72,17,72,38,0],[73,17,73,24,0],[76,13,76,59,0],[77,13,77,51,0],[78,13,78,60,0],[80,13,80,68,0],[82,13,82,48,0],[84,13,84,66,0],[85,13,85,50,0],[87,13,87,49,0],[88,13,88,14,0],[89,17,89,77,0],[90,17,90,65,0],[91,13,91,14,0],[92,18,92,62,0],[93,13,93,14,0],[94,17,94,76,0],[95,13,95,14,0],[97,13,97,14,0],[98,17,98,106,0],[100,17,100,51,0],[101,17,101,180,0],[102,17,102,105,0],[103,17,103,101,0],[104,17,104,101,0],[105,17,105,53,0],[107,17,107,60,0],[108,17,108,18,0],[111,17,111,18,0],[113,17,113,53,0],[116,17,116,103,0],[117,17,117,61,0],[119,17,119,79,0],[121,17,121,38,0],[122,13,122,14,0],[123,9,123,10,0]]);
+    </script>
+  </body>
+</html>

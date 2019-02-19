@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\cart\shippingmethod.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Marketing;
+
+namespace VirtoCommerce.Storefront.Model
+{
+    public partial class ShippingMethod : ITaxable, IDiscountable
+    {
+        public ShippingMethod()
+        {
+            Discounts = new List&lt;Discount&gt;();
+        }
+
+        public ShippingMethod(Currency currency)
+            : this()
+        {
+            Currency = currency;
+            Price = new Money(currency);
+            DiscountAmount = new Money(currency);
+        }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shipping method priority
+        /// &lt;/summary&gt;
+        public int Priority { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shipping method code
+        /// &lt;/summary&gt;
+        public string ShipmentMethodCode { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shipping method name
+        /// &lt;/summary&gt;
+        public string Name { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shipping method option name
+        /// &lt;/summary&gt;
+        public string OptionName { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shipping method option description
+        /// &lt;/summary&gt;
+        public string OptionDescription { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shipping method logo absolute URL
+        /// &lt;/summary&gt;
+        public string LogoUrl { get; set; }
+
+        /// &lt;summary&gt;
+        /// price without discount and taxes
+        /// &lt;/summary&gt;
+        public Money Price { get; set; }
+
+        /// &lt;summary&gt;
+        ///  price with tax but without discount
+        /// &lt;/summary&gt;
+        public Money PriceWithTax
+        {
+            get
+            {
+                return Price + Price * TaxPercentRate;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Resulting price with discount but without tax
+        /// &lt;/summary&gt;
+        public Money Total
+        {
+            get
+            {
+                return Price - DiscountAmount;
+            }
+        }
+        /// &lt;summary&gt;
+        /// Resulting price with discount and tax
+        /// &lt;/summary&gt;
+        public Money TotalWithTax
+        {
+            get
+            {
+                return PriceWithTax - DiscountAmountWithTax;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Total discount amount without tax
+        /// &lt;/summary&gt;
+        public Money DiscountAmount { get; set; }
+        public Money DiscountAmountWithTax
+        {
+            get
+            {
+                return DiscountAmount + DiscountAmount * TaxPercentRate;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Custom properties for shipping method
+        /// &lt;/summary&gt;
+        public List&lt;SettingEntry&gt; Settings { get; set; }
+
+        #region ITaxable Members
+        /// &lt;summary&gt;
+        /// Gets the value of total shipping method tax 
+        /// &lt;/summary&gt;
+        public Money TaxTotal
+        {
+            get
+            {
+                return TotalWithTax - Total;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shipping tax type
+        /// &lt;/summary&gt;
+        public string TaxType { get; set; }
+
+        public decimal TaxPercentRate { get; private set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the collection of line item tax details lines
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;
+        /// Collection of TaxDetail objects
+        /// &lt;/value&gt;
+        public IList&lt;TaxDetail&gt; TaxDetails { get; set; }
+
+        public void ApplyTaxRates(IEnumerable&lt;TaxRate&gt; taxRates)
+        {
+            TaxPercentRate = 0m;
+            var taxLineId = BuildTaxLineId();
+            var taxRate = taxRates.FirstOrDefault(x =&gt; x.Line.Id == taxLineId);
+
+            if (taxRate != null &amp;&amp; taxRate.Rate.Amount &gt; 0)
+            {
+                var amount = Total.Amount &gt; 0 ? Total.Amount : Price.Amount;
+                if (amount &gt; 0)
+                {
+                    TaxPercentRate = TaxRate.TaxPercentRound(taxRate.Rate.Amount / amount);
+                }
+            }
+        }
+
+        public virtual string BuildTaxLineId()
+        {
+            return string.Join(&quot;&amp;&quot;, ShipmentMethodCode, OptionName);
+        }
+
+        #endregion
+
+        #region IDiscountable Members
+        public IList&lt;Discount&gt; Discounts { get; private set; }
+
+        public Currency Currency { get; set; }
+
+        public void ApplyRewards(IEnumerable&lt;PromotionReward&gt; rewards)
+        {
+            var shipmentRewards = rewards.Where(r =&gt; r.RewardType == PromotionRewardType.ShipmentReward &amp;&amp; (r.ShippingMethodCode.IsNullOrEmpty() || r.ShippingMethodCode.EqualsInvariant(ShipmentMethodCode)));
+
+            Discounts.Clear();
+            DiscountAmount = new Money(0m, Currency);
+
+            foreach (var reward in shipmentRewards)
+            {
+                var discount = reward.ToDiscountModel(Price);
+
+                if (reward.IsValid)
+                {
+                    Discounts.Add(discount);
+                    DiscountAmount += discount.Amount;
+                }
+            }
+        }
+        #endregion
+
+        public override string ToString()
+        {
+            return string.Join(&quot;:&quot;, ShipmentMethodCode, OptionName);
+        }
+
+        public override bool Equals(object obj)
+        {
+            // If parameter is null return false.
+            if (obj == null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            // If parameter cannot be cast to ModuleIdentity return false.
+            ShippingMethod other = obj as ShippingMethod;
+            if (other == null)
+            {
+                return false;
+            }
+            // Return true if the fields match:
+            return (ShipmentMethodCode.EqualsInvariant(other.ShipmentMethodCode)) &amp;&amp; (OptionName.EqualsInvariant(other.OptionName));
+        }
+
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,9,10,32,0],[11,9,11,10,0],[12,13,12,46,0],[13,9,13,10,0],[16,15,16,21,0],[17,9,17,10,0],[18,13,18,33,0],[19,13,19,41,0],[20,13,20,50,0],[21,9,21,10,0],[26,31,26,35,0],[26,36,26,40,0],[31,44,31,48,0],[31,49,31,53,0],[36,30,36,34,0],[36,35,36,39,0],[41,36,41,40,0],[41,41,41,45,0],[46,43,46,47,0],[46,48,46,52,0],[51,33,51,37,0],[51,38,51,42,0],[56,30,56,34,0],[56,35,56,39,0],[64,13,64,14,0],[65,17,65,55,0],[66,13,66,14,0],[75,13,75,14,0],[76,17,76,47,0],[77,13,77,14,0],[85,13,85,14,0],[86,17,86,61,0],[87,13,87,14,0],[93,39,93,43,0],[93,44,93,48,0],[97,13,97,14,0],[98,17,98,73,0],[99,13,99,14,0],[105,46,105,50,0],[105,51,105,55,0],[114,13,114,14,0],[115,17,115,45,0],[116,13,116,14,0],[122,33,122,37,0],[122,38,122,42,0],[124,41,124,45,0],[124,46,124,58,0],[132,46,132,50,0],[132,51,132,55,0],[135,9,135,10,0],[136,13,136,33,0],[137,13,137,46,0],[138,13,138,80,0],[138,56,138,78,0],[140,13,140,60,0],[141,13,141,14,0],[142,17,142,77,0],[143,17,143,32,0],[144,17,144,18,0],[145,21,145,92,0],[146,17,146,18,0],[147,13,147,14,0],[148,9,148,10,0],[151,9,151,10,0],[152,13,152,69,0],[153,9,153,10,0],[158,44,158,48,0],[158,49,158,61,0],[160,36,160,40,0],[160,41,160,45,0],[163,9,163,10,0],[164,13,164,208,0],[164,54,164,206,0],[166,13,166,31,0],[167,13,167,54,0],[169,13,169,20,0],[169,22,169,32,0],[169,33,169,35,0],[169,36,169,51,0],[170,13,170,14,0],[171,17,171,62,0],[173,17,173,36,0],[174,17,174,18,0],[175,21,175,45,0],[176,21,176,55,0],[177,17,177,18,0],[178,13,178,14,0],[179,9,179,10,0],[183,9,183,10,0],[184,13,184,69,0],[185,9,185,10,0],[188,9,188,10,0],[190,13,190,29,0],[191,13,191,14,0],[192,17,192,30,0],[195,13,195,44,0],[196,13,196,14,0],[197,17,197,29,0],[201,13,201,58,0],[202,13,202,31,0],[203,13,203,14,0],[204,17,204,30,0],[207,13,207,133,0],[208,9,208,10,0],[211,9,211,10,0],[212,13,212,45,0],[213,9,213,10,0]]);
+    </script>
+  </body>
+</html>

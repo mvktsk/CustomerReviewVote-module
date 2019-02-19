@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\security\userregistrationbyinvitation.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
+
+namespace VirtoCommerce.Storefront.Model.Security
+{
+    public partial class UserRegistrationByInvitation : UserRegistration
+    {
+        [Required]
+        [FromForm(Name = &quot;customer[token]&quot;)]
+        public string Token { get; set; }
+        [FromForm(Name = &quot;customer[organization_id]&quot;)]
+        public string OrganizationId { get; set; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,31,10,35,0],[10,36,10,40,0],[12,40,12,44,0],[12,45,12,49,0]]);
+    </script>
+  </body>
+</html>

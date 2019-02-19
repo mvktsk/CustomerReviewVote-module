@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\catalogsearchcontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Web;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Storefront.Common;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Services;
+
+namespace VirtoCommerce.Storefront.Controllers
+{
+    public class CatalogSearchController : StorefrontControllerBase
+    {
+        private readonly ICatalogService _searchService;
+
+        public CatalogSearchController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder, ICatalogService searchService)
+            : base(workContextAccessor, urlBuilder)
+        {
+            _searchService = searchService;
+        }
+
+        /// GET search
+        /// This method used for search products by given criteria 
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public ActionResult SearchProducts()
+        {
+            //All resulting categories, products and aggregations will be lazy evaluated when view will be rendered. (workContext.Products, workContext.Categories etc) 
+            //All data will loaded using by current search criteria taken from query string
+            WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Поиск товаров&quot; };
+            return View(&quot;search&quot;, WorkContext);
+        }
+
+        public ActionResult Brands()
+        {
+            WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Бренды&quot; };
+
+            return View(&quot;brands&quot;);
+        }
+
+        public async Task&lt;ActionResult&gt; Brand(string brandName)
+        {
+            var existingBrand = WorkContext.Brands.FirstOrDefault(b =&gt; b.EqualsInvariant(HttpUtility.UrlDecode(brandName)));
+            if (!string.IsNullOrEmpty(existingBrand))
+            {
+                WorkContext.CurrentProductSearchCriteria = new ProductSearchCriteria
+                {
+                    PageNumber = 1,
+                    Terms = new List&lt;Term&gt;(new[] { new Term { Name = &quot;Brand Group&quot;, Value = existingBrand } }),
+                    ResponseGroup = WorkContext.CurrentProductSearchCriteria.ResponseGroup | ItemResponseGroup.Inventory
+                };
+                var searchResult = await _searchService.SearchProductsAsync(WorkContext.CurrentProductSearchCriteria);
+
+                WorkContext.CurrentPageSeo = new SeoInfo { Title = existingBrand };
+                WorkContext.CurrentProductSearchCriteria.Keyword = existingBrand;
+                WorkContext.Products = new MutablePagedList&lt;Product&gt;(searchResult.Products);
+            }
+
+            return View(&quot;search&quot;, WorkContext);
+        }
+
+        /// &lt;summary&gt;
+        /// GET search/{categoryId}?view=...
+        /// This method called from SeoRoute when url contains slug for category
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;categoryId&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;view&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public async Task&lt;ActionResult&gt; CategoryBrowsing(string categoryId, string view)
+        {
+            var category = (await _searchService.GetCategoriesAsync(new[] { categoryId }, CategoryResponseGroup.Full)).FirstOrDefault();
+            if (category == null)
+            {
+                return NotFound($&quot;Category {categoryId} not found.&quot;);
+            }
+
+            WorkContext.CurrentCategory = category;
+            WorkContext.CurrentPageSeo = category.SeoInfo.JsonClone();
+            WorkContext.CurrentPageSeo.Slug = category.Url;
+
+            var criteria = WorkContext.CurrentProductSearchCriteria.Clone();
+            criteria.Outline = category.Outline; // should we simply take it from current category?
+
+            category.Products = new MutablePagedList&lt;Product&gt;((pageNumber, pageSize, sortInfos) =&gt;
+            {
+                criteria.PageNumber = pageNumber;
+                criteria.PageSize = pageSize;
+                if (string.IsNullOrEmpty(criteria.SortBy) &amp;&amp; !sortInfos.IsNullOrEmpty())
+                {
+                    criteria.SortBy = SortInfo.ToString(sortInfos);
+                }
+                var result = _searchService.SearchProducts(criteria);
+                //Prevent double api request for get aggregations
+                //Because catalog search products returns also aggregations we can use it to populate workContext using C# closure
+                //now workContext.Aggregation will be contains preloaded aggregations for current search criteria
+                WorkContext.Aggregations = new MutablePagedList&lt;Aggregation&gt;(result.Aggregations);
+                return result.Products;
+            }, 1, ProductSearchCriteria.DefaultPageSize);
+
+
+            // make sure title is set
+            if (string.IsNullOrEmpty(WorkContext.CurrentPageSeo.Title))
+            {
+                WorkContext.CurrentPageSeo.Title = category.Name;
+            }
+
+            if (string.IsNullOrEmpty(view))
+            {
+                view = &quot;grid&quot;;
+            }
+
+            if (view.Equals(&quot;list&quot;, StringComparison.OrdinalIgnoreCase))
+            {
+                return View(&quot;collection.list&quot;, WorkContext);
+            }
+
+            return View(&quot;collection&quot;, WorkContext);
+        }
+
+        public ActionResult AllProducts()
+        {
+            WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Каталог товаров&quot; };
+            return View(&quot;catalog&quot;, WorkContext);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[20,15,20,52,0],[21,9,21,10,0],[22,13,22,44,0],[23,9,23,10,0],[29,9,29,10,0],[32,13,32,82,0],[33,13,33,48,0],[34,9,34,10,0],[37,9,37,10,0],[38,13,38,75,0],[40,13,40,35,0],[41,9,41,10,0],[44,9,44,10,0],[45,13,45,125,0],[45,72,45,123,0],[46,13,46,54,0],[47,13,47,14,0],[48,17,53,19,0],[54,17,54,119,0],[56,17,56,84,0],[57,17,57,82,0],[58,17,58,93,0],[59,13,59,14,0],[61,13,61,48,0],[62,9,62,10,0],[72,9,72,10,0],[73,13,73,137,0],[74,13,74,34,0],[75,13,75,14,0],[76,17,76,70,0],[79,13,79,52,0],[80,13,80,71,0],[81,13,81,60,0],[83,13,83,77,0],[84,13,84,49,0],[86,13,100,58,0],[87,13,87,14,0],[88,17,88,50,0],[89,17,89,46,0],[90,17,90,89,0],[91,17,91,18,0],[92,21,92,68,0],[93,17,93,18,0],[94,17,94,70,0],[98,17,98,99,0],[99,17,99,40,0],[100,13,100,14,0],[104,13,104,72,0],[105,13,105,14,0],[106,17,106,66,0],[107,13,107,14,0],[109,13,109,44,0],[110,13,110,14,0],[111,17,111,31,0],[112,13,112,14,0],[114,13,114,73,0],[115,13,115,14,0],[116,17,116,61,0],[119,13,119,52,0],[120,9,120,10,0],[123,9,123,10,0],[124,13,124,84,0],[125,13,125,49,0],[126,9,126,10,0]]);
+    </script>
+  </body>
+</html>

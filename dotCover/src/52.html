@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\paginate.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using DotLiquid;
+using PagedList.Core;
+using System.Collections.Generic;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/objects/paginate
+    /// The paginate tag&#39;s navigation is built using the attributes of the paginate object. You can also use the default_pagination filter for a quicker alternative.
+    /// &lt;/summary&gt;
+    public partial class Paginate : Drop
+    {
+        private readonly IPagedList _pagedList;
+    
+        public Paginate(IPagedList pagedList)
+        {
+            _pagedList = pagedList;
+            Parts = new List&lt;Part&gt;();
+        }
+        /// &lt;summary&gt;
+        /// Returns the number of the current page.
+        /// &lt;/summary&gt;
+        public int CurrentPage
+        {
+            get
+            {
+                return _pagedList.PageNumber;
+            }
+        }
+        /// &lt;summary&gt;
+        /// Returns the total number of items that are on the pages previous to the current one. For example, if you are paginating by 5 and are on the third page, paginate.current_offset would return 10.
+        /// &lt;/summary&gt;
+        public int CurrentOffset
+        {
+            get
+            {
+                return _pagedList.FirstItemOnPage;
+            }
+        }
+        /// &lt;summary&gt;
+        /// Returns the total number of items to be paginated. For example, if you are paginating a collection of 120 products, paginate.items would return 120.
+        /// &lt;/summary&gt;
+        public int Items
+        {
+            get
+            {
+                return _pagedList.TotalItemCount;
+            }
+        }
+        /// &lt;summary&gt;
+        /// Returns the number of items displayed per page.
+        /// &lt;/summary&gt;
+        public int PageSize
+        {
+            get
+            {
+                return _pagedList.PageSize;
+            }
+        }
+        /// &lt;summary&gt;
+        /// Returns the part variable for the Next link in the pagination navigation.
+        /// &lt;/summary&gt;
+        public Part Next {
+            get
+            {
+                Part retVal = null;
+                if (!_pagedList.IsLastPage)
+                {
+                    retVal = Parts[CurrentPage];
+                }
+                return retVal;
+            }
+        }
+        /// &lt;summary&gt;
+        /// Returns the part variable for the Previous link in the pagination navigation.
+        /// &lt;/summary&gt;
+        public Part Previous
+        {
+            get
+            {
+                Part retVal = null;
+                if (!_pagedList.IsFirstPage)
+                {
+                    retVal = Parts[CurrentPage - 2];
+                }
+                return retVal;
+            }
+        }
+        /// &lt;summary&gt;
+        /// Returns the number of pages created by the pagination tag.
+        /// &lt;/summary&gt;
+        public int Pages
+        {
+            get
+            {
+                return _pagedList.PageCount;
+            }
+        }
+        /// &lt;summary&gt;
+        /// Returns an array of all parts of the pagination. A part is a component used to build the navigation for the pagination.
+        /// &lt;/summary&gt;
+        public List&lt;Part&gt; Parts { get; set; }
+    }
+
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,46,0],[16,9,16,10,0],[17,13,17,36,0],[18,13,18,38,0],[19,9,19,10,0],[26,13,26,14,0],[27,17,27,46,0],[28,13,28,14,0],[36,13,36,14,0],[37,17,37,51,0],[38,13,38,14,0],[46,13,46,14,0],[47,17,47,50,0],[48,13,48,14,0],[56,13,56,14,0],[57,17,57,44,0],[58,13,58,14,0],[65,13,65,14,0],[66,17,66,36,0],[67,17,67,44,0],[68,17,68,18,0],[69,21,69,49,0],[70,17,70,18,0],[71,17,71,31,0],[72,13,72,14,0],[80,13,80,14,0],[81,17,81,36,0],[82,17,82,45,0],[83,17,83,18,0],[84,21,84,53,0],[85,17,85,18,0],[86,17,86,31,0],[87,13,87,14,0],[95,13,95,14,0],[96,17,96,45,0],[97,13,97,14,0],[102,35,102,39,0],[102,40,102,44,0]]);
+    </script>
+  </body>
+</html>

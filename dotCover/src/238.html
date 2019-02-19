@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\entity.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+
+namespace VirtoCommerce.Storefront.Model.Common
+{
+    public abstract class Entity : ValueObject, IEntity
+    {
+        public string Id { get; set; }
+
+        public bool IsTransient()
+        {
+            return Id == null;
+        }
+
+        protected override IEnumerable&lt;object&gt; GetEqualityComponents()
+        {
+            yield return Id;
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[7,28,7,32,1],[7,33,7,37,1],[10,9,10,10,0],[11,13,11,31,0],[12,9,12,10,0],[15,9,15,10,0],[16,13,16,29,0],[17,9,17,10,0]]);
+    </script>
+  </body>
+</html>

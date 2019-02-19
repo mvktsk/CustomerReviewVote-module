@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\catalog\catalogproperty.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model.Catalog
+{
+    public partial class CatalogProperty : Entity
+    {
+        public CatalogProperty()
+        {
+            LocalizedValues = new List&lt;LocalizedString&gt;();
+            DisplayNames = new List&lt;LocalizedString&gt;();
+            Values = new List&lt;string&gt;();
+        }
+        /// &lt;summary&gt;
+        /// Property name
+        /// &lt;/summary&gt;
+        public string Name { get; set; }
+
+        /// &lt;summary&gt;
+        /// Type of object this property is applied to.
+        /// &lt;/summary&gt;
+        public string Type { get; set; }
+
+        /// &lt;summary&gt;
+        /// Property value type
+        /// &lt;/summary&gt;
+        public string ValueType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Dictionary value id
+        /// &lt;/summary&gt;
+        public string ValueId { get; set; }
+        /// &lt;summary&gt;
+        /// Property values for all languages
+        /// &lt;/summary&gt;
+        public IList&lt;LocalizedString&gt; LocalizedValues { get; set; }
+        /// &lt;summary&gt;
+        /// Property value in current language
+        /// &lt;/summary&gt;
+        public string Value { get; set; }
+
+        public string DisplayName { get; set; }
+
+        public IList&lt;LocalizedString&gt; DisplayNames { get; set; }
+
+        public bool IsMultivalue { get; set; }
+
+        public IList&lt;string&gt; Values { get; set; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,33,0],[13,9,13,10,0],[14,13,14,59,0],[15,13,15,56,0],[16,13,16,41,0],[17,9,17,10,0],[21,30,21,34,0],[21,35,21,39,0],[26,30,26,34,0],[26,35,26,39,0],[31,35,31,39,0],[31,40,31,44,0],[36,33,36,37,0],[36,38,36,42,0],[40,57,40,61,0],[40,62,40,66,0],[44,31,44,35,0],[44,36,44,40,0],[46,37,46,41,0],[46,42,46,46,0],[48,54,48,58,0],[48,59,48,63,0],[50,36,50,40,0],[50,41,50,45,0],[52,39,52,43,0],[52,44,52,48,0]]);
+    </script>
+  </body>
+</html>

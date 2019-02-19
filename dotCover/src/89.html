@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\converters\blogconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using PagedList.Core;
+using System.Linq;
+using VirtoCommerce.LiquidThemeEngine.Objects;
+using VirtoCommerce.Storefront.Model.Common;
+using StorefrontModel = VirtoCommerce.Storefront.Model.StaticContent;
+
+namespace VirtoCommerce.LiquidThemeEngine.Converters
+{
+    public static class BlogConverter
+    {
+        public static Blog ToShopifyModel(this StorefrontModel.Blog blog, Storefront.Model.Language language)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidBlog(blog, language);
+        }
+
+    }
+
+    public partial class ShopifyModelConverter
+    {
+        public virtual Blog ToLiquidBlog(StorefrontModel.Blog blog, Storefront.Model.Language language)
+        {
+            var retVal = new Blog();
+
+            retVal.Title = blog.Title;
+            retVal.Url = blog.Url;
+
+            if (blog.Articles != null)
+            {
+                retVal.Articles = new MutablePagedList&lt;Article&gt;((pageNumber, pageSize, sortInfos) =&gt;
+                {
+                    //var articlesForLanguage = blog.Articles.Where(x =&gt; x.Language == language || x.Language.IsInvariant).GroupBy(x =&gt; x.Name).Select(x =&gt; x.OrderByDescending(y =&gt; y.Language).FirstOrDefault());
+                    // ordering generating exception
+                    var articlesForLanguage = blog.Articles.GroupBy(x =&gt; x.Name).Select(x =&gt; x.FindWithLanguage(language)).Where(x =&gt; x != null &amp;&amp; x.IsPublished);
+                    return new PagedList&lt;Article&gt;(articlesForLanguage.Select(x =&gt; x.ToShopifyModel()).OrderByDescending(x =&gt; x.CreatedAt).AsQueryable(), pageNumber, pageSize);
+                }, blog.Articles.PageNumber, blog.Articles.PageSize);
+            }
+
+            retVal.Handle = blog.Name.Replace(&quot; &quot;, &quot;-&quot;).ToLower();
+            retVal.Categories = blog.Categories;
+
+            return retVal;
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,10,0],[13,13,13,57,0],[14,13,14,59,0],[15,9,15,10,0],[22,9,22,10,0],[23,13,23,37,0],[25,13,25,39,0],[26,13,26,35,0],[28,13,28,39,0],[29,13,29,14,0],[30,17,36,70,0],[31,17,31,18,0],[34,21,34,163,0],[34,74,34,80,0],[34,94,34,122,0],[34,135,34,161,0],[35,21,35,176,0],[35,83,35,101,0],[35,126,35,137,0],[36,17,36,18,0],[37,13,37,14,0],[39,13,39,67,0],[40,13,40,49,0],[42,13,42,27,0],[43,9,43,10,0]]);
+    </script>
+  </body>
+</html>

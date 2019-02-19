@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\cartcontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Storefront.AutoRestClients.OrdersModuleApi;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Order.Services;
+using orderModel = VirtoCommerce.Storefront.AutoRestClients.OrdersModuleApi.Models;
+
+namespace VirtoCommerce.Storefront.Controllers
+{
+    public class CartController : StorefrontControllerBase
+    {
+        private readonly IOrderModule _orderApi;
+        private readonly ICustomerOrderService _orderService;
+        public CartController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder, IOrderModule orderApi, ICustomerOrderService orderService)
+            : base(workContextAccessor, urlBuilder)
+        {
+            _orderApi = orderApi;
+            _orderService = orderService;
+        }
+
+        // GET: /cart
+        [HttpGet]
+        public ActionResult Index()
+        {
+            WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Корзина заказов&quot; };
+            return View(&quot;cart&quot;, WorkContext);
+        }
+
+
+        // GET: /cart/checkout
+        [HttpGet]
+        public ActionResult Checkout()
+        {
+            WorkContext.Layout = &quot;checkout_layout&quot;;
+            return View(&quot;checkout&quot;, WorkContext);
+        }
+
+        // GET: /cart/checkout/paymentform?orderNumber=...
+        [HttpGet]
+        public async Task&lt;ActionResult&gt; PaymentForm(string orderNumber)
+        {
+            var order = await _orderService.GetOrderByNumberAsync(orderNumber);
+
+            var incomingPayment = order.InPayments?.FirstOrDefault(x =&gt; x.PaymentMethodType.EqualsInvariant(&quot;PreparedForm&quot;));
+            if (incomingPayment == null)
+            {
+                return BadRequest(&quot;Order doesn&#39;t have any payment of type: PreparedForm&quot;);
+            }
+            var processingResult = await _orderApi.ProcessOrderPaymentsAsync(order.Id, incomingPayment.Id);
+
+            WorkContext.PaymentFormHtml = processingResult.HtmlForm;
+
+            return View(&quot;payment-form&quot;, WorkContext);
+        }
+
+        // GET/POST: /cart/externalpaymentcallback
+        public async Task&lt;ActionResult&gt; ExternalPaymentCallback()
+        {
+            var callback = new orderModel.PaymentCallbackParameters
+            {
+                Parameters = new List&lt;orderModel.KeyValuePair&gt;()
+            };
+
+            foreach (var pair in HttpContext.Request.Query)
+            {
+                callback.Parameters.Add(new orderModel.KeyValuePair
+                {
+                    Key = pair.Key,
+                    Value = pair.Value
+                });
+            }
+            if (HttpContext.Request.HasFormContentType)
+            {
+                foreach (var pair in HttpContext.Request.Form)
+                {
+                    callback.Parameters.Add(new orderModel.KeyValuePair
+                    {
+                        Key = pair.Key,
+                        Value = pair.Value
+                    });
+                }
+            }
+
+            var postProcessingResult = await _orderApi.PostProcessPaymentAsync(callback);
+            if (postProcessingResult.IsSuccess.HasValue &amp;&amp; postProcessingResult.IsSuccess.Value)
+            {
+                WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Спасибо за заказ!&quot; };
+                return StoreFrontRedirect(&quot;~/cart/thanks/&quot; + postProcessingResult.OrderId);
+            }
+            else
+            {
+                WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Упсс...&quot; };
+                return View(&quot;error&quot;);
+            }
+        }
+
+        // GET: /cart/order_confirmation
+        [HttpGet]
+        public ActionResult OrderConfirmation()
+        {
+            if (WorkContext.CurrentUser.IsRegisteredUser &amp;&amp; WorkContext.CurrentCart.Value != null)
+            {
+                return View(&quot;order_confirmation&quot;, WorkContext);
+            }
+
+            return Unauthorized();
+        }
+
+        // GET: /cart/thanks/{orderNumber}
+        [HttpGet]
+        public async Task&lt;ActionResult&gt; Thanks(string orderNumber)
+        {
+            var order = await _orderService.GetOrderByNumberAsync(orderNumber);
+
+            if (order == null || order.CustomerId != WorkContext.CurrentUser.Id)
+            {
+                return NotFound($&quot;Order with number {orderNumber} not found.&quot;);
+            }
+
+            WorkContext.CurrentOrder = order;
+            WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Спасибо за заказ!&quot; };
+
+            return View(&quot;thanks&quot;, WorkContext);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,15,18,52,0],[19,9,19,10,0],[20,13,20,34,0],[21,13,21,42,0],[22,9,22,10,0],[27,9,27,10,0],[28,13,28,84,0],[29,13,29,46,0],[30,9,30,10,0],[36,9,36,10,0],[37,13,37,52,0],[38,13,38,50,0],[39,9,39,10,0],[44,9,44,10,0],[45,13,45,80,0],[47,13,47,126,0],[47,73,47,124,0],[48,13,48,41,0],[49,13,49,14,0],[50,17,50,91,0],[52,13,52,108,0],[54,13,54,69,0],[56,13,56,54,0],[57,9,57,10,0],[61,9,61,10,0],[62,13,65,15,0],[67,13,67,20,0],[67,22,67,30,0],[67,31,67,33,0],[67,34,67,59,0],[68,13,68,14,0],[69,17,73,20,0],[74,13,74,14,0],[75,13,75,56,0],[76,13,76,14,0],[77,17,77,24,0],[77,26,77,34,0],[77,35,77,37,0],[77,38,77,62,0],[78,17,78,18,0],[79,21,83,24,0],[84,17,84,18,0],[85,13,85,14,0],[87,13,87,90,0],[88,13,88,97,0],[89,13,89,14,0],[90,17,90,90,0],[91,17,91,92,0],[94,13,94,14,0],[95,17,95,80,0],[96,17,96,38,0],[98,9,98,10,0],[103,9,103,10,0],[104,13,104,99,0],[105,13,105,14,0],[106,17,106,64,0],[109,13,109,35,0],[110,9,110,10,0],[115,9,115,10,0],[116,13,116,80,0],[118,13,118,81,0],[119,13,119,14,0],[120,17,120,80,0],[123,13,123,46,0],[124,13,124,86,0],[126,13,126,48,0],[127,9,127,10,0]]);
+    </script>
+  </body>
+</html>

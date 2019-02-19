@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\part.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using DotLiquid;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/objects/part
+    /// Each part returned by the paginate.parts array represents a link in the pagination&#39;s navigation.
+    /// &lt;/summary&gt;
+    public partial class Part : Drop
+    {
+        /// &lt;summary&gt;
+        /// Returns true if the part is a link, returns false if it is not.
+        /// &lt;/summary&gt;
+        public bool IsLink { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the title of the part.
+        /// &lt;/summary&gt;
+        public string Title { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the URL of the part.
+        /// &lt;/summary&gt;
+        public string Url { get; set; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[19,30,19,34,0],[19,35,19,39,0],[24,31,24,35,0],[24,36,24,40,0],[29,29,29,33,0],[29,34,29,38,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\caching\storefrontmemorycache.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
+using VirtoCommerce.Storefront.Infrastructure;
+using VirtoCommerce.Storefront.Model.Caching;
+
+namespace VirtoCommerce.Storefront.Caching
+{
+    public class StorefrontMemoryCache : IStorefrontMemoryCache
+    {
+        private readonly IOptions&lt;StorefrontOptions&gt; _settingManager;
+        private readonly IMemoryCache _memoryCache;
+        private bool _disposed;
+
+        public StorefrontMemoryCache(IMemoryCache memoryCache, IOptions&lt;StorefrontOptions&gt; settingManager)
+        {
+            _memoryCache = memoryCache;
+            _settingManager = settingManager;
+        }
+
+        public ICacheEntry CreateEntry(object key)
+        {
+            var result = _memoryCache.CreateEntry(key);
+            if (result != null)
+            {
+                var absoluteExpiration = CacheEnabled ? AbsoluteExpiration : TimeSpan.FromTicks(1);
+                result.SetAbsoluteExpiration(absoluteExpiration);
+            }
+            return result;
+        }
+
+        public void Remove(object key)
+        {
+            _memoryCache.Remove(key);
+        }
+
+        public bool TryGetValue(object key, out object value)
+        {
+            return _memoryCache.TryGetValue(key, out value);
+        }
+
+        protected TimeSpan AbsoluteExpiration =&gt; _settingManager.Value.CacheAbsoluteExpiration;
+
+        protected bool CacheEnabled =&gt; _settingManager.Value.CacheEnabled;
+
+        /// &lt;summary&gt;
+        /// Cleans up the background collection events.
+        /// &lt;/summary&gt;
+        ~StorefrontMemoryCache()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    GC.SuppressFinalize(this);
+                }
+
+                _disposed = true;
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,107,0],[16,9,16,10,0],[17,13,17,40,0],[18,13,18,46,0],[19,9,19,10,0],[22,9,22,10,0],[23,13,23,56,0],[24,13,24,32,0],[25,13,25,14,0],[26,17,26,100,0],[27,17,27,66,0],[28,13,28,14,0],[29,13,29,27,0],[30,9,30,10,0],[33,9,33,10,0],[34,13,34,38,0],[35,9,35,10,0],[38,9,38,10,0],[39,13,39,61,0],[40,9,40,10,0],[42,50,42,95,0],[44,40,44,74,0],[50,9,50,10,0],[50,9,50,10,0],[51,13,51,28,0],[52,9,52,10,0],[52,9,52,10,0],[55,9,55,10,0],[56,13,56,27,0],[57,9,57,10,0],[60,9,60,10,0],[61,13,61,28,0],[62,13,62,14,0],[63,17,63,31,0],[64,17,64,18,0],[65,21,65,47,0],[66,17,66,18,0],[68,17,68,34,0],[69,13,69,14,0],[70,9,70,10,0]]);
+    </script>
+  </body>
+</html>

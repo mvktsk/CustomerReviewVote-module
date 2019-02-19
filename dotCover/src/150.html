@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\subscriptions\subscription.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Order;
+
+namespace VirtoCommerce.Storefront.Model.Subscriptions
+{
+    public partial class Subscription : CustomerOrder
+    {
+      
+        public Subscription(Currency currency)
+            : base(currency)
+        {
+            Balance = new Money(currency);
+        }
+
+        /// &lt;summary&gt;
+        /// Subscription actual balance
+        /// &lt;/summary&gt;
+        public Money Balance { get; set; }
+
+        /// &lt;summary&gt;
+        /// (days, months, years) - billing interval
+        /// &lt;/summary&gt;
+        public PaymentInterval Interval { get; set; }
+        /// &lt;summary&gt;
+        /// - to set more customized intervals (every 5 month)
+        /// &lt;/summary&gt;
+        public int IntervalCount { get; set; }
+        /// &lt;summary&gt;
+        ///  subscription trial period in days 
+        /// &lt;/summary&gt;
+        public int TrialPeriodDays { get; set; }
+
+        /// &lt;summary&gt;
+        /// List of all orders  created on the basis of the subscription
+        /// &lt;/summary&gt;
+        public IList&lt;CustomerOrder&gt; CustomerOrders { get; set; } = new List&lt;CustomerOrder&gt;();
+
+        /// &lt;summary&gt;
+        /// Date the most recent update to this subscription started.
+        /// &lt;/summary&gt;
+        public DateTime? StartDate { get; set; }
+        /// &lt;summary&gt;
+        /// The date the subscription ended
+        /// &lt;/summary&gt;
+        public DateTime? EndDate { get; set; }
+
+        //If the subscription has a trial, the beginning of that trial.
+        public DateTime? TrialSart { get; set; }
+        // If the subscription has a trial, the end of that trial.
+        public DateTime? TrialEnd { get; set; }
+
+        //Start of the current period that the subscription has been ordered for
+        public DateTime? CurrentPeriodStart { get; set; }
+
+        //End of the current period that the subscription has been ordered for. At the end of this period, a new order will be created.
+        public DateTime? CurrentPeriodEnd { get; set; }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,15,15,29,0],[16,9,16,10,0],[17,13,17,43,0],[18,9,18,10,0],[23,32,23,36,0],[23,37,23,41,0],[28,43,28,47,0],[28,48,28,52,0],[32,36,32,40,0],[32,41,32,45,0],[36,38,36,42,0],[36,43,36,47,0],[41,54,41,58,0],[41,59,41,63,0],[41,68,41,93,0],[46,38,46,42,0],[46,43,46,47,0],[50,36,50,40,0],[50,41,50,45,0],[53,38,53,42,0],[53,43,53,47,0],[55,37,55,41,0],[55,42,55,46,0],[58,47,58,51,0],[58,52,58,56,0],[61,45,61,49,0],[61,50,61,54,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\infrastructure\applicationinsights\servicecollectionextension.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.ApplicationInsights.AspNetCore;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.ApplicationInsights.SnapshotCollector;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace VirtoCommerce.Storefront.Infrastructure.ApplicationInsights
+{
+    public static class ServiceCollectionExtension
+    {
+        public static void AddApplicationInsightsExtensions(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddSingleton&lt;ITelemetryInitializer, UserTelemetryInitializer&gt;();
+            services.Configure&lt;SnapshotCollectorConfiguration&gt;(configuration.GetSection(nameof(SnapshotCollectorConfiguration)));
+            services.AddSingleton&lt;ITelemetryProcessorFactory&gt;(sp =&gt; new SnapshotCollectorTelemetryProcessorFactory(sp));
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,10,0],[13,13,13,86,0],[14,13,14,130,0],[15,13,15,121,0],[15,69,15,119,0],[16,9,16,10,0]]);
+    </script>
+  </body>
+</html>

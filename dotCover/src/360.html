@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\export\ordersexporthandler.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Storefront.AutoRestClients.HruOrdersModuleApi;
+
+namespace VirtoCommerce.Storefront.Export
+{
+    public class OrdersExportHandler : IOrderExportHandler
+    {
+        private readonly IHruOrders _hruOrdersApi;
+
+        public OrdersExportHandler(IHruOrders hruOrdersApi)
+        {
+            _hruOrdersApi = hruOrdersApi;
+        }
+
+        public async Task&lt;IActionResult&gt; GetExportedOrdersAsync(string orderId)
+        {
+            var result = await _hruOrdersApi.ExportOrderByIdAsync(orderId);
+
+            return CastActionResult(result, null, null);
+        }
+
+        public async Task&lt;IActionResult&gt; GetExportedOrdersAsync(string customerId, string outletId, DateTime? startDate, DateTime? endDate, string status, int? pagesize)
+        {
+            var result = await _hruOrdersApi.ExportMultipleOrdersAsync(customerId, outletId, startDate, endDate, status, pagesize);
+
+            return CastActionResult(result, startDate, endDate);
+        }
+
+        private static IActionResult CastActionResult(byte[] value, DateTime? startDate, DateTime? endDate)
+        {
+            return new FileStreamResult(new MemoryStream(value), &quot;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet&quot;)
+            {
+                FileDownloadName = GetWorkbookName(startDate, endDate)
+            };
+        }
+
+        private static string GetWorkbookName(DateTime? startDate, DateTime? endDate)
+        {
+            var result = &quot;Отчет по заказам&quot;;
+            if (startDate != null &amp;&amp; endDate != null)
+            {
+                result = result + &quot;_&quot; + startDate?.ToString(&quot;dd.MM.yyyy.&quot;) + &quot;_&quot; + endDate?.ToString(&quot;dd.MM.yyyy&quot;);
+            }
+            else if (startDate != null)
+            {
+                result = result + &quot;_&quot; + startDate?.ToString(&quot;dd.MM.yyyy&quot;);
+            }
+            else if (endDate != null)
+            {
+                result = result + &quot;_&quot; + endDate?.ToString(&quot;dd.MM.yyyy&quot;);
+            }
+
+            return result + &quot;.xlsx&quot;;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,60,0],[14,9,14,10,0],[15,13,15,42,0],[16,9,16,10,0],[19,9,19,10,0],[20,13,20,76,0],[22,13,22,57,0],[23,9,23,10,0],[26,9,26,10,0],[27,13,27,132,0],[29,13,29,65,0],[30,9,30,10,0],[33,9,33,10,0],[34,13,37,15,0],[38,9,38,10,0],[41,9,41,10,0],[42,13,42,45,0],[43,13,43,54,0],[44,13,44,14,0],[45,17,45,116,0],[46,13,46,14,0],[47,18,47,40,0],[48,13,48,14,0],[49,17,49,75,0],[50,13,50,14,0],[51,18,51,38,0],[52,13,52,14,0],[53,17,53,73,0],[54,13,54,14,0],[56,13,56,37,0],[57,9,57,10,0]]);
+    </script>
+  </body>
+</html>

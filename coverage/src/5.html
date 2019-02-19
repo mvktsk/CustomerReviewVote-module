@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\customerreviewvote-module\newmanagedmodule.test\customerreviewvotestest.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Data.Entity;
+using CustomerReviewVotes.Core.Model;
+using CustomerReviewVotes.Core.Services;
+using CustomerReviewVotes.Data.Migrations;
+using CustomerReviewVotes.Data.Repositories;
+using CustomerReviewVotes.Data.Services;
+using VirtoCommerce.Platform.Testing.Bases;
+using VirtoCommerce.Platform.Data.Infrastructure;
+using VirtoCommerce.Platform.Data.Infrastructure.Interceptors;
+using Xunit;
+
+namespace CustomerReviewVotes.Test
+{
+    public class NewManagedModuleTest : FunctionalTestBase
+    {
+        private const string _productId = &quot;testProductId&quot;;
+        private const string _customerReviewId = &quot;testReviewId&quot;;
+        private const string _customerReviewVoteId = &quot;testReviewVoteId&quot;;
+        private const string _authorId = &quot;testAuthorId&quot;;
+
+        private ICustomerReviewService _customerReviewService =&gt; new CustomerReviewService(GetRepository);
+        private ICustomerReviewSearchService _customerReviewSearchService =&gt; new CustomerReviewSearchService(GetRepository, _customerReviewService);
+
+        public NewManagedModuleTest()
+        {
+            ConnectionString = &quot;VirtoCommerce0&quot;;
+        }
+        
+
+        protected ICustomerReviewRepository GetRepository()
+        {
+            var repository = new CustomerReviewRepository(ConnectionString, new EntityPrimaryKeyGeneratorInterceptor(), new AuditableInterceptor(null));
+            EnsureDatabaseInitialized(() =&gt; new CustomerReviewRepository(ConnectionString), () =&gt; Database.SetInitializer(new SetupDatabaseInitializer&lt;CustomerReviewRepository, Configuration&gt;()));
+            return repository;
+        }
+
+
+        [Fact]
+        public void CanDoReviewCRUDandSearch()
+        {
+            //Read non-existing item
+            var getByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewId });
+            Assert.NotNull(getByIdsResult);
+            Assert.Empty(getByIdsResult);
+
+            //Create new item
+            var item = new CustomerReview
+            {
+                Id = _customerReviewId,
+                ProductId = _productId,
+                CreatedDate = DateTime.Now,
+                CreatedBy = &quot;initial data seed&quot;,
+                AuthorNickname = &quot;John Doe&quot;,
+                Content = &quot;Liked that&quot;
+            };
+
+            _customerReviewService.SaveCustomerReviews(new[] { item });
+
+            getByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewId });
+            Assert.Single(getByIdsResult);
+
+            item = getByIdsResult[0];
+            Assert.Equal(_customerReviewId, item.Id);
+
+            //Update existing item
+            var updatedConent = &quot;Updated content&quot;;
+            Assert.NotEqual(updatedConent, item.Content);
+
+            item.Content = updatedConent;
+            _customerReviewService.SaveCustomerReviews(new[] { item });
+            getByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewId });
+            Assert.Single(getByIdsResult);
+
+            item = getByIdsResult[0];
+            Assert.Equal(updatedConent, item.Content);
+
+            //Search by creteria
+            Assert.Throws&lt;ArgumentNullException&gt;(() =&gt; _customerReviewSearchService.SearchCustomerReviews(null));
+
+            var criteria = new CustomerReviewSearchCriteria { ProductIds = new[] { _productId }, AuthorId = _authorId};
+            var searchResult = _customerReviewSearchService.SearchCustomerReviews(criteria);
+
+            Assert.NotNull(searchResult);
+            Assert.Equal(1, searchResult.TotalCount);
+            Assert.Single(searchResult.Results);
+
+            //Delete existing item
+            CanDeleteCustomerReviews();
+
+        }
+        [Fact]
+        public void CanDeleteCustomerReviews()
+        {
+            _customerReviewService.DeleteCustomerReviews(new[] { _customerReviewId });
+            var getByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewId });
+            Assert.NotNull(getByIdsResult);
+            Assert.Empty(getByIdsResult);
+
+        }
+
+        [Fact]
+        public void CanDoReviewVoteCRUDandSearch()
+        {
+            //Read non-existing item
+            var getVoteByIdsResult = _customerReviewService.GetVoteByIds(new[] { _customerReviewVoteId });
+            Assert.NotNull(getVoteByIdsResult);
+            Assert.Empty(getVoteByIdsResult);
+
+            //Create new ReviewVote item
+            var itemVote = new CustomerReviewVote
+            {
+                Id = _customerReviewVoteId,
+                AuthorId = _authorId,
+                CustomerReviewId = _customerReviewId,
+                CreatedDate = DateTime.Now,
+                CreatedBy = &quot;initial data seed&quot;,
+                ReviewRate = VoteRate.Helpfull
+            };
+
+            //Create new Review item
+            var itemReview = new CustomerReview
+            {
+                Id = _customerReviewId,
+                ProductId = _productId,
+                CreatedDate = DateTime.Now,
+                CreatedBy = &quot;initial data seed&quot;,
+                AuthorNickname = &quot;John Doe&quot;,
+                Content = &quot;Liked that&quot;
+            };
+
+            _customerReviewService.SaveCustomerReviews(new[] { itemReview });
+            
+            //Save ReviewVote item for existing Review item
+            _customerReviewService.SaveCustomerReviewVotes(new[] { itemVote });
+
+            var getReviewByIdsResult = _customerReviewService.GetReviewByIds(new[] { _customerReviewId });
+            Assert.Single(getReviewByIdsResult);
+
+            getVoteByIdsResult = _customerReviewService.GetVoteByIds(new[] { _customerReviewVoteId });
+            Assert.Single(getVoteByIdsResult);
+
+            //Check that TotalVotesCount HelpfullVotesCount UselessVotesCount fields of Review item are changed
+            itemReview = getReviewByIdsResult[0];
+            Assert.Equal(1, itemReview.TotalVotesCount);
+            Assert.Equal(1, itemReview.HelpfullVotesCount);
+            Assert.Equal(0, itemReview.UselessVotesCount);
+
+            itemVote = getVoteByIdsResult[0];
+            Assert.Equal(_customerReviewVoteId, itemVote.Id);
+
+
+            //Search Votes by creteria
+            Assert.Throws&lt;ArgumentNullException&gt;(() =&gt; _customerReviewSearchService.SearchCustomerReviewVotes(null));
+
+            var criteriaVote = new CustomerReviewVoteSearchCriteria { CustomerReviewIds = new[] { _customerReviewId } };
+            var searchResultVote = _customerReviewSearchService.SearchCustomerReviewVotes(criteriaVote);
+
+            Assert.NotNull(searchResultVote);
+            Assert.Equal(1, searchResultVote.TotalCount);
+            Assert.Single(searchResultVote.Results);
+
+            //Update existing item
+            var updatedVoteIdx = VoteRate.Useless;
+            Assert.NotEqual(updatedVoteIdx, itemVote.ReviewRate);
+
+            itemVote.ReviewRate = updatedVoteIdx;
+            _customerReviewService.SaveCustomerReviewVotes(new[] { itemVote });
+            getVoteByIdsResult = _customerReviewService.GetVoteByIds(new[] { _customerReviewVoteId });
+            Assert.Single(getVoteByIdsResult);
+
+            itemVote = getVoteByIdsResult[0];
+            Assert.Equal(updatedVoteIdx, itemVote.ReviewRate);
+
+
+
+            //Delete existing items
+            CanDeleteCustomerReviewVotes();
+            CanDeleteCustomerReviews();
+           
+
+        }
+
+        [Fact]
+        public void CanDeleteCustomerReviewVotes()
+        {
+            _customerReviewService.DeleteCustomerReviewVotes(new[] { _customerReviewVoteId });
+            var getByIdsResult = _customerReviewService.GetVoteByIds(new[] { _customerReviewVoteId });
+            Assert.NotNull(getByIdsResult);
+            Assert.Empty(getByIdsResult);
+
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[22,66,22,106,1],[23,78,23,148,1],[25,9,25,38,1],[26,9,26,10,1],[27,13,27,49,1],[28,9,28,10,1],[32,9,32,10,1],[33,13,33,153,1],[34,13,34,197,1],[34,45,34,91,1],[34,99,34,195,1],[35,13,35,31,1],[36,9,36,10,1],[41,9,41,10,1],[43,13,43,101,1],[44,13,44,44,1],[45,13,45,42,1],[48,13,56,15,1],[58,13,58,72,1],[60,13,60,97,1],[61,13,61,43,1],[63,13,63,38,1],[64,13,64,54,1],[67,13,67,51,1],[68,13,68,58,1],[70,13,70,42,1],[71,13,71,72,1],[72,13,72,97,1],[73,13,73,43,1],[75,13,75,38,1],[76,13,76,55,1],[79,13,79,114,1],[79,56,79,112,1],[81,13,81,120,1],[82,13,82,93,1],[84,13,84,42,1],[85,13,85,54,1],[86,13,86,49,1],[89,13,89,40,1],[91,9,91,10,1],[94,9,94,10,1],[95,13,95,87,1],[96,13,96,101,1],[97,13,97,44,1],[98,13,98,42,1],[100,9,100,10,1],[104,9,104,10,1],[106,13,106,107,1],[107,13,107,48,1],[108,13,108,46,1],[111,13,119,15,1],[122,13,130,15,1],[132,13,132,78,1],[135,13,135,80,1],[137,13,137,107,1],[138,13,138,49,1],[140,13,140,103,1],[141,13,141,47,1],[144,13,144,50,1],[145,13,145,57,1],[146,13,146,60,1],[147,13,147,59,1],[149,13,149,46,1],[150,13,150,62,1],[154,13,154,118,1],[154,56,154,116,1],[156,13,156,121,1],[157,13,157,105,1],[159,13,159,46,1],[160,13,160,58,1],[161,13,161,53,1],[164,13,164,51,1],[165,13,165,66,1],[167,13,167,50,1],[168,13,168,80,1],[169,13,169,103,1],[170,13,170,47,1],[172,13,172,46,1],[173,13,173,63,1],[178,13,178,44,1],[179,13,179,40,1],[182,9,182,10,1],[186,9,186,10,1],[187,13,187,95,1],[188,13,188,103,1],[189,13,189,44,1],[190,13,190,42,1],[192,9,192,10,1]]);
+    </script>
+  </body>
+</html>

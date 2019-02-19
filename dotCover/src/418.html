@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\stores\storeservice.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
+using VirtoCommerce.Storefront.AutoRestClients.StoreModuleApi;
+using VirtoCommerce.Storefront.Extensions;
+using VirtoCommerce.Storefront.Infrastructure;
+using VirtoCommerce.Storefront.Model.Caching;
+using VirtoCommerce.Storefront.Model.Common.Caching;
+using VirtoCommerce.Storefront.Model.Stores;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    /// &lt;summary&gt;
+    /// Data access object for stores implementation
+    /// &lt;/summary&gt;
+    public class StoreService : IStoreService
+    {
+        private readonly IStoreModule _storeApi;
+        private readonly IStorefrontMemoryCache _memoryCache;
+        private readonly IApiChangesWatcher _apiChangesWatcher;
+        public StoreService(IStoreModule storeApi, IStorefrontMemoryCache memoryCache, IApiChangesWatcher apiChangesWatcher)
+        {
+            _storeApi = storeApi;
+            _memoryCache = memoryCache;
+            _apiChangesWatcher = apiChangesWatcher;
+        }
+        public async Task&lt;Model.Stores.Store[]&gt; GetAllStoresAsync()
+        {
+            var cacheKey = CacheKey.With(GetType(), &quot;GetAllStoresAsync&quot;);
+            return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =&gt;
+            {
+                cacheEntry.AddExpirationToken(StoreCacheRegion.CreateChangeToken());
+                cacheEntry.AddExpirationToken(_apiChangesWatcher.CreateChangeToken());
+
+                return (await _storeApi.GetStoresAsync()).Select(x =&gt; x.ToStore()).ToArray();
+            }, cacheNullValue: false);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[21,9,21,125,0],[22,9,22,10,0],[23,13,23,34,0],[24,13,24,40,0],[25,13,25,52,0],[26,9,26,10,0],[28,9,28,10,0],[29,13,29,74,0],[30,13,36,39,0],[31,13,31,14,0],[32,17,32,85,0],[33,17,33,87,0],[35,17,35,94,0],[35,71,35,82,0],[36,13,36,14,0],[37,9,37,10,0]]);
+    </script>
+  </body>
+</html>

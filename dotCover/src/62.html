@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\search.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using DotLiquid;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// https://docs.shopify.com/themes/liquid/objects/search
+    /// &lt;/summary&gt;
+    public partial class Search : Drop
+    {
+        /// &lt;summary&gt;
+        /// Returns  true  if an HTML form with the attribute  action=&quot;/search&quot;  was submitted successfully. This allows you to show content based on whether a search was performed or not.
+        /// &lt;/summary&gt;
+        public bool Performed { get; set; }
+        /// &lt;summary&gt;
+        /// Returns an array of matching search result items. The items in the array can be a(n): product, article, page
+        /// &lt;/summary&gt;
+        public IMutablePagedList&lt;Drop&gt; Results { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the number of results found.
+        /// &lt;/summary&gt;
+        public int ResultsCount { get { return Results.GetTotalCount(); } }
+
+        /// &lt;summary&gt;
+        /// Returns the string that was entered in the search input box.
+        /// &lt;/summary&gt;
+        public string Terms { get; set; }
+
+        public string SearchIn { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns a list of all tags in a search result.
+        /// &lt;/summary&gt;
+        public TagCollection AllTags { get; set; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,33,14,37,0],[14,38,14,42,0],[18,50,18,54,0],[18,55,18,59,0],[23,39,23,40,0],[23,41,23,72,0],[23,73,23,74,0],[28,31,28,35,0],[28,36,28,40,0],[30,34,30,38,0],[30,39,30,43,0],[35,40,35,44,0],[35,45,35,49,0]]);
+    </script>
+  </body>
+</html>

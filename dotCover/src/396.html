@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\order\orderworkcontextbuilderextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using PagedList.Core;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Order;
+using VirtoCommerce.Storefront.Model.Order.Services;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public static class OrderWorkContextBuilderExtensions
+    {
+        public static Task WithUserOrdersAsync(this IWorkContextBuilder builder, IMutablePagedList&lt;CustomerOrder&gt; orders)
+        {
+            builder.WorkContext.CurrentUser.Orders = orders;
+            return Task.CompletedTask;
+        }
+
+        public static Task WithUserOrdersAsync(this IWorkContextBuilder builder)
+        {
+            if (builder.WorkContext.CurrentUser != null)
+            {
+                var serviceProvider = builder.HttpContext.RequestServices;
+                var orderService = serviceProvider.GetRequiredService&lt;ICustomerOrderService&gt;();
+
+                Func&lt;int, int, IEnumerable&lt;SortInfo&gt;, IPagedList&lt;CustomerOrder&gt;&gt; factory = (pageNumber, pageSize, sortInfos) =&gt;
+                {
+                    var orderSearchcriteria = new OrderSearchCriteria
+                    {
+                        CustomerId = builder.WorkContext.CurrentUser.Id,
+                        PageNumber = pageNumber,
+                        PageSize = pageSize,
+                        Sort = sortInfos?.ToString()
+                    };
+
+                    var result = orderService.SearchOrders(orderSearchcriteria);
+                    return new StaticPagedList&lt;CustomerOrder&gt;(result, pageNumber, pageSize, result.Count);
+                };
+                return builder.WithUserOrdersAsync(new MutablePagedList&lt;CustomerOrder&gt;(factory, 1, OrderSearchCriteria.DefaultPageSize));
+            }
+
+            return Task.CompletedTask;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,10,0],[16,13,16,61,0],[17,13,17,39,0],[18,9,18,10,0],[21,9,21,10,0],[22,13,22,57,0],[23,13,23,14,0],[24,17,24,75,0],[25,17,25,96,0],[27,17,39,19,0],[28,17,28,18,0],[29,21,35,23,0],[37,21,37,81,0],[38,21,38,107,0],[39,17,39,18,0],[40,17,40,138,0],[43,13,43,39,0],[44,9,44,10,0]]);
+    </script>
+  </body>
+</html>

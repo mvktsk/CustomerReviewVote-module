@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\staticcontent\staticcontentitemfactory.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.IO;
+using System.Text.RegularExpressions;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.StaticContent;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public class StaticContentItemFactory : IStaticContentItemFactory
+    {
+        private static readonly Regex _blogMatchRegex = new Regex(@&quot;blogs/(?&lt;blog&gt;[^\/]*)\/([^\/]*)\.[^\.]+$&quot;, RegexOptions.Compiled);
+
+        public ContentItem GetItemFromPath(string path)
+        {
+            ContentItem retVal = null;
+            if (!string.IsNullOrEmpty(path))
+            {
+                //Blog
+                var blogMatch = _blogMatchRegex.Match(path);
+                if (blogMatch.Success)
+                {
+                    var blogName = blogMatch.Groups[&quot;blog&quot;].Value;
+                    var fileName = Path.GetFileNameWithoutExtension(path);
+                    if (fileName.EqualsInvariant(blogName) || fileName.EqualsInvariant(&quot;default&quot;))
+                    {
+                        retVal = new Blog()
+                        {
+                            Name = blogName,
+                        };
+                    }
+                    else
+                    {
+                        retVal = new BlogArticle()
+                        {
+                            BlogName = blogName
+                        };
+                    }
+                }
+                else
+                {
+                    retVal = new ContentPage();
+                }
+            }
+                
+            return retVal;
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,9,10,135,0],[13,9,13,10,0],[14,13,14,39,0],[15,13,15,45,0],[16,13,16,14,0],[18,17,18,61,0],[19,17,19,39,0],[20,17,20,18,0],[21,21,21,67,0],[22,21,22,75,0],[23,21,23,99,0],[24,21,24,22,0],[25,25,28,27,0],[29,21,29,22,0],[31,21,31,22,0],[32,25,35,27,0],[36,21,36,22,0],[37,17,37,18,0],[39,17,39,18,0],[40,21,40,48,0],[41,17,41,18,0],[42,13,42,14,0],[44,13,44,27,0],[45,9,45,10,0]]);
+    </script>
+  </body>
+</html>

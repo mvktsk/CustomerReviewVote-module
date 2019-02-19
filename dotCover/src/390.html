@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\inventory\inventoryworkcontextbuilderextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using PagedList.Core;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Inventory;
+using VirtoCommerce.Storefront.Model.Inventory.Services;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public static class InventoryWorkContextBuilderExtensions
+    {
+        public static Task WithFulfillmentCentersAsync(this IWorkContextBuilder builder, IMutablePagedList&lt;FulfillmentCenter&gt; centers)
+        {
+            builder.WorkContext.FulfillmentCenters = centers;
+            return Task.CompletedTask;
+        }
+
+        public static Task WithFulfillmentCentersAsync(this IWorkContextBuilder builder)
+        {
+            var serviceProvider = builder.HttpContext.RequestServices;
+            var inventoryService = serviceProvider.GetRequiredService&lt;IInventoryService&gt;();
+
+            Func&lt;int, int, IEnumerable&lt;SortInfo&gt;, IPagedList&lt;FulfillmentCenter&gt;&gt; factory = (pageNumber, pageSize, sortInfos) =&gt;
+            {
+                return inventoryService.SearchFulfillmentCenters(new FulfillmentCenterSearchCriteria { PageNumber = pageNumber, PageSize = pageSize, Sort = SortInfo.ToString(sortInfos) });
+
+            };
+            return builder.WithFulfillmentCentersAsync(new MutablePagedList&lt;FulfillmentCenter&gt;(factory, 1, FulfillmentCenterSearchCriteria.DefaultPageSize));
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,10,0],[16,13,16,62,0],[17,13,17,39,0],[18,9,18,10,0],[21,9,21,10,0],[22,13,22,71,0],[23,13,23,92,0],[25,13,29,15,0],[26,13,26,14,0],[27,17,27,189,0],[29,13,29,14,0],[30,13,30,158,0],[31,9,31,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\quoterequestcontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Common.Exceptions;
+using VirtoCommerce.Storefront.Model.Quote.Services;
+
+namespace VirtoCommerce.Storefront.Controllers
+{
+    public class QuoteRequestController : StorefrontControllerBase
+    {
+        private readonly IQuoteRequestBuilder _quoteRequestBuilder;
+
+        public QuoteRequestController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder, IQuoteRequestBuilder quoteRequestBuilder)
+            : base(workContextAccessor, urlBuilder)
+        {
+            _quoteRequestBuilder = quoteRequestBuilder;
+         }
+
+        /// &lt;summary&gt;
+        /// Display user current quote request
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        // GET: quoterequest
+        [HttpGet]
+        public ActionResult CurrentQuoteRequest()
+        {
+            return View(&quot;quote-request&quot;, WorkContext);
+        }
+
+        /// &lt;summary&gt;
+        /// Display quote request by number
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;number&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        // GET: /quoterequest/{number}
+        [HttpGet]
+        public async Task&lt;ActionResult&gt; QuoteRequestByNumber(string number)
+        {
+            var builder = await _quoteRequestBuilder.LoadQuoteRequestAsync(number, WorkContext.CurrentLanguage, WorkContext.CurrentCurrency);
+            WorkContext.CurrentQuoteRequest = new System.Lazy&lt;Model.Quote.QuoteRequest&gt;(() =&gt; builder.QuoteRequest);
+            if (WorkContext.CurrentUser.Id != builder.QuoteRequest.CustomerId)
+            {
+                throw new StorefrontException(&quot;Requested quote not belongs to current user&quot;);
+            }
+            return View(&quot;quote-request&quot;, WorkContext);
+        }
+
+
+        /// &lt;summary&gt;
+        /// List of all quote requests for current user
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        // GET: /account/quoterequests
+        [HttpGet]
+        public ActionResult QuoteRequests()
+        {
+            //All customer quote requests filled in WorkContext.Customer.QuoteRequests
+            return View(&quot;customers/quote-requests&quot;, WorkContext);
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,15,15,52,0],[16,9,16,10,0],[17,13,17,56,0],[18,10,18,11,0],[27,9,27,10,0],[28,13,28,55,0],[29,9,29,10,0],[39,9,39,10,0],[40,13,40,142,0],[41,13,41,117,0],[41,95,41,115,0],[42,13,42,79,0],[43,13,43,14,0],[44,17,44,94,0],[46,13,46,55,0],[47,9,47,10,0],[57,9,57,10,0],[59,13,59,66,0],[60,9,60,10,0]]);
+    </script>
+  </body>
+</html>

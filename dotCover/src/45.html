@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\linklists.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    public partial class Linklists : ItemCollection&lt;Linklist&gt;
+    {
+        public Linklists(IEnumerable&lt;Linklist&gt; linklists)
+            : base(linklists)
+        {
+        }
+
+        public override object BeforeMethod(string method)
+        {
+            return this.FirstOrDefault(x =&gt; x.Handle.EqualsInvariant(method));
+        }
+
+        #region ItemCollection Members
+        public override bool Contains(object value)
+        {
+            return false;
+        }
+        #endregion
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,15,11,30,0],[12,9,12,10,0],[13,9,13,10,0],[16,9,16,10,0],[17,13,17,79,0],[17,45,17,77,0],[18,9,18,10,0],[22,9,22,10,0],[23,13,23,26,0],[24,9,24,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\cart\heiholidaysservice.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.AutoRestClients.HeiHolidaysModuleApi;
+using VirtoCommerce.Storefront.Extensions;
+using VirtoCommerce.Storefront.Model.Caching;
+using VirtoCommerce.Storefront.Model.Cart.Services;
+using VirtoCommerce.Storefront.Model.Common.Caching;
+
+namespace VirtoCommerce.Storefront.Domain.Cart
+{
+    public class HeiHolidaysService : IHeiHolidaysService
+    {
+        private readonly IHeiHolidays _heiHolidays;
+        private readonly IStorefrontMemoryCache _memoryCache;
+
+        public HeiHolidaysService(IHeiHolidays heiHolidays, IStorefrontMemoryCache memoryCache)
+        {
+            _heiHolidays = heiHolidays;
+            _memoryCache = memoryCache;
+        }
+
+        public async Task&lt;IList&lt;DateTime?&gt;&gt; GetGlobalHolidaysAsync()
+        {
+            var cacheKey = CacheKey.With(GetType(), nameof(GetGlobalHolidaysAsync));
+            return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =&gt;
+            {
+                cacheEntry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMilliseconds(15);
+
+                return await _heiHolidays.GetGlobalHolidaysAsync();
+            });
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,9,17,96,0],[18,9,18,10,0],[19,13,19,40,0],[20,13,20,40,0],[21,9,21,10,0],[24,9,24,10,0],[25,13,25,85,0],[26,13,31,16,0],[27,13,27,14,0],[28,17,28,92,0],[30,17,30,68,0],[31,13,31,14,0],[32,9,32,10,0]]);
+    </script>
+  </body>
+</html>

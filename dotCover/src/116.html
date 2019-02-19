@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\converters\countryconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Globalization;
+using System.Linq;
+using System.Web;
+using Newtonsoft.Json;
+using VirtoCommerce.Storefront.Model;
+
+namespace VirtoCommerce.LiquidThemeEngine.Converters
+{
+    public static class CountryConverter
+    {
+        public static string ToOptionTag(this Country country)
+        {
+            var regions = &quot;[]&quot;;
+
+            if (country.Regions != null)
+            {
+                regions = JsonConvert.SerializeObject(country.Regions.Select(r =&gt; r.Name));
+            }
+
+            return string.Format(CultureInfo.InvariantCulture, &quot;&lt;option value=\&quot;{0}\&quot; data-provinces=\&quot;{1}\&quot;&gt;{0}&lt;/option&gt;&quot;,
+                HttpUtility.HtmlAttributeEncode(country.Name),
+                HttpUtility.HtmlAttributeEncode(regions)
+                );
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,10,0],[13,13,13,32,0],[15,13,15,41,0],[16,13,16,14,0],[17,17,17,92,0],[17,83,17,89,0],[18,13,18,14,0],[20,13,23,19,0],[24,9,24,10,0]]);
+    </script>
+  </body>
+</html>

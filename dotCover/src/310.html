@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\routing\slugrouteservice.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
+using VirtoCommerce.Storefront.AutoRestClients.CatalogModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.CoreModuleApi;
+using VirtoCommerce.Storefront.Common;
+using VirtoCommerce.Storefront.Extensions;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Caching;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Common.Caching;
+using VirtoCommerce.Storefront.Model.Services;
+using VirtoCommerce.Storefront.Model.StaticContent;
+using VirtoCommerce.Storefront.Model.Stores;
+using coreDto = VirtoCommerce.Storefront.AutoRestClients.CoreModuleApi.Models;
+
+namespace VirtoCommerce.Storefront.Routing
+{
+    public class SlugRouteService : ISlugRouteService
+    {
+        private readonly IStorefrontMemoryCache _memoryCache;
+        private readonly ICommerce _coreApi;
+        private readonly ICatalogService _catalogService;
+
+        public SlugRouteService(IStorefrontMemoryCache memoryCache, ICommerce coreApi, ICatalogService catalogService, ICatalogModuleProducts catalogProductsApi)
+        {
+            _memoryCache = memoryCache;
+            _coreApi = coreApi;
+            _catalogService = catalogService;
+        }
+
+        public virtual async Task&lt;SlugRouteResponse&gt; HandleSlugRequestAsync(string slugPath, WorkContext workContext)
+        {
+            var entity = await FindEntityBySlugPath(slugPath, workContext) ?? new SeoEntity { ObjectType = &quot;Asset&quot;, SeoPath = slugPath };
+            var response = entity.SeoPath.EqualsInvariant(slugPath) ? View(entity) : Redirect(entity);
+            return response;
+        }
+
+
+        protected virtual SlugRouteResponse View(SeoEntity entity)
+        {
+            var response = new SlugRouteResponse();
+
+            switch (entity.ObjectType)
+            {
+                case &quot;Category&quot;:
+                    response.RouteData[&quot;action&quot;] = &quot;CategoryBrowsing&quot;;
+                    response.RouteData[&quot;controller&quot;] = &quot;CatalogSearch&quot;;
+                    response.RouteData[&quot;categoryId&quot;] = entity.ObjectId;
+                    break;
+                case &quot;CatalogProduct&quot;:
+                    response.RouteData[&quot;action&quot;] = &quot;ProductDetails&quot;;
+                    response.RouteData[&quot;controller&quot;] = &quot;Product&quot;;
+                    response.RouteData[&quot;productId&quot;] = entity.ObjectId;
+                    break;
+                case &quot;Vendor&quot;:
+                    response.RouteData[&quot;action&quot;] = &quot;VendorDetails&quot;;
+                    response.RouteData[&quot;controller&quot;] = &quot;Vendor&quot;;
+                    response.RouteData[&quot;vendorId&quot;] = entity.ObjectId;
+                    break;
+                case &quot;Page&quot;:
+                    response.RouteData[&quot;action&quot;] = &quot;GetContentPage&quot;;
+                    response.RouteData[&quot;controller&quot;] = &quot;StaticContent&quot;;
+                    response.RouteData[&quot;page&quot;] = entity.ObjectInstance;
+                    break;
+                case &quot;Asset&quot;:
+                    response.RouteData[&quot;action&quot;] = &quot;GetThemeAssets&quot;;
+                    response.RouteData[&quot;controller&quot;] = &quot;Asset&quot;;
+                    response.RouteData[&quot;path&quot;] = entity.SeoPath;
+                    break;
+            }
+
+            return response;
+        }
+
+        protected virtual SlugRouteResponse Redirect(SeoEntity entity)
+        {
+            return new SlugRouteResponse
+            {
+                Redirect = true,
+                RedirectLocation = entity.SeoPath,
+            };
+        }
+
+        protected virtual async Task&lt;SeoEntity&gt; FindEntityBySlugPath(string path, WorkContext workContext)
+        {
+            path = path.Trim(&#39;/&#39;);
+
+            var slugs = path.Split(&#39;/&#39;);
+            var lastSlug = slugs.LastOrDefault();
+
+            // Get all SEO records for requested slug and also all other SEO records with different slug and languages but related to the same object
+            var allSeoRecords = await GetAllSeoRecordsAsync(lastSlug);
+            var bestSeoRecords = GetBestMatchingSeoRecords(allSeoRecords, workContext.CurrentStore, workContext.CurrentLanguage, lastSlug);
+
+            var seoEntityComparer = AnonymousComparer.Create((SeoEntity x) =&gt; string.Join(&quot;:&quot;, x.ObjectType, x.ObjectId, x.SeoPath));
+            // Find distinct objects
+            var entities = bestSeoRecords
+                .Select(s =&gt; new SeoEntity { ObjectType = s.ObjectType, ObjectId = s.ObjectId, SeoPath = s.SemanticUrl })
+                .Distinct(seoEntityComparer)
+                .ToList();
+
+            // Don&#39;t load objects for non-SEO links
+            if (workContext.CurrentStore.SeoLinksType != SeoLinksType.None)
+            {
+                foreach (var group in entities.GroupBy(e =&gt; e.ObjectType))
+                {
+                    await LoadObjectsAndBuildFullSeoPaths(group.Key, group.ToList(), workContext.CurrentStore, workContext.CurrentLanguage);
+                }
+
+                entities = entities.Where(e =&gt; !string.IsNullOrEmpty(e.SeoPath)).ToList();
+            }
+
+            // If found multiple entities, keep those which have the requested SEO path
+            if (entities.Count &gt; 1)
+            {
+                entities = entities.Where(e =&gt; e.SeoPath.EqualsInvariant(path)).ToList();
+            }
+
+            // If still found multiple entities, give up
+            var result = entities.Count == 1 ? entities.FirstOrDefault() : null;
+
+            if (result == null)
+            {
+                // Try to find a static page
+                var page = FindPageBySeoPath(path, workContext);
+                if (page != null)
+                {
+                    result = new SeoEntity
+                    {
+                        ObjectType = &quot;Page&quot;,
+                        SeoPath = page.Url,
+                        ObjectInstance = page,
+                    };
+                }
+            }
+
+            return result;
+        }
+
+
+        protected virtual ContentItem FindPageBySeoPath(string seoPath, WorkContext workContext)
+        {
+            ContentItem result = null;
+
+            if (workContext.Pages != null)
+            {
+                var pages = workContext.Pages
+                    .Where(p =&gt; string.Equals(p.Url, seoPath, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                // Find page with current language
+                result = pages.FirstOrDefault(x =&gt; x.Language == workContext.CurrentLanguage);
+
+                if (result == null)
+                {
+                    // Find page with invariant language
+                    result = pages.FirstOrDefault(x =&gt; x.Language.IsInvariant);
+                }
+
+                if (result == null)
+                {
+                    // Check alternate page URLs
+                    result = workContext.Pages.FirstOrDefault(x =&gt; x.AliasesUrls.Contains(seoPath, StringComparer.OrdinalIgnoreCase));
+                }
+            }
+
+            return result;
+        }
+
+        protected virtual async Task&lt;IList&lt;coreDto.SeoInfo&gt;&gt; GetAllSeoRecordsAsync(string slug)
+        {
+            var result = new List&lt;coreDto.SeoInfo&gt;();
+
+            if (!string.IsNullOrEmpty(slug))
+            {
+                var cacheKey = CacheKey.With(GetType(), &quot;GetAllSeoRecords&quot;, slug);
+                var apiResult = await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =&gt;
+                {
+                    cacheEntry.AddExpirationToken(RoutingCacheRegion.CreateChangeToken());
+                    return await _coreApi.GetSeoInfoBySlugAsync(slug);
+                });
+                result.AddRange(apiResult);
+            }
+            return result;
+        }
+
+        protected virtual IList&lt;coreDto.SeoInfo&gt; GetBestMatchingSeoRecords(IEnumerable&lt;coreDto.SeoInfo&gt; allSeoRecords, Store store, Language language, string slug)
+        {
+            return allSeoRecords.GetBestMatchingSeoInfos(store, language, slug);
+        }
+
+        protected virtual async Task LoadObjectsAndBuildFullSeoPaths(string objectType, IList&lt;SeoEntity&gt; objects, Store store, Language language)
+        {
+            var objectIds = objects.Select(o =&gt; o.ObjectId).ToArray();
+            var seoPaths = await GetFullSeoPathsAsync(objectType, objectIds, store, language);
+
+            if (seoPaths != null)
+            {
+                foreach (var seo in objects)
+                {
+                    if (seoPaths.ContainsKey(seo.ObjectId))
+                    {
+                        seo.SeoPath = seoPaths[seo.ObjectId];
+                    }
+                }
+            }
+        }
+
+        protected virtual async Task&lt;IDictionary&lt;string, string&gt;&gt; GetFullSeoPathsAsync(string objectType, string[] objectIds, Store store, Language language)
+        {
+            var cacheKey = CacheKey.With(GetType(), &quot;GetFullSeoPaths&quot;, store.Id, objectType, string.Join(&quot;-&quot;, objectIds.OrderBy(x =&gt; x)));
+            return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =&gt;
+            {
+                switch (objectType)
+                {
+                    case &quot;Category&quot;:
+                        return await GetCategorySeoPathsAsync(objectIds, store, language);
+                    case &quot;CatalogProduct&quot;:
+                        return await GetProductSeoPathsAsync(objectIds, store, language);
+                }
+                return new Dictionary&lt;string, string&gt;();
+            });
+        }
+
+        protected virtual async Task&lt;IDictionary&lt;string, string&gt;&gt; GetCategorySeoPathsAsync(string[] objectIds, Store store, Language language)
+        {
+            var result = (await _catalogService.GetCategoriesAsync(objectIds, CategoryResponseGroup.WithOutlines | CategoryResponseGroup.WithSeo));
+            return result.ToDictionary(x =&gt; x.Id, x =&gt; x.SeoPath);
+        }
+
+        protected virtual async Task&lt;IDictionary&lt;string, string&gt;&gt; GetProductSeoPathsAsync(string[] objectIds, Store store, Language language)
+        {
+            var result = await _catalogService.GetProductsAsync(objectIds, ItemResponseGroup.Outlines | ItemResponseGroup.Seo);
+            return result.ToDictionary(x =&gt; x.Id, x =&gt; x.SeoPath);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[28,9,28,162,0],[29,9,29,10,0],[30,13,30,40,0],[31,13,31,32,0],[32,13,32,46,0],[33,9,33,10,0],[36,9,36,10,0],[37,13,37,138,0],[38,13,38,103,0],[39,13,39,29,0],[40,9,40,10,0],[44,9,44,10,0],[45,13,45,52,0],[47,13,47,39,0],[50,21,50,71,0],[51,21,51,72,0],[52,21,52,72,0],[53,21,53,27,0],[55,21,55,69,0],[56,21,56,66,0],[57,21,57,71,0],[58,21,58,27,0],[60,21,60,68,0],[61,21,61,65,0],[62,21,62,70,0],[63,21,63,27,0],[65,21,65,69,0],[66,21,66,72,0],[67,21,67,72,0],[68,21,68,27,0],[70,21,70,69,0],[71,21,71,64,0],[72,21,72,65,0],[73,21,73,27,0],[76,13,76,29,0],[77,9,77,10,0],[80,9,80,10,0],[81,13,85,15,0],[86,9,86,10,0],[89,9,89,10,0],[90,13,90,35,0],[92,13,92,41,0],[93,13,93,50,0],[96,13,96,71,0],[97,13,97,140,0],[99,13,99,134,0],[99,79,99,132,0],[101,13,104,27,0],[102,30,102,121,0],[107,13,107,76,0],[108,13,108,14,0],[109,17,109,24,0],[109,26,109,35,0],[109,36,109,38,0],[109,39,109,74,0],[109,61,109,73,0],[110,17,110,18,0],[111,21,111,141,0],[112,17,112,18,0],[114,17,114,91,0],[114,48,114,80,0],[115,13,115,14,0],[118,13,118,36,0],[119,13,119,14,0],[120,17,120,90,0],[120,48,120,79,0],[121,13,121,14,0],[124,13,124,81,0],[126,13,126,32,0],[127,13,127,14,0],[129,17,129,65,0],[130,17,130,34,0],[131,17,131,18,0],[132,21,137,23,0],[138,17,138,18,0],[139,13,139,14,0],[141,13,141,27,0],[142,9,142,10,0],[146,9,146,10,0],[147,13,147,39,0],[149,13,149,43,0],[150,13,150,14,0],[151,17,153,31,0],[152,33,152,98,0],[156,17,156,95,0],[156,52,156,93,0],[158,17,158,36,0],[159,17,159,18,0],[161,21,161,80,0],[161,56,161,78,0],[162,17,162,18,0],[164,17,164,36,0],[165,17,165,18,0],[167,21,167,135,0],[167,68,167,133,0],[168,17,168,18,0],[169,13,169,14,0],[171,13,171,27,0],[172,9,172,10,0],[175,9,175,10,0],[176,13,176,54,0],[178,13,178,45,0],[179,13,179,14,0],[180,17,180,83,0],[181,17,185,20,0],[182,17,182,18,0],[183,21,183,91,0],[184,21,184,71,0],[185,17,185,18,0],[186,17,186,44,0],[187,13,187,14,0],[188,13,188,27,0],[189,9,189,10,0],[192,9,192,10,0],[193,13,193,81,0],[194,9,194,10,0],[197,9,197,10,0],[198,13,198,71,0],[198,49,198,59,0],[199,13,199,95,0],[201,13,201,34,0],[202,13,202,14,0],[203,17,203,24,0],[203,26,203,33,0],[203,34,203,36,0],[203,37,203,44,0],[204,17,204,18,0],[205,21,205,60,0],[206,21,206,22,0],[207,25,207,62,0],[208,21,208,22,0],[209,17,209,18,0],[210,13,210,14,0],[211,9,211,10,0],[214,9,214,10,0],[215,13,215,139,0],[215,134,215,135,0],[216,13,226,16,0],[217,13,217,14,0],[218,17,218,36,0],[221,25,221,91,0],[223,25,223,90,0],[225,17,225,57,0],[226,13,226,14,0],[227,9,227,10,0],[230,9,230,10,0],[231,13,231,148,0],[232,13,232,67,0],[232,45,232,49,0],[232,56,232,65,0],[233,9,233,10,0],[236,9,236,10,0],[237,13,237,128,0],[238,13,238,67,0],[238,45,238,49,0],[238,56,238,65,0],[239,9,239,10,0]]);
+    </script>
+  </body>
+</html>

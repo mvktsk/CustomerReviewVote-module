@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\quote\quotesearchcriteria.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Specialized;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model.Quote
+{
+    public partial class QuoteSearchCriteria : PagedSearchCriteria
+    {
+        public string CustomerId { get; set; }
+        public string Sort { get; set; }
+        public string StoreId { get; set; }
+        public static int DefaultPageSize { get; set; } = 20;
+
+        public QuoteSearchCriteria()
+            : base(new NameValueCollection(), DefaultPageSize)
+        {
+        }
+        public QuoteSearchCriteria(NameValueCollection queryString)
+            : base(queryString, DefaultPageSize)
+        {
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,36,8,40,0],[8,41,8,45,0],[9,30,9,34,0],[9,35,9,39,0],[10,33,10,37,0],[10,38,10,42,0],[11,45,11,49,0],[11,50,11,54,0],[11,59,11,61,0],[14,15,14,63,0],[15,9,15,10,0],[16,9,16,10,0],[18,15,18,49,0],[19,9,19,10,0],[20,9,20,10,0]]);
+    </script>
+  </body>
+</html>

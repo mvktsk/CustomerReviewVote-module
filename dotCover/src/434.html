@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\security\customcookieauthenticationhandler.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
+namespace VirtoCommerce.Storefront.Domain.Security
+{
+    public class CustomCookieAuthenticationHandler : CookieAuthenticationHandler
+    {
+        public CustomCookieAuthenticationHandler(IOptionsMonitor&lt;CookieAuthenticationOptions&gt; options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
+        {
+        }
+
+        protected override async Task&lt;AuthenticateResult&gt; HandleAuthenticateAsync()
+        {
+            await HandleExpirationAsync();
+            return await base.HandleAuthenticateAsync();
+        }
+
+        protected override async Task HandleForbiddenAsync(AuthenticationProperties properties)
+        {
+            var handleExpirationResult = await HandleExpirationAsync();
+            if (handleExpirationResult.Succeeded)
+            {
+                await RedirectToLoginAsync(handleExpirationResult.Ticket.Properties);
+            }
+            else
+            {
+                await base.HandleForbiddenAsync(properties);
+            }
+        }
+
+        protected virtual async Task&lt;AuthenticateResult&gt; HandleExpirationAsync()
+        {
+            var authenticationTicket = GetAuthenticationTicket();
+            if (authenticationTicket?.Properties != null &amp;&amp; IsCookieExpired(authenticationTicket.Properties) &amp;&amp; Options.LoginPath.HasValue)
+            {
+                await RedirectToLoginAsync(authenticationTicket.Properties);
+                return AuthenticateResult.Success(authenticationTicket);
+            }
+            return AuthenticateResult.Fail(&quot;Cookie doesn&#39;t exist or doesn&#39;t expired&quot;);
+        }
+
+        private AuthenticationTicket GetAuthenticationTicket()
+        {
+            var cookie = Options.CookieManager.GetRequestCookie(Context, Options.Cookie.Name);
+            if (!string.IsNullOrEmpty(cookie))
+            {
+                return Options.TicketDataFormat.Unprotect(cookie, GetTlsTokenBinding());
+            }
+            return null;
+        }
+
+        private string GetTlsTokenBinding()
+        {
+            var binding = Context.Features.Get&lt;ITlsTokenBindingFeature&gt;()?.GetProvidedTokenBindingId();
+            return binding == null ? null : Convert.ToBase64String(binding);
+        }
+
+        private async Task RedirectToLoginAsync(AuthenticationProperties properties)
+        {
+            var redirectUri = properties.RedirectUri;
+            if (string.IsNullOrEmpty(redirectUri))
+            {
+                redirectUri = OriginalPathBase + Request.Path + Request.QueryString;
+            }
+            var loginUri = Options.LoginPath + QueryString.Create(Options.ReturnUrlParameter, redirectUri);
+            await Events.RedirectToLogin(new RedirectContext&lt;CookieAuthenticationOptions&gt;(Context, Scheme, Options, properties, BuildRedirectUri(loginUri)));
+        }
+
+        private bool IsCookieExpired(AuthenticationProperties properties)
+        {
+            return properties.ExpiresUtc != null &amp;&amp; properties.ExpiresUtc.Value &lt; Clock.UtcNow;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,169,15,206,0],[16,9,16,10,0],[17,9,17,10,0],[20,9,20,10,0],[21,13,21,43,0],[22,13,22,57,0],[23,9,23,10,0],[26,9,26,10,0],[27,13,27,72,0],[28,13,28,50,0],[29,13,29,14,0],[30,17,30,86,0],[31,13,31,14,0],[33,13,33,14,0],[34,17,34,61,0],[35,13,35,14,0],[36,9,36,10,0],[39,9,39,10,0],[40,13,40,66,0],[41,13,41,140,0],[42,13,42,14,0],[43,17,43,77,0],[44,17,44,73,0],[46,13,46,87,0],[47,9,47,10,0],[50,9,50,10,0],[51,13,51,95,0],[52,13,52,47,0],[53,13,53,14,0],[54,17,54,89,0],[56,13,56,25,0],[57,9,57,10,0],[60,9,60,10,0],[61,13,61,104,0],[62,13,62,77,0],[63,9,63,10,0],[66,9,66,10,0],[67,13,67,54,0],[68,13,68,51,0],[69,13,69,14,0],[70,17,70,85,0],[71,13,71,14,0],[72,13,72,108,0],[73,13,73,158,0],[74,9,74,10,0],[77,9,77,10,0],[78,13,78,96,0],[79,9,79,10,0]]);
+    </script>
+  </body>
+</html>

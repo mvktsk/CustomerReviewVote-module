@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\infrastructure\hmacutility.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Globalization;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+
+namespace VirtoCommerce.Storefront.Infrastructure
+{
+    public static class HmacUtility
+    {
+        public const string NameValueSeparator = &quot;=&quot;;
+        public const string ParameterSeparator = &quot;&amp;&quot;;
+
+        public static string ComputeHash(Func&lt;byte[], HMAC&gt; hmacFactory, string secretKey, string data)
+        {
+            var dataBytes = Encoding.UTF8.GetBytes(data);
+            var keyBytes = ConvertHexStringToBytes(secretKey);
+            return ComputeHash(hmacFactory, keyBytes, dataBytes);
+        }
+
+        public static string ComputeHash(Func&lt;byte[], HMAC&gt; hmacFactory, byte[] secretKey, byte[] data)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(&quot;data&quot;);
+            }
+
+            using (var hmac = hmacFactory(secretKey))
+            {
+                var hash = hmac.ComputeHash(data, 0, data.Length);
+                return ConvertBytesToHexString(hash);
+            }
+        }
+
+        public static string GetHashString(Func&lt;byte[], HMAC&gt; hmacFactory, string secretKey, NameValuePair[] parameters)
+        {
+            var data = BuildDataString(parameters);
+            return ComputeHash(hmacFactory, secretKey, data);
+        }
+
+
+        private static string BuildDataString(NameValuePair[] parameters)
+        {
+            if (parameters == null)
+            {
+                throw new ArgumentNullException(&quot;parameters&quot;);
+            }
+
+            var builder = new StringBuilder();
+
+            var orderedParameters =
+                parameters.Where(p =&gt; string.IsNullOrEmpty(p.Name) &amp;&amp; !string.IsNullOrEmpty(p.Value))
+                    .Union(
+                        parameters.Where(p =&gt; !string.IsNullOrEmpty(p.Name) &amp;&amp; !string.IsNullOrEmpty(p.Value))
+                            .OrderBy(i =&gt; i.Name))
+                    .ToList();
+
+            foreach (var parameter in orderedParameters)
+            {
+                if (builder.Length &gt; 0)
+                {
+                    builder.Append(ParameterSeparator);
+                }
+
+                if (!string.IsNullOrEmpty(parameter.Name))
+                {
+                    builder.Append(parameter.Name);
+                    builder.Append(NameValueSeparator);
+                }
+
+                builder.Append(parameter.Value);
+            }
+
+            var data = builder.ToString();
+            return data;
+        }
+
+        private static string ConvertBytesToHexString(byte[] bytes)
+        {
+            var builder = new StringBuilder();
+
+            foreach (var b in bytes)
+            {
+                builder.Append(b.ToString(&quot;x2&quot;, CultureInfo.InvariantCulture));
+            }
+
+            return builder.ToString();
+        }
+
+        private static byte[] ConvertHexStringToBytes(string hexString)
+        {
+            return
+                Enumerable.Range(0, hexString.Length)
+                    .Where(i =&gt; i % 2 == 0)
+                    .Select(i =&gt; Convert.ToByte(hexString.Substring(i, 2), 16))
+                    .ToArray();
+        }
+    }
+
+    public class NameValuePair
+    {
+        public string Name { get; private set; }
+        public string Value { get; private set; }
+
+        public NameValuePair(string name, string value)
+        {
+            Name = name;
+            Value = value;
+        }
+
+        public override string ToString()
+        {
+            var builder = new StringBuilder();
+            builder.Append(&quot;[&quot;);
+            builder.Append(Name);
+            builder.Append(&quot;, &quot;);
+            builder.Append(Value);
+            builder.Append(&quot;]&quot;);
+            return builder.ToString();
+        }
+    }
+
+    public class ApiRequestSignature
+    {
+        public string AppId { get; set; }
+        public string Hash { get; set; }
+        public DateTime Timestamp { get; private set; }
+        public string TimestampString { get; private set; }
+
+        public ApiRequestSignature()
+        {
+            Timestamp = DateTime.UtcNow;
+            TimestampString = Timestamp.ToString(&quot;o&quot;, CultureInfo.InvariantCulture);
+        }
+
+        public static bool TryParse(string input, out ApiRequestSignature parsedValue)
+        {
+            parsedValue = null;
+            var success = false;
+
+            if (input != null)
+            {
+                var parts = input.Split(new[] { &#39;;&#39; }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length == 3)
+                {
+                    if (parts[2].Length == 64)
+                    {
+                        DateTime timestamp;
+                        if (DateTime.TryParseExact(
+                            parts[1],
+                            &quot;o&quot;,
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.AdjustToUniversal,
+                            out timestamp))
+                        {
+                            parsedValue = new ApiRequestSignature
+                            {
+                                AppId = parts[0],
+                                TimestampString = parts[1],
+                                Hash = parts[2],
+                                Timestamp = timestamp,
+                            };
+                            success = true;
+                        }
+                    }
+                }
+            }
+
+            return success;
+        }
+
+        public override string ToString()
+        {
+            return string.Join(&quot;;&quot;, AppId, TimestampString, Hash);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,10,0],[16,13,16,58,0],[17,13,17,63,0],[18,13,18,66,0],[19,9,19,10,0],[22,9,22,10,0],[23,13,23,30,0],[24,13,24,14,0],[25,17,25,57,0],[28,20,28,53,0],[29,13,29,14,0],[30,17,30,67,0],[31,17,31,54,0],[33,9,33,10,0],[36,9,36,10,0],[37,13,37,52,0],[38,13,38,62,0],[39,9,39,10,0],[43,9,43,10,0],[44,13,44,36,0],[45,13,45,14,0],[46,17,46,63,0],[49,13,49,47,0],[51,13,56,31,0],[52,39,52,101,0],[54,47,54,110,0],[55,43,55,49,0],[58,13,58,20,0],[58,22,58,35,0],[58,36,58,38,0],[58,39,58,56,0],[59,13,59,14,0],[60,17,60,40,0],[61,17,61,18,0],[62,21,62,56,0],[63,17,63,18,0],[65,17,65,59,0],[66,17,66,18,0],[67,21,67,52,0],[68,21,68,56,0],[69,17,69,18,0],[71,17,71,49,0],[72,13,72,14,0],[74,13,74,43,0],[75,13,75,25,0],[76,9,76,10,0],[79,9,79,10,0],[80,13,80,47,0],[82,13,82,20,0],[82,22,82,27,0],[82,28,82,30,0],[82,31,82,36,0],[83,13,83,14,0],[84,17,84,80,0],[85,13,85,14,0],[87,13,87,39,0],[88,9,88,10,0],[91,9,91,10,0],[92,13,96,32,0],[94,33,94,43,0],[95,34,95,79,0],[97,9,97,10,0],[102,30,102,34,0],[102,35,102,47,0],[103,31,103,35,0],[103,36,103,48,0],[105,9,105,56,0],[106,9,106,10,0],[107,13,107,25,0],[108,13,108,27,0],[109,9,109,10,0],[112,9,112,10,0],[113,13,113,47,0],[114,13,114,33,0],[115,13,115,34,0],[116,13,116,34,0],[117,13,117,35,0],[118,13,118,33,0],[119,13,119,39,0],[120,9,120,10,0],[125,31,125,35,0],[125,36,125,40,0],[126,30,126,34,0],[126,35,126,39,0],[127,37,127,41,0],[127,42,127,54,0],[128,41,128,45,0],[128,46,128,58,0],[130,9,130,37,0],[131,9,131,10,0],[132,13,132,41,0],[133,13,133,85,0],[134,9,134,10,0],[137,9,137,10,0],[138,13,138,32,0],[139,13,139,33,0],[141,13,141,31,0],[142,13,142,14,0],[143,17,143,95,0],[144,17,144,39,0],[145,17,145,18,0],[146,21,146,47,0],[147,21,147,22,0],[149,25,154,44,0],[155,25,155,26,0],[156,29,162,31,0],[163,29,163,44,0],[164,25,164,26,0],[165,21,165,22,0],[166,17,166,18,0],[167,13,167,14,0],[169,13,169,28,0],[170,9,170,10,0],[173,9,173,10,0],[174,13,174,67,0],[175,9,175,10,0]]);
+    </script>
+  </body>
+</html>

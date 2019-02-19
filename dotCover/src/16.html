@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\tags\paginatetag.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using DotLiquid;
+using DotLiquid.Exceptions;
+using DotLiquid.Util;
+using PagedList.Core;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using VirtoCommerce.LiquidThemeEngine.Extensions;
+using VirtoCommerce.LiquidThemeEngine.Objects;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.LiquidThemeEngine.Tags
+{
+    /// &lt;summary&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/tags/theme-tags#paginate
+    /// Splitting products, blog articles, and search results across multiple pages is a necessary component of theme design as you are limited to 50 results per page in any for loop.
+    /// The paginate tag works in conjunction with the for tag to split content into numerous pages.It must wrap a for tag block that loops through an array, as shown in the example below:
+    /// &lt;/summary&gt;
+    public class PaginateTag : Block
+    {
+        private static readonly Regex _syntax = R.B(R.Q(@&quot;({0})\s*by\s*({0}+)?&quot;), Liquid.QuotedFragment);
+
+        private string _collectionName;
+        private string _paginateBy;
+
+        public override void Initialize(string tagName, string markup, List&lt;string&gt; tokens)
+        {
+            var match = _syntax.Match(markup);
+
+            if (match.Success)
+            {
+                _collectionName = match.Groups[1].Value;
+                _paginateBy = match.Groups[2].Value;
+            }
+            else
+            {
+                throw new SyntaxException(&quot;PaginateSyntaxException&quot;);
+            }
+
+            base.Initialize(tagName, markup, tokens);
+        }
+
+        public override void Render(Context context, TextWriter result)
+        {
+            var mutablePagedList = context[_collectionName] as IMutablePagedList;
+            var collection = context[_collectionName] as ICollection;
+            var pagedList = context[_collectionName] as IPagedList;
+            Uri requestUrl;
+            Uri.TryCreate(context[&quot;request_url&quot;] as string, UriKind.RelativeOrAbsolute, out requestUrl);
+            var pageNumber = (int)context[&quot;current_page&quot;];
+            var globalPageSize = (int)context[&quot;page_size&quot;];
+            var localPageSize = GetIntegerValue(_paginateBy, context, 20);
+
+            if (mutablePagedList != null)
+            {
+                mutablePagedList.Slice(pageNumber, globalPageSize &gt; 0 ? globalPageSize : localPageSize, mutablePagedList.SortInfos);
+                pagedList = mutablePagedList;
+            }
+            else if (collection != null)
+            {
+                pagedList = new PagedList&lt;Drop&gt;(collection.OfType&lt;Drop&gt;().AsQueryable(), pageNumber, localPageSize);
+                //TODO: Need find way to replace ICollection instance in liquid context to paged instance
+                //var hash = context.Environments.FirstOrDefault(s =&gt; s.ContainsKey(_collectionName));
+                //hash[_collectionName] = pagedList;
+            }
+
+            if (pagedList != null)
+            {
+                var paginate = new Paginate(pagedList);
+
+                for (var i = 1; i &lt;= pagedList.PageCount; i++)
+                {
+                    var part = new Part
+                    {
+                        IsLink = i != pagedList.PageNumber,
+                        Title = i.ToString(),
+                        Url = requestUrl != null ? requestUrl.SetQueryParameter(&quot;page&quot;, i &gt; 1 ? i.ToString() : null).ToString() : i.ToString()
+                    };
+
+                    paginate.Parts.Add(part);
+                }
+
+                context[&quot;paginate&quot;] = paginate;
+                RenderAll(NodeList, context, result);
+            }
+        }
+
+        private static int GetIntegerValue(string paginateBy, Context context, int defaultValue)
+        {
+            int? result = null;
+
+            int pageSize;
+            if (int.TryParse(paginateBy, out pageSize))
+            {
+                result = pageSize;
+            }
+
+            if (result == null &amp;&amp; context.HasKey(paginateBy))
+            {
+                result = Convert.ToInt32(context[paginateBy]);
+            }
+
+            return result ?? defaultValue;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[24,9,24,106,0],[30,9,30,10,0],[31,13,31,47,0],[33,13,33,31,0],[34,13,34,14,0],[35,17,35,57,0],[36,17,36,53,0],[37,13,37,14,0],[39,13,39,14,0],[40,17,40,70,0],[43,13,43,54,0],[44,9,44,10,0],[47,9,47,10,0],[48,13,48,82,0],[49,13,49,70,0],[50,13,50,68,0],[52,13,52,105,0],[53,13,53,59,0],[54,13,54,60,0],[55,13,55,75,0],[57,13,57,42,0],[58,13,58,14,0],[59,17,59,133,0],[60,17,60,46,0],[61,13,61,14,0],[62,18,62,41,0],[63,13,63,14,0],[64,17,64,117,0],[68,13,68,14,0],[70,13,70,35,0],[71,13,71,14,0],[72,17,72,56,0],[74,22,74,31,0],[74,33,74,57,0],[74,59,74,62,0],[75,17,75,18,0],[76,21,81,23,0],[83,21,83,46,0],[84,17,84,18,0],[86,17,86,48,0],[87,17,87,54,0],[88,13,88,14,0],[89,9,89,10,0],[92,9,92,10,0],[93,13,93,32,0],[96,13,96,56,0],[97,13,97,14,0],[98,17,98,35,0],[99,13,99,14,0],[101,13,101,62,0],[102,13,102,14,0],[103,17,103,63,0],[104,13,104,14,0],[106,13,106,43,0],[107,9,107,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\lineitem.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using DotLiquid;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// Represents shopping cart&#39;s line item
+    /// &lt;/summary&gt;
+    /// &lt;remarks&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/objects/line_item
+    /// &lt;/remarks&gt;
+    [DataContract]
+    public partial class LineItem : Drop
+    {
+        /// &lt;summary&gt;
+        /// Gets line item fulfillment info
+        /// &lt;/summary&gt;
+        [DataMember]
+        public Fulfillment Fulfillment { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets line item weight
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal Grams { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets line item id
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Id { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets line item image
+        /// &lt;/summary&gt;
+        [DataMember]
+        public Image Image { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets line item subtotal
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal LinePrice { get; set; }
+        [DataMember]
+        public decimal LinePriceWithTax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets line item price
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal Price { get; set; }
+        [DataMember]
+        public decimal PriceWithTax { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets product associated with the line item
+        /// &lt;/summary&gt;
+        [DataMember]
+        public Product Product { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets ID of the product that associated with the line item
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string ProductId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets line item custom information
+        /// &lt;/summary&gt;
+        [DataMember]
+        public MetafieldsCollection Properties { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets line item quantity
+        /// &lt;/summary&gt;
+        [DataMember]
+        public int Quantity { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets sign that line item requires shipping
+        /// &lt;/summary&gt;
+        [DataMember]
+        public bool RequiresShipping { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets line item SKU
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Sku { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets sign that line item includes taxes
+        /// &lt;/summary&gt;
+        [DataMember]
+        public bool Taxable { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets line item title
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Title { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets line item type
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Type { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets line item product URL
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Url { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets the product variant that associated with the line item
+        /// &lt;/summary&gt;
+        [DataMember]
+        public Variant Variant { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets the ID of product variant that associated with line item
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string VariantId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets line item product vendor
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Vendor { get; set; }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[20,42,20,46,0],[20,47,20,51,0],[26,32,26,36,0],[26,37,26,41,0],[32,28,32,32,0],[32,33,32,37,0],[38,30,38,34,0],[38,35,38,39,0],[44,36,44,40,0],[44,41,44,45,0],[46,43,46,47,0],[46,48,46,52,0],[52,32,52,36,0],[52,37,52,41,0],[54,39,54,43,0],[54,44,54,48,0],[60,34,60,38,0],[60,39,60,43,0],[66,35,66,39,0],[66,40,66,44,0],[72,50,72,54,0],[72,55,72,59,0],[78,31,78,35,0],[78,36,78,40,0],[84,40,84,44,0],[84,45,84,49,0],[90,29,90,33,0],[90,34,90,38,0],[96,31,96,35,0],[96,36,96,40,0],[102,31,102,35,0],[102,36,102,40,0],[108,30,108,34,0],[108,35,108,39,0],[114,29,114,33,0],[114,34,114,38,0],[120,34,120,38,0],[120,39,120,43,0],[126,35,126,39,0],[126,40,126,44,0],[132,32,132,36,0],[132,37,132,41,0]]);
+    </script>
+  </body>
+</html>

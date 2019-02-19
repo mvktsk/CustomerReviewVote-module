@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\localizedstring.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace VirtoCommerce.Storefront.Model
+{
+    public class LocalizedString : IHasLanguage
+    {
+        public LocalizedString()
+        {
+            Language = Language.InvariantLanguage;
+            Value = null;
+        }
+        public LocalizedString(Language language, string value)
+        {
+            Language = language;
+            Value = value;
+
+        }
+
+        public string Value { get; set; }
+
+        #region IHasLanguage Members
+        public Language Language { get; set; }
+        #endregion
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,9,11,33,0],[12,9,12,10,0],[13,13,13,51,0],[14,13,14,26,0],[15,9,15,10,0],[16,9,16,64,0],[17,9,17,10,0],[18,13,18,33,0],[19,13,19,27,0],[21,9,21,10,0],[23,31,23,35,0],[23,36,23,40,0],[26,36,26,40,0],[26,41,26,45,0]]);
+    </script>
+  </body>
+</html>

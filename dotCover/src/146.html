@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\tierprice.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Marketing;
+
+namespace VirtoCommerce.Storefront.Model
+{
+    public partial class TierPrice : ValueObject, ITaxable
+    {
+        public TierPrice(Currency currency)
+            :this (new Money(currency), 0)
+        {
+        }
+        public TierPrice(Money price, long quantity)
+        {
+            Currency = price.Currency;
+            TaxDetails = new List&lt;TaxDetail&gt;();
+            Price = price;
+            DiscountAmount = new Money(price.Currency);
+
+            Quantity = quantity;
+        }
+
+        public Money Price { get; set; }
+
+        private Money _price;
+        public Money PriceWithTax
+        {
+            get
+            {
+                return _price ?? Price;
+            }
+            set
+            {
+                _price = value;
+            }
+        }      
+
+        public Money DiscountAmount { get; set; }
+        public Money DiscountAmountWithTax
+        {
+            get
+            {
+                return DiscountAmount + DiscountAmount * TaxPercentRate;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Actual price includes all kind of discounts
+        /// &lt;/summary&gt;
+        public Money ActualPrice
+        {
+            get
+            {
+                return Price - DiscountAmount;
+            }
+        }
+
+        public Money ActualPriceWithTax
+        {
+            get
+            {
+                return PriceWithTax - DiscountAmountWithTax;
+            }
+        }
+
+        public long Quantity { get; set; }
+
+
+
+        #region ITaxable Members
+        public Currency Currency { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of total shipping tax amount
+        /// &lt;/summary&gt;
+        public Money TaxTotal
+        {
+            get
+            {
+                return ActualPriceWithTax - ActualPrice;
+            }
+        }
+
+        public decimal TaxPercentRate { get; private set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shipping tax type
+        /// &lt;/summary&gt;
+        public string TaxType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the collection of line item tax details lines
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;
+        /// Collection of TaxDetail objects
+        /// &lt;/value&gt;
+        public IList&lt;TaxDetail&gt; TaxDetails { get; set; }
+
+        public void ApplyTaxRates(IEnumerable&lt;TaxRate&gt; taxRates)
+        {
+            var shipmentTaxRate = taxRates.FirstOrDefault(x =&gt; x.Line.Quantity == Quantity);
+            if (shipmentTaxRate != null &amp;&amp; ActualPrice.Amount &gt; 0 &amp;&amp; shipmentTaxRate.Rate.Amount &gt; 0)
+            {
+                TaxPercentRate = TaxRate.TaxPercentRound(shipmentTaxRate.Rate.Amount / ActualPrice.Amount);
+            }
+        }
+        #endregion
+
+        protected override IEnumerable&lt;object&gt; GetEqualityComponents()
+        {
+            yield return Price;
+            yield return DiscountAmount;
+            yield return TaxPercentRate;
+            yield return Quantity;           
+
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,14,11,43,0],[12,9,12,10,0],[13,9,13,10,0],[14,9,14,53,0],[15,9,15,10,0],[16,13,16,39,0],[17,13,17,48,0],[18,13,18,27,0],[19,13,19,56,0],[21,13,21,33,0],[22,9,22,10,0],[24,30,24,34,0],[24,35,24,39,0],[30,13,30,14,0],[31,17,31,40,0],[32,13,32,14,0],[34,13,34,14,0],[35,17,35,32,0],[36,13,36,14,0],[39,39,39,43,0],[39,44,39,48,0],[43,13,43,14,0],[44,17,44,73,0],[45,13,45,14,0],[54,13,54,14,0],[55,17,55,47,0],[56,13,56,14,0],[62,13,62,14,0],[63,17,63,61,0],[64,13,64,14,0],[67,32,67,36,0],[67,37,67,41,0],[72,36,72,40,0],[72,41,72,45,0],[80,13,80,14,0],[81,17,81,57,0],[82,13,82,14,0],[85,41,85,45,0],[85,46,85,58,0],[90,33,90,37,0],[90,38,90,42,0],[98,46,98,50,0],[98,51,98,55,0],[101,9,101,10,0],[102,13,102,93,0],[102,64,102,91,0],[103,13,103,102,0],[104,13,104,14,0],[105,17,105,108,0],[106,13,106,14,0],[107,9,107,10,0],[111,9,111,10,0],[112,13,112,32,0],[113,13,113,41,0],[114,13,114,41,0],[115,13,115,35,0],[117,9,117,10,0]]);
+    </script>
+  </body>
+</html>

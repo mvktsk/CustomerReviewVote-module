@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\api\apidistributorcontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Storefront.AutoRestClients.OrdersModuleApi;
+using VirtoCommerce.Storefront.Domain;
+using VirtoCommerce.Storefront.Domain.Distributors;
+using VirtoCommerce.Storefront.Domain.Security;
+using VirtoCommerce.Storefront.Extensions;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Customer;
+using VirtoCommerce.Storefront.Model.Customer.Services;
+using VirtoCommerce.Storefront.Model.Inventory;
+using VirtoCommerce.Storefront.Model.Inventory.Services;
+using VirtoCommerce.Storefront.Model.Order;
+using VirtoCommerce.Storefront.Model.Order.Services;
+using VirtoCommerce.Storefront.Model.Security;
+using VirtoCommerce.Storefront.Model.Services;
+using orderApiModel = VirtoCommerce.Storefront.AutoRestClients.OrdersModuleApi.Models;
+
+namespace VirtoCommerce.Storefront.Controllers.Api
+{
+    [Authorize(OnlyDistributorAuthorizationRequirement.PolicyName)]
+    public class ApiDistributorController : StorefrontControllerBase
+    {
+        private readonly IWorkContextAccessor _workContextAccessor;
+        private readonly IOrderModule _orderApi;
+        private readonly IMemberService _memberService;
+        private readonly SignInManager&lt;User&gt; _signInManager;
+        private readonly ICustomerOrderService _orderService;
+        private readonly ICatalogService _catalogService;
+
+        public ApiDistributorController(
+            IWorkContextAccessor workContextAccessor,
+            IStorefrontUrlBuilder urlBuilder,
+            IOrderModule orderApi,
+            IMemberService memberService,
+            SignInManager&lt;User&gt; signInManager,
+            ICustomerOrderService orderService,
+            ICatalogService catalogService)
+            : base(workContextAccessor, urlBuilder)
+        {
+            _workContextAccessor = workContextAccessor;
+            _orderApi = orderApi;
+            _memberService = memberService;
+            _signInManager = signInManager;
+            _orderService = orderService;
+            _catalogService = catalogService;
+        }
+
+
+        // GET: /storefrontapi/distributor/orders
+        [HttpGet]
+        public async Task&lt;ActionResult&gt; Orders(string[] statuses, DateTime? startDate, DateTime? endDate, string sort)
+        {
+            if (statuses == null)
+            {
+                return BadRequest();
+            }
+
+            var searchResult = await _orderService.SearchOrdersAsync(new OrderSearchCriteria
+            {
+                StoreIds = new[] { WorkContext.CurrentStore.Id },
+                Statuses = statuses,
+                StartDate = startDate,
+                EndDate = endDate,
+                Sort = sort,
+                PageSize = 1000 // Temporary value
+            });
+
+            return Ok(searchResult);
+        }
+
+        // PUT: /storefrontapi/distributor/orders/{orderNumber}/confirm
+        [HttpPut]
+        public async Task&lt;ActionResult&gt; ConfirmOrder(string orderNumber, [FromBody]string deliveryDate)
+        {
+            if (string.IsNullOrEmpty(orderNumber))
+            {
+                return BadRequest();
+            }
+
+            var order = await _orderApi.GetByNumberAsync(orderNumber);
+            if (order == null)
+            {
+                return OrderNotFound();
+            }
+
+            if (order.StoreId != WorkContext.CurrentStore.Id)
+            {
+                return InvalidStore();
+            }
+
+            if (order.Status != OrderStatus.SentToDistributor)
+            {
+                return InvalidOrderState();
+            }
+
+            if (!string.IsNullOrEmpty(deliveryDate))
+            {
+                SetDynamicPropertyValue(order, &quot;Delivery date&quot;, &quot;ShortText&quot;, deliveryDate);
+            }
+
+            order.Status = OrderStatus.Confirmed;
+            await _orderApi.UpdateAsync(order);
+
+            return Ok();
+        }
+
+        // PUT: /storefrontapi/distributor/orders/{orderNumber}/reject
+        [HttpPut]
+        public async Task&lt;ActionResult&gt; RejectOrder(string orderNumber, [FromBody]string reason)
+        {
+            if (string.IsNullOrEmpty(orderNumber))
+            {
+                return BadRequest();
+            }
+
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                return RejectionReasonIsEmpty();
+            }
+
+            var order = await _orderApi.GetByNumberAsync(orderNumber);
+            if (order == null)
+            {
+                return OrderNotFound();
+            }
+
+            if (order.StoreId != WorkContext.CurrentStore.Id)
+            {
+                return InvalidStore();
+            }
+
+            if (order.Status != OrderStatus.SentToDistributor)
+            {
+                return InvalidOrderState();
+            }
+
+            order.Status = OrderStatus.Cancelled;
+            SetDynamicPropertyValue(order, &quot;Distributor rejection reason&quot;, &quot;ShortText&quot;, reason);
+            await _orderApi.UpdateAsync(order);
+
+            return Ok();
+        }
+
+        // PUT: /storefrontapi/distributor/orders/{orderNumber}
+        [HttpPut]
+        public async Task&lt;ActionResult&gt; UpdateOrder(string orderNumber, [FromBody]CustomerOrder order)
+        {
+            if (order == null)
+            {
+                return BadRequest();
+            }
+
+            var existingOrder = await _orderService.GetOrderByNumberAsync(orderNumber);
+            if (existingOrder == null)
+            {
+                return OrderNotFound();
+            }
+
+            if (existingOrder.StoreId != WorkContext.CurrentStore.Id)
+            {
+                return InvalidStore();
+            }
+
+            if (existingOrder.Status != OrderStatus.SentToDistributor)
+            {
+                return InvalidOrderState();
+            }
+
+            var orderDto = order.ToCustomerOrderDto();
+            orderDto.Id = existingOrder.Id;
+            orderDto.Number = existingOrder.Number;
+            orderDto.StoreId = existingOrder.StoreId;
+
+            await _orderApi.UpdateAsync(orderDto);
+
+            return Ok();
+        }
+
+        private static bool IsValidState(orderApiModel.CustomerOrder orderDto)
+        {
+            return orderDto.Status == &quot;Sent to distributor&quot; &amp;&amp; string.IsNullOrWhiteSpace(GetDynamicPropertyValue(orderDto, DistributorRejectionReason.PropertyName));
+        }
+
+        private static void SetRejectionReason(orderApiModel.CustomerOrder orderDto, string value)
+        {
+            var property = GetDynamicProperty(orderDto, DistributorRejectionReason.PropertyName);
+            if (property != null)
+            {
+                property.Values = new List&lt;orderApiModel.DynamicPropertyObjectValue&gt;
+                {
+                    new orderApiModel.DynamicPropertyObjectValue(null, value),
+                };
+            }
+        }
+
+        private BadRequestObjectResult InvalidStore()
+        {
+            return BadRequest(&quot;Requested order was created in a different store&quot;);
+        }
+
+        private BadRequestObjectResult OrderNotFound()
+        {
+            return BadRequest(&quot;Requested order does not exist or access key is not valid.&quot;);
+        }
+
+        private BadRequestObjectResult InvalidOrderState()
+        {
+            return BadRequest(&quot;The state of the order does not allow to accept feedback.&quot;);
+        }
+
+        private BadRequestObjectResult RejectionReasonIsEmpty()
+        {
+            return BadRequest(&quot;Rejection reason must not be empty.&quot;);
+        }
+
+        private static bool IsValidKey(orderApiModel.CustomerOrder orderDto, string key)
+        {
+            var actualKey = GetDynamicPropertyValue(orderDto, DistributorAccessKey.PropertyName);
+            return key == actualKey;
+        }
+
+        private string FormatAsDeliveryDate(string dateString)
+        {
+            string result = null;
+
+            if (DateTime.TryParse(dateString, CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
+            {
+                result = date.ToDeliveryDateString(_workContextAccessor.WorkContext.CurrentStore.DefaultLanguage.CultureName);
+            }
+
+            return result;
+        }
+
+        private static void SetDynamicPropertyValue(orderApiModel.CustomerOrder orderDto, string propertyName, string valueType, string value)
+        {
+            if (orderDto.DynamicProperties == null)
+            {
+                orderDto.DynamicProperties = new List&lt;orderApiModel.DynamicObjectProperty&gt;();
+            }
+
+            var property = GetDynamicProperty(orderDto, propertyName);
+            if (property == null)
+            {
+                property = new orderApiModel.DynamicObjectProperty
+                {
+                    Name = propertyName,
+                    ValueType = valueType,
+                };
+
+                orderDto.DynamicProperties.Add(property);
+            }
+
+            property.Values = new List&lt;orderApiModel.DynamicPropertyObjectValue&gt;
+            {
+                new orderApiModel.DynamicPropertyObjectValue
+                {
+                    Locale = null,
+                    Value = value,
+                }
+            };
+        }
+
+        private static string GetDynamicPropertyValue(orderApiModel.CustomerOrder orderDto, string propertyName)
+        {
+            return GetDynamicProperty(orderDto, propertyName)
+                ?.Values
+                ?.FirstOrDefault()
+                ?.Value as string;
+        }
+
+        private static orderApiModel.DynamicObjectProperty GetDynamicProperty(orderApiModel.CustomerOrder orderDto, string propertyName)
+        {
+            return orderDto
+                ?.DynamicProperties
+                ?.FirstOrDefault(p =&gt; p.Name.EqualsInvariant(propertyName));
+        }
+
+        private async Task&lt;orderApiModel.CustomerOrder&gt; GetOrderDtoAsync(string orderNumber, string key)
+        {
+            orderApiModel.CustomerOrder result = null;
+
+            if (!string.IsNullOrWhiteSpace(key))
+            {
+                var orderDto = await _orderApi.GetByNumberAsync(orderNumber);
+                if (orderDto != null &amp;&amp; IsValidKey(orderDto, key))
+                {
+                    result = orderDto;
+                }
+            }
+
+            return result;
+        }
+
+        private CustomerOrder ToCustomerOrder(orderApiModel.CustomerOrder orderDto)
+        {
+            CustomerOrder order = null;
+
+            if (orderDto != null)
+            {
+                var workContext = _workContextAccessor.WorkContext;
+
+                order = orderDto.ToCustomerOrder(workContext.AllCurrencies, workContext.CurrentLanguage);
+                order.Status = orderDto.Status; // Return real status to a distributor
+            }
+
+            return order;
+        }
+
+        private async Task&lt;Contact&gt; GetContactByUserIdAsync(string userId)
+        {
+            Contact customer = null;
+
+            var user = await _signInManager.UserManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                customer = await _memberService.GetContactByIdAsync(user.ContactId);
+            }
+
+            return customer;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[47,15,47,52,0],[48,9,48,10,0],[49,13,49,56,0],[50,13,50,34,0],[51,13,51,44,0],[52,13,52,44,0],[53,13,53,42,0],[54,13,54,46,0],[55,9,55,10,0],[61,9,61,10,0],[62,13,62,34,0],[63,13,63,14,0],[64,17,64,37,0],[67,13,75,16,0],[77,13,77,37,0],[78,9,78,10,0],[83,9,83,10,0],[84,13,84,51,0],[85,13,85,14,0],[86,17,86,37,0],[89,13,89,71,0],[90,13,90,31,0],[91,13,91,14,0],[92,17,92,40,0],[95,13,95,62,0],[96,13,96,14,0],[97,17,97,39,0],[100,13,100,63,0],[101,13,101,14,0],[102,17,102,44,0],[105,13,105,53,0],[106,13,106,14,0],[107,17,107,92,0],[108,13,108,14,0],[110,13,110,50,0],[111,13,111,48,0],[113,13,113,25,0],[114,9,114,10,0],[119,9,119,10,0],[120,13,120,51,0],[121,13,121,14,0],[122,17,122,37,0],[125,13,125,51,0],[126,13,126,14,0],[127,17,127,49,0],[130,13,130,71,0],[131,13,131,31,0],[132,13,132,14,0],[133,17,133,40,0],[136,13,136,62,0],[137,13,137,14,0],[138,17,138,39,0],[141,13,141,63,0],[142,13,142,14,0],[143,17,143,44,0],[146,13,146,50,0],[147,13,147,97,0],[148,13,148,48,0],[150,13,150,25,0],[151,9,151,10,0],[156,9,156,10,0],[157,13,157,31,0],[158,13,158,14,0],[159,17,159,37,0],[162,13,162,88,0],[163,13,163,39,0],[164,13,164,14,0],[165,17,165,40,0],[168,13,168,70,0],[169,13,169,14,0],[170,17,170,39,0],[173,13,173,71,0],[174,13,174,14,0],[175,17,175,44,0],[178,13,178,55,0],[179,13,179,44,0],[180,13,180,52,0],[181,13,181,54,0],[183,13,183,51,0],[185,13,185,25,0],[186,9,186,10,0],[189,9,189,10,0],[190,13,190,166,0],[191,9,191,10,0],[194,9,194,10,0],[195,13,195,98,0],[196,13,196,34,0],[197,13,197,14,0],[198,17,201,19,0],[202,13,202,14,0],[203,9,203,10,0],[206,9,206,10,0],[207,13,207,83,0],[208,9,208,10,0],[211,9,211,10,0],[212,13,212,93,0],[213,9,213,10,0],[216,9,216,10,0],[217,13,217,92,0],[218,9,218,10,0],[221,9,221,10,0],[222,13,222,70,0],[223,9,223,10,0],[226,9,226,10,0],[227,13,227,98,0],[228,13,228,37,0],[229,9,229,10,0],[232,9,232,10,0],[233,13,233,34,0],[235,13,235,112,0],[236,13,236,14,0],[237,17,237,127,0],[238,13,238,14,0],[240,13,240,27,0],[241,9,241,10,0],[244,9,244,10,0],[245,13,245,52,0],[246,13,246,14,0],[247,17,247,94,0],[248,13,248,14,0],[250,13,250,71,0],[251,13,251,34,0],[252,13,252,14,0],[253,17,257,19,0],[259,17,259,58,0],[260,13,260,14,0],[262,13,269,15,0],[270,9,270,10,0],[273,9,273,10,0],[274,13,277,35,0],[278,9,278,10,0],[281,9,281,10,0],[282,13,284,77,0],[284,39,284,75,0],[285,9,285,10,0],[288,9,288,10,0],[289,13,289,55,0],[291,13,291,49,0],[292,13,292,14,0],[293,17,293,78,0],[294,17,294,67,0],[295,17,295,18,0],[296,21,296,39,0],[297,17,297,18,0],[298,13,298,14,0],[300,13,300,27,0],[301,9,301,10,0],[304,9,304,10,0],[305,13,305,40,0],[307,13,307,34,0],[308,13,308,14,0],[309,17,309,68,0],[311,17,311,106,0],[312,17,312,48,0],[313,13,313,14,0],[315,13,315,26,0],[316,9,316,10,0],[319,9,319,10,0],[320,13,320,37,0],[322,13,322,79,0],[323,13,323,30,0],[324,13,324,14,0],[325,17,325,85,0],[326,13,326,14,0],[328,13,328,29,0],[329,9,329,10,0]]);
+    </script>
+  </body>
+</html>

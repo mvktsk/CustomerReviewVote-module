@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\recommendations\recommendationproviderfactory.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Recommendations;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public class RecommendationProviderFactory : IRecommendationProviderFactory
+    {
+        private readonly IList&lt;IRecommendationsProvider&gt; _providers;
+        public RecommendationProviderFactory(params IRecommendationsProvider[] providers)
+        {
+            _providers = providers;
+        }
+        public IRecommendationsProvider GetProvider(string providerName)
+        {
+            return _providers.FirstOrDefault(x =&gt; x.ProviderName.EqualsInvariant(providerName));
+        }  
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,9,11,90,0],[12,9,12,10,0],[13,13,13,36,0],[14,9,14,10,0],[16,9,16,10,0],[17,13,17,97,0],[17,51,17,95,0],[18,9,18,10,0]]);
+    </script>
+  </body>
+</html>

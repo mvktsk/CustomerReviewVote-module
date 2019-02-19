@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\customer\organization.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+using Newtonsoft.Json;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model.Customer
+{
+    public class Organization : Member
+    {
+        /// &lt;summary&gt;
+        /// Organization contacts
+        /// &lt;/summary&gt;
+        [JsonIgnore]
+        [IgnoreDataMember]
+        public IMutablePagedList&lt;Contact&gt; Contacts { get; set; }
+
+        public string ParentId { get; set; }
+
+        public IList&lt;double?&gt; VolumeTiers { get; set; } = new List&lt;double?&gt;();
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,54,15,58,0],[15,59,15,63,0],[17,34,17,38,0],[17,39,17,43,0],[19,45,19,49,0],[19,50,19,54,0],[19,59,19,78,0]]);
+    </script>
+  </body>
+</html>

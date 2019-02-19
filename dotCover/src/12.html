@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\shopifyliquidthemeengine.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
+using DotLiquid;
+using DotLiquid.Exceptions;
+using DotLiquid.FileSystems;
+using DotLiquid.ViewEngine.Exceptions;
+using LibSassHost;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using VirtoCommerce.LiquidThemeEngine.Converters;
+using VirtoCommerce.LiquidThemeEngine.Extensions;
+using VirtoCommerce.LiquidThemeEngine.Filters;
+using VirtoCommerce.LiquidThemeEngine.Operators;
+using VirtoCommerce.LiquidThemeEngine.Tags;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Caching;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Common.Caching;
+using VirtoCommerce.Storefront.Model.Common.Exceptions;
+using VirtoCommerce.Storefront.Model.StaticContent;
+
+namespace VirtoCommerce.LiquidThemeEngine
+{
+    /// &lt;summary&gt;
+    /// Shopify compliant theme folder structure and all methods for rendering
+    /// assets - storages for css, images and other assets
+    /// config - contains theme configuration
+    /// layout - master pages and layouts
+    /// locales - localization resources
+    /// snippets - snippets - partial views
+    /// templates - view templates
+    /// &lt;/summary&gt;
+    public class ShopifyLiquidThemeEngine : IFileSystem, ILiquidThemeEngine
+    {
+        private readonly LiquidThemeEngineOptions _options;
+        private static readonly Regex _isLiquid = new Regex(&quot;[{}|]&quot;, RegexOptions.Compiled);
+        private const string _liquidTemplateFormat = &quot;{0}.liquid&quot;;
+        private readonly IWorkContextAccessor _workContextAccessor;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IStorefrontUrlBuilder _storeFrontUrlBuilder;
+        private readonly IStorefrontMemoryCache _memoryCache;
+        private readonly IContentBlobProvider _themeBlobProvider;
+
+        static ShopifyLiquidThemeEngine()
+        {
+            Liquid.UseRubyDateFormat = true;
+            // Register custom tags (Only need to do this once)
+            Template.RegisterFilter(typeof(CommonFilters));
+            Template.RegisterFilter(typeof(CommerceFilters));
+            Template.RegisterFilter(typeof(TranslationFilter));
+            Template.RegisterFilter(typeof(UrlFilters));
+            Template.RegisterFilter(typeof(DateFilters));
+            Template.RegisterFilter(typeof(MoneyFilters));
+            Template.RegisterFilter(typeof(HtmlFilters));
+            Template.RegisterFilter(typeof(StringFilters));
+            Template.RegisterFilter(typeof(ArrayFilters));
+            Template.RegisterFilter(typeof(MathFilters));
+
+            Condition.Operators[&quot;contains&quot;] = CommonOperators.ContainsMethod;
+
+            Template.RegisterTag&lt;AntiforgeryTag&gt;(&quot;anti_forgery&quot;);
+            Template.RegisterTag&lt;LayoutTag&gt;(&quot;layout&quot;);
+            Template.RegisterTag&lt;FormTag&gt;(&quot;form&quot;);
+            Template.RegisterTag&lt;PaginateTag&gt;(&quot;paginate&quot;);
+        }
+
+        public ShopifyLiquidThemeEngine(IStorefrontMemoryCache memoryCache, IWorkContextAccessor workContextAccessor,
+                                        IHttpContextAccessor httpContextAccessor,
+                                        IStorefrontUrlBuilder storeFrontUrlBuilder, IContentBlobProvider contentBlobProvder, IOptions&lt;LiquidThemeEngineOptions&gt; options)
+        {
+            _workContextAccessor = workContextAccessor;
+            _httpContextAccessor = httpContextAccessor;
+            _storeFrontUrlBuilder = storeFrontUrlBuilder;
+            _options = options.Value;
+            _memoryCache = memoryCache;
+            _themeBlobProvider = contentBlobProvder;
+        }
+
+        /// &lt;summary&gt;
+        /// Main work context
+        /// &lt;/summary&gt;
+        public WorkContext WorkContext =&gt; _workContextAccessor.WorkContext;
+
+        /// &lt;summary&gt;
+        /// Current HttpContext
+        /// &lt;/summary&gt;
+        public HttpContext HttpContext =&gt; _httpContextAccessor.HttpContext;
+
+        /// &lt;summary&gt;
+        /// Store url builder
+        /// &lt;/summary&gt;
+        public IStorefrontUrlBuilder UrlBuilder =&gt; _storeFrontUrlBuilder;
+
+        /// &lt;summary&gt;
+        /// Default master view name
+        /// &lt;/summary&gt;
+        public string MasterViewName =&gt; _options.DefaultLayout;
+
+        private IEnumerable&lt;string&gt; ThemeNames
+        {
+            get
+            {
+                var customThemeName = _options.DefaultThemeName ?? WorkContext?.CurrentStore?.ThemeName;
+                if (customThemeName != null)
+                {
+                    yield return customThemeName;
+                }
+
+                yield return &quot;default&quot;;
+            }
+        }
+
+        private IEnumerable&lt;string&gt; ThemePaths =&gt; ThemeNames.Select(name =&gt; Path.Combine(&quot;Themes&quot;, name));
+
+        /// &lt;summary&gt;
+        /// Current theme name
+        /// &lt;/summary&gt;
+        private string CurrentThemeName =&gt; ThemeNames.FirstOrDefault();
+
+        /// &lt;summary&gt;
+        /// Current theme base path
+        /// &lt;/summary&gt;
+        private string CurrentThemePath =&gt; ThemePaths.FirstOrDefault();
+
+        #region IFileSystem members
+        public string ReadTemplateFile(Context context, string templateName)
+        {
+            return ReadTemplateByName(templateName);
+        }
+        #endregion
+
+        #region ILiquidThemeEngine Members
+        public IEnumerable&lt;string&gt; DiscoveryPaths =&gt; ThemePaths.SelectMany(theme =&gt; _options.TemplatesDiscoveryFolders.Select(x =&gt; Path.Combine(theme, x)));
+
+        /// &lt;summary&gt;
+        /// Return stream for requested  asset file  (used for search current and base themes assets)
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;filePath&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public Stream GetAssetStream(string filePath)
+        {
+            Stream retVal = null;
+            var filePathWithoutExtension = Path.Combine(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath));
+            //file.ext =&gt; file.ext || file || file.liquid || file.ext.liquid        
+            var searchPatterns = new[] { filePath, filePathWithoutExtension, string.Format(_liquidTemplateFormat, filePathWithoutExtension), string.Format(_liquidTemplateFormat, filePath) };
+
+            var assetsPaths = ThemePaths.Select(theme =&gt; Path.Combine(theme, &quot;assets&quot;)).Where(path =&gt; _themeBlobProvider.PathExists(path));
+            var currentThemeFilePath = assetsPaths.SelectMany(path =&gt; searchPatterns.SelectMany(x =&gt; _themeBlobProvider.Search(path, x, true))).FirstOrDefault();
+
+            if (currentThemeFilePath != null)
+            {
+                retVal = _themeBlobProvider.OpenRead(currentThemeFilePath);
+                filePath = currentThemeFilePath;
+            }
+
+            if (retVal != null &amp;&amp; filePath.EndsWith(&quot;.liquid&quot;))
+            {
+                var shopifyContext = WorkContext.ToShopifyModel(UrlBuilder);
+                var parameters = shopifyContext.ToLiquid() as Dictionary&lt;string, object&gt;;
+                var settings = GetSettings(&quot;&#39;&#39;&quot;);
+                parameters.Add(&quot;settings&quot;, settings);
+
+                var templateContent = retVal.ReadToString();
+                retVal.Dispose();
+
+                var template = RenderTemplate(templateContent, parameters);
+                retVal = new MemoryStream(Encoding.UTF8.GetBytes(template));
+            }
+
+            if (retVal != null &amp;&amp; (filePath.Contains(&quot;.scss.&quot;) &amp;&amp; filePath.EndsWith(&quot;.liquid&quot;) || filePath.EndsWith(&quot;.scss&quot;)))
+            {
+                var content = retVal.ReadToString();
+                retVal.Dispose();
+
+                try
+                {
+                    //handle scss resources
+                    CompilationResult result = SassCompiler.Compile(content);
+                    content = result.CompiledContent;
+
+                    retVal = new MemoryStream(Encoding.UTF8.GetBytes(content));
+                }
+                catch (Exception ex)
+                {
+                    throw new SaasCompileException(filePath, content, ex);
+                }
+            }
+
+            return retVal;
+        }
+
+
+        /// &lt;summary&gt;
+        /// Return hash of requested asset (used for file versioning)
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;filePath&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public string GetAssetHash(string filePath)
+        {
+            var cacheKey = CacheKey.With(GetType(), &quot;GetAssetHash&quot;, filePath);
+            return _memoryCache.GetOrCreate(cacheKey, (cacheEntry) =&gt;
+            {
+                cacheEntry.AddExpirationToken(new CompositeChangeToken(new[] { ThemeEngineCacheRegion.CreateChangeToken(), _themeBlobProvider.Watch(filePath) }));
+
+                using (var stream = GetAssetStream(filePath))
+                {
+                    var hashAlgorithm = CryptoConfig.AllowOnlyFipsAlgorithms ? (SHA256)new SHA256CryptoServiceProvider() : new SHA256Managed();
+                    return WebEncoders.Base64UrlEncode(hashAlgorithm.ComputeHash(stream));
+                }
+            });
+        }
+
+        /// &lt;summary&gt;
+        /// resolve  template path by it name
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;templateName&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public string ResolveTemplatePath(string templateName)
+        {
+            if (WorkContext.CurrentStore == null)
+                return null;
+
+            var liquidTemplateFileName = string.Format(_liquidTemplateFormat, templateName);
+            var curentThemeDiscoveryPaths = DiscoveryPaths.Select(x =&gt; Path.Combine(x, liquidTemplateFileName));
+
+            //Try to find template in current theme folder
+            return curentThemeDiscoveryPaths.FirstOrDefault(x =&gt; _themeBlobProvider.PathExists(x));
+        }
+
+        /// &lt;summary&gt;
+        /// Render template by name and with passed context (parameters)
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;templateName&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;parameters&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public string RenderTemplateByName(string templateName, Dictionary&lt;string, object&gt; parameters)
+        {
+            if (string.IsNullOrEmpty(templateName))
+                throw new ArgumentNullException(nameof(templateName));
+
+            var templateContent = ReadTemplateByName(templateName);
+            var retVal = RenderTemplate(templateContent, parameters);
+            return retVal;
+        }
+
+        /// &lt;summary&gt;
+        /// Render template by content and parameters
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;templateContent&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;parameters&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public string RenderTemplate(string templateContent, Dictionary&lt;string, object&gt; parameters)
+        {
+            if (string.IsNullOrEmpty(templateContent))
+            {
+                return templateContent;
+            }
+
+            var isLiquidTemplate = _isLiquid.Match(templateContent);
+            if (!isLiquidTemplate.Success)
+            {
+                return templateContent;
+            }
+
+            if (parameters == null)
+            {
+                parameters = new Dictionary&lt;string, object&gt;();
+            }
+
+            Template.FileSystem = this;
+            //TODO:       
+            var renderParams = new RenderParameters
+            {
+                LocalVariables = Hash.FromDictionary(parameters),
+                RethrowErrors = _options.RethrowLiquidRenderErrors
+            };
+
+            var parsedTemplate = Template.Parse(templateContent);
+
+            var retVal = parsedTemplate.RenderWithTracing(renderParams);
+
+            //Copy key values which were generated in rendering to out parameters
+            if (parsedTemplate.Registers != null)
+            {
+                foreach (var registerPair in parsedTemplate.Registers)
+                {
+                    parameters[registerPair.Key] = registerPair.Value;
+                }
+            }
+
+            return retVal;
+        }
+
+        /// &lt;summary&gt;
+        /// Read shopify theme settings from &#39;config&#39; folder
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;defaultValue&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public IDictionary GetSettings(string defaultValue = null)
+        {
+            var cacheKey = CacheKey.With(GetType(), &quot;GetSettings&quot;, CurrentThemeName, defaultValue);
+            return _memoryCache.GetOrCreate(cacheKey, (cacheItem) =&gt;
+            {
+                var currentThemeSettingsPath = ThemePaths
+                    .Select(theme =&gt; Path.Combine(theme, &quot;config&quot;, &quot;settings_data.json&quot;))
+                    .FirstOrDefault(path =&gt; _themeBlobProvider.PathExists(path));
+
+                cacheItem.AddExpirationToken(new CompositeChangeToken(new[] { ThemeEngineCacheRegion.CreateChangeToken(), _themeBlobProvider.Watch(currentThemeSettingsPath) }));
+                var retVal = new DefaultableDictionary(defaultValue);
+                //Load all data from current theme config
+                var resultSettings = InnerGetAllSettings(_themeBlobProvider, currentThemeSettingsPath);
+                if (resultSettings != null)
+                {
+                    //Get actual preset from merged config
+                    var currentPreset = resultSettings.GetValue(&quot;current&quot;);
+                    if (currentPreset is JValue)
+                    {
+                        var currentPresetName = ((JValue)currentPreset).Value.ToString();
+                        var presets = resultSettings.GetValue(&quot;presets&quot;) as JObject;
+                        if (presets == null || !presets.Children().Any())
+                        {
+                            throw new StorefrontException(&quot;Setting presets not defined&quot;);
+                        }
+
+                        IList&lt;JProperty&gt; allPresets = presets.Children().Cast&lt;JProperty&gt;().ToList();
+                        resultSettings = allPresets.FirstOrDefault(p =&gt; p.Name == currentPresetName).Value as JObject;
+                        if (resultSettings == null)
+                        {
+                            throw new StorefrontException($&quot;Setting preset with name &#39;{currentPresetName}&#39; not found&quot;);
+                        }
+                    }
+                    if (currentPreset is JObject)
+                    {
+                        resultSettings = (JObject)currentPreset;
+                    }
+
+                    var dict = resultSettings.ToObject&lt;Dictionary&lt;string, object&gt;&gt;().ToDictionary(x =&gt; x.Key, x =&gt; x.Value);
+                    retVal = new DefaultableDictionary(dict, defaultValue);
+                }
+
+                return retVal;
+            });
+        }
+
+
+        /// &lt;summary&gt;
+        /// Read localization resources 
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public JObject ReadLocalization()
+        {
+            var cacheKey = CacheKey.With(GetType(), &quot;ReadLocalization&quot;, CurrentThemeName, WorkContext.CurrentLanguage.CultureName);
+            return _memoryCache.GetOrCreate(cacheKey, cacheItem =&gt;
+            {
+                var result = new JObject();
+
+                var localizationFilePaths = GetAllLocalizationFilePaths(WorkContext.CurrentLanguage);
+
+                foreach (var localizationFilePath in localizationFilePaths.Reverse())
+                {
+                    cacheItem.AddExpirationToken(new CompositeChangeToken(new[] { ThemeEngineCacheRegion.CreateChangeToken(), _themeBlobProvider.Watch(localizationFilePath) }));
+
+                    using (var stream = _themeBlobProvider.OpenRead(localizationFilePath))
+                    {
+                        JObject content = JsonConvert.DeserializeObject&lt;dynamic&gt;(stream.ReadToString());
+                        result.Merge(content, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Merge });
+                    }
+                }
+
+                return result;
+            });
+        }
+
+        /// &lt;summary&gt;
+        /// Get relative url for assets (assets folder)
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;assetName&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public string GetAssetAbsoluteUrl(string assetName)
+        {
+            var result = UrlBuilder.ToAppAbsolute(_options.ThemesAssetsRelativeUrl.TrimEnd(&#39;/&#39;) + &quot;/&quot; + assetName.TrimStart(&#39;/&#39;), WorkContext.CurrentStore, WorkContext.CurrentLanguage);
+
+            if (WorkContext.ApplicationSettings.TryGetValue(&quot;AssetCdn:Url&quot;, out var cdnUrlObject))
+            {
+                var cdnUrl = cdnUrlObject as string;
+                if (!string.IsNullOrEmpty(cdnUrl))
+                {
+                    result = cdnUrl.TrimEnd(&#39;/&#39;) + &quot;/&quot; + result.TrimStart(&#39;/&#39;);
+                }
+            }
+
+            return result;
+        }
+
+        #endregion
+
+        private IEnumerable&lt;string&gt; GetAllLocalizationFilePaths(Language language)
+        {
+            return ThemePaths.SelectMany(theme =&gt; GetThemeLocalizationFilePaths(theme, language));
+        }
+
+        private IEnumerable&lt;string&gt; GetThemeLocalizationFilePaths(string themePath, Language language)
+        {
+            var localesPath = Path.Combine(themePath, &quot;locales&quot;);
+
+            if (_themeBlobProvider.PathExists(localesPath))
+            {
+                var languageNames = new[] { language.CultureName, language.TwoLetterLanguageName };
+
+                var languageFilePath = languageNames
+                    .Select(languageName =&gt; Path.Combine(localesPath, string.Concat(languageName, &quot;.json&quot;)))
+                    .FirstOrDefault(path =&gt; _themeBlobProvider.PathExists(path));
+
+                if (languageFilePath != null)
+                {
+                    yield return languageFilePath;
+                }
+
+                var defaultFilePath = _themeBlobProvider.Search(localesPath, &quot;*.default.json&quot;, false).FirstOrDefault();
+
+                if (defaultFilePath != null)
+                {
+                    yield return defaultFilePath;
+                }
+            }
+        }
+
+        private static JObject InnerReadLocalization(IContentBlobProvider themeBlobProvider, string localePath, Language language)
+        {
+            JObject retVal = null;
+
+            if (themeBlobProvider.PathExists(localePath))
+            {
+                JObject localeJson = null;
+                JObject defaultJson = null;
+
+                foreach (var languageName in new[] { language.CultureName, language.TwoLetterLanguageName })
+                {
+                    var currentLocalePath = Path.Combine(localePath, string.Concat(languageName, &quot;.json&quot;));
+
+                    if (themeBlobProvider.PathExists(currentLocalePath))
+                    {
+                        using (var stream = themeBlobProvider.OpenRead(currentLocalePath))
+                        {
+                            localeJson = JsonConvert.DeserializeObject&lt;dynamic&gt;(stream.ReadToString());
+                        }
+                        break;
+                    }
+                }
+
+                var localeDefaultPath = themeBlobProvider.Search(localePath, &quot;*.default.json&quot;, false).FirstOrDefault();
+
+                if (localeDefaultPath != null &amp;&amp; themeBlobProvider.PathExists(localeDefaultPath))
+                {
+                    using (var stream = themeBlobProvider.OpenRead(localeDefaultPath))
+                    {
+                        defaultJson = JsonConvert.DeserializeObject&lt;dynamic&gt;(stream.ReadToString());
+                    }
+                }
+
+                //Need merge default and requested localization json to resulting object
+                retVal = defaultJson ?? localeJson;
+
+                if (defaultJson != null &amp;&amp; localeJson != null)
+                {
+                    retVal.Merge(localeJson, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Merge });
+                }
+            }
+            return retVal;
+        }
+
+        private static JObject InnerGetAllSettings(IContentBlobProvider themeBlobProvider, string settingsPath)
+        {
+            if (settingsPath == null)
+            {
+                throw new ArgumentNullException(nameof(settingsPath));
+            }
+
+            JObject retVal = null;
+
+            if (themeBlobProvider.PathExists(settingsPath))
+            {
+                using (var stream = themeBlobProvider.OpenRead(settingsPath))
+                {
+                    retVal = JsonConvert.DeserializeObject&lt;JObject&gt;(stream.ReadToString());
+                }
+            }
+            return retVal;
+        }
+
+        private string ReadTemplateByName(string templateName)
+        {
+            var templatePath = ResolveTemplatePath(templateName);
+            if (string.IsNullOrEmpty(templatePath))
+            {
+                throw new FileSystemException($&quot;The template &#39;{templateName}&#39; was not found. The following locations were searched:&lt;br/&gt;{string.Join(&quot;&lt;br/&gt;&quot;, DiscoveryPaths)}&quot;);
+            }
+
+            var cacheKey = CacheKey.With(GetType(), &quot;ReadTemplateByName&quot;, templatePath);
+            return _memoryCache.GetOrCreate(cacheKey, (cacheItem) =&gt;
+            {
+                cacheItem.AddExpirationToken(new CompositeChangeToken(new[] { ThemeEngineCacheRegion.CreateChangeToken(), _themeBlobProvider.Watch(templatePath) }));
+                using (var stream = _themeBlobProvider.OpenRead(templatePath))
+                {
+                    return stream.ReadToString();
+                }
+            });
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[47,9,47,93,0],[56,9,56,10,0],[57,13,57,45,0],[59,13,59,60,0],[60,13,60,62,0],[61,13,61,64,0],[62,13,62,57,0],[63,13,63,58,0],[64,13,64,59,0],[65,13,65,58,0],[66,13,66,60,0],[67,13,67,59,0],[68,13,68,58,0],[70,13,70,78,0],[72,13,72,66,0],[73,13,73,55,0],[74,13,74,51,0],[75,13,75,59,0],[76,9,76,10,0],[78,9,80,169,0],[81,9,81,10,0],[82,13,82,56,0],[83,13,83,56,0],[84,13,84,58,0],[85,13,85,38,0],[86,13,86,40,0],[87,13,87,53,0],[88,9,88,10,0],[93,43,93,75,0],[98,43,98,75,0],[103,52,103,73,0],[108,41,108,63,0],[113,13,113,14,0],[114,17,114,105,0],[115,17,115,45,0],[116,17,116,18,0],[117,21,117,50,0],[118,17,118,18,0],[120,17,120,40,0],[121,13,121,14,0],[124,51,124,106,0],[124,77,124,105,0],[129,44,129,71,0],[134,44,134,71,0],[138,9,138,10,0],[139,13,139,53,0],[140,9,140,10,0],[144,54,144,156,0],[144,85,144,155,0],[144,132,144,154,0],[152,9,152,10,0],[153,13,153,34,0],[154,13,154,134,0],[156,13,156,191,0],[158,13,158,140,0],[158,58,158,87,0],[158,103,158,138,0],[159,13,159,162,0],[159,71,159,143,0],[159,102,159,142,0],[161,13,161,46,0],[162,13,162,14,0],[163,17,163,76,0],[164,17,164,49,0],[165,13,165,14,0],[167,13,167,64,0],[168,13,168,14,0],[169,17,169,77,0],[170,17,170,90,0],[171,17,171,50,0],[172,17,172,54,0],[174,17,174,61,0],[175,17,175,34,0],[177,17,177,76,0],[178,17,178,77,0],[179,13,179,14,0],[181,13,181,127,0],[182,13,182,14,0],[183,17,183,53,0],[184,17,184,34,0],[187,17,187,18,0],[189,21,189,78,0],[190,21,190,54,0],[192,21,192,80,0],[193,17,193,18,0],[194,17,194,37,0],[195,17,195,18,0],[196,21,196,75,0],[198,13,198,14,0],[200,13,200,27,0],[201,9,201,10,0],[210,9,210,10,0],[211,13,211,79,0],[212,13,221,16,0],[213,13,213,14,0],[214,17,214,163,0],[216,24,216,61,0],[217,17,217,18,0],[218,21,218,144,0],[219,21,219,91,0],[221,13,221,14,0],[222,9,222,10,0],[230,9,230,10,0],[231,13,231,50,0],[232,17,232,29,0],[234,13,234,93,0],[235,13,235,113,0],[235,72,235,111,0],[238,13,238,100,0],[238,66,238,98,0],[239,9,239,10,0],[248,9,248,10,0],[249,13,249,52,0],[250,17,250,71,0],[252,13,252,68,0],[253,13,253,70,0],[254,13,254,27,0],[255,9,255,10,0],[264,9,264,10,0],[265,13,265,55,0],[266,13,266,14,0],[267,17,267,40,0],[270,13,270,69,0],[271,13,271,43,0],[272,13,272,14,0],[273,17,273,40,0],[276,13,276,36,0],[277,13,277,14,0],[278,17,278,63,0],[279,13,279,14,0],[281,13,281,40,0],[283,13,287,15,0],[289,13,289,66,0],[291,13,291,73,0],[294,13,294,50,0],[295,13,295,14,0],[296,17,296,24,0],[296,26,296,42,0],[296,43,296,45,0],[296,46,296,70,0],[297,17,297,18,0],[298,21,298,71,0],[299,17,299,18,0],[300,13,300,14,0],[302,13,302,27,0],[303,9,303,10,0],[311,9,311,10,0],[312,13,312,100,0],[313,13,353,16,0],[314,13,314,14,0],[315,17,317,82,0],[316,38,316,89,0],[317,45,317,80,0],[319,17,319,178,0],[320,17,320,70,0],[322,17,322,104,0],[323,17,323,44,0],[324,17,324,18,0],[326,21,326,76,0],[327,21,327,49,0],[328,21,328,22,0],[329,25,329,90,0],[330,25,330,85,0],[331,25,331,74,0],[332,25,332,26,0],[333,29,333,90,0],[336,25,336,101,0],[337,25,337,119,0],[337,73,337,100,0],[338,25,338,52,0],[339,25,339,26,0],[340,29,340,120,0],[342,21,342,22,0],[343,21,343,50,0],[344,21,344,22,0],[345,25,345,65,0],[346,21,346,22,0],[348,21,348,125,0],[348,104,348,109,0],[348,116,348,123,0],[349,21,349,76,0],[350,17,350,18,0],[352,17,352,31,0],[353,13,353,14,0],[354,9,354,10,0],[362,9,362,10,0],[363,13,363,132,0],[364,13,382,16,0],[365,13,365,14,0],[366,17,366,44,0],[368,17,368,102,0],[370,17,370,24,0],[370,26,370,50,0],[370,51,370,53,0],[370,54,370,85,0],[371,17,371,18,0],[372,21,372,178,0],[374,28,374,90,0],[375,21,375,22,0],[376,25,376,105,0],[377,25,377,120,0],[378,21,378,22,0],[379,17,379,18,0],[381,17,381,31,0],[382,13,382,14,0],[383,9,383,10,0],[391,9,391,10,0],[392,13,392,186,0],[394,13,394,99,0],[395,13,395,14,0],[396,17,396,53,0],[397,17,397,51,0],[398,17,398,18,0],[399,21,399,80,0],[400,17,400,18,0],[401,13,401,14,0],[403,13,403,27,0],[404,9,404,10,0],[409,9,409,10,0],[410,13,410,99,0],[410,51,410,97,0],[411,9,411,10,0],[414,9,414,10,0],[415,13,415,66,0],[417,13,417,60,0],[418,13,418,14,0],[419,17,419,100,0],[421,17,423,82,0],[422,45,422,108,0],[423,45,423,80,0],[425,17,425,46,0],[426,17,426,18,0],[427,21,427,51,0],[428,17,428,18,0],[430,17,430,120,0],[432,17,432,45,0],[433,17,433,18,0],[434,21,434,50,0],[435,17,435,18,0],[436,13,436,14,0],[437,9,437,10,0],[440,9,440,10,0],[441,13,441,35,0],[443,13,443,58,0],[444,13,444,14,0],[445,17,445,43,0],[446,17,446,44,0],[448,17,448,24,0],[448,26,448,42,0],[448,43,448,45,0],[448,46,448,108,0],[449,17,449,18,0],[450,21,450,108,0],[452,21,452,73,0],[453,21,453,22,0],[454,32,454,90,0],[455,25,455,26,0],[456,29,456,104,0],[457,25,457,26,0],[458,25,458,31,0],[460,17,460,18,0],[462,17,462,120,0],[464,17,464,98,0],[465,17,465,18,0],[466,28,466,86,0],[467,21,467,22,0],[468,25,468,101,0],[469,21,469,22,0],[470,17,470,18,0],[473,17,473,52,0],[475,17,475,63,0],[476,17,476,18,0],[477,21,477,119,0],[478,17,478,18,0],[479,13,479,14,0],[480,13,480,27,0],[481,9,481,10,0],[484,9,484,10,0],[485,13,485,38,0],[486,13,486,14,0],[487,17,487,71,0],[490,13,490,35,0],[492,13,492,60,0],[493,13,493,14,0],[494,24,494,77,0],[495,17,495,18,0],[496,21,496,92,0],[497,17,497,18,0],[498,13,498,14,0],[499,13,499,27,0],[500,9,500,10,0],[503,9,503,10,0],[504,13,504,66,0],[505,13,505,52,0],[506,13,506,14,0],[507,17,507,178,0],[510,13,510,89,0],[511,13,518,16,0],[512,13,512,14,0],[513,17,513,166,0],[514,24,514,78,0],[515,17,515,18,0],[516,21,516,50,0],[518,13,518,14,0],[519,9,519,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\taxline.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using DotLiquid;
+using System;
+using System.Runtime.Serialization;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// Represents tax line object
+    /// &lt;/summary&gt;
+    /// &lt;remarks&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/objects/tax_line
+    /// &lt;/remarks&gt;
+    [DataContract]
+    public partial class TaxLine : Drop
+    {
+        /// &lt;summary&gt;
+        /// Returns the title of the tax.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Title { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the amount of the tax.
+        /// Use one of the money filters to return the value in a monetary format.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal Price { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the rate of the tax in decimal notation.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal Rate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the rate of the tax in percentage format.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal RatePercentage
+        {
+            get
+            {
+                return Math.Round(Rate * 100, 2);
+            }
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[20,31,20,35,0],[20,36,20,40,0],[27,32,27,36,0],[27,37,27,41,0],[33,31,33,35,0],[33,36,33,40,0],[42,13,42,14,0],[43,17,43,50,0],[44,13,44,14,0]]);
+    </script>
+  </body>
+</html>

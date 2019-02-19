@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\stringextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+
+namespace VirtoCommerce.Storefront.Model.Common
+{
+    public static class StringExtensions
+    {
+        /// &lt;summary&gt;
+        /// http://stackoverflow.com/questions/484085/an-algorithm-to-spacify-camelcased-strings
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;str&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;spacer&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string Decamelize(this string str, char spacer = &#39;_&#39;)
+        {
+            if (string.IsNullOrEmpty(str))
+                return str;
+
+            /* Note that the .ToString() is required, otherwise the char is implicitly
+             * converted to an integer and the wrong overloaded ctor is used */
+            var sb = new StringBuilder(str[0].ToString());
+            for (var i = 1; i &lt; str.Length; i++)
+            {
+                if (char.IsUpper(str, i))
+                    sb.Append(spacer);
+                sb.Append(str[i]);
+            }
+            return sb.ToString().ToLowerInvariant();
+        }
+
+        /// &lt;summary&gt;
+        /// Equals invariant
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;str1&quot;&gt;The STR1.&lt;/param&gt;
+        /// &lt;param name=&quot;str2&quot;&gt;The STR2.&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static bool EqualsInvariant(this string str1, string str2)
+        {
+            return string.Equals(str1, str2, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool FitsMask(this string fileName, string fileMask)
+        {
+            var mask = new Regex(&quot;^&quot; + Regex.Escape(fileMask).Replace(&quot;\\.&quot;, &quot;[.]&quot;).Replace(&quot;\\*&quot;, &quot;.*&quot;).Replace(&quot;\\?&quot;, &quot;.&quot;) + &quot;$&quot;, RegexOptions.IgnoreCase);
+            return mask.IsMatch(fileName);
+        }
+
+        public static int? ToNullableInt(this string str)
+        {
+            int retVal;
+            if (int.TryParse(str, out retVal))
+            {
+                return retVal;
+            }
+            return null;
+        }
+
+        public static Tuple&lt;string, string, string&gt; SplitIntoTuple(this string input, char separator)
+        {
+            if (input == null)
+            {
+                throw new ArgumentNullException(&quot;input&quot;);
+            }
+
+            var pieces = input.Split(separator);
+            return Tuple.Create(pieces.FirstOrDefault(), pieces.Skip(1).FirstOrDefault(), pieces.Skip(2).FirstOrDefault());
+        }
+
+        public static string RemoveAccent(this string txt)
+        {
+            var bytes = Encoding.ASCII.GetBytes(txt);
+            return Encoding.ASCII.GetString(bytes);
+        }
+
+        public static string Handelize(this string phrase)
+        {
+            var retVal = phrase;
+            if (phrase != null)
+            {
+                retVal = phrase.RemoveAccent().ToLower();
+
+                retVal = Regex.Replace(retVal, @&quot;[^a-z0-9\s-]&quot;, &quot;&quot;); // invalid chars           
+                retVal = Regex.Replace(retVal, @&quot;\s+&quot;, &quot; &quot;).Trim(); // convert multiple spaces into one space   
+                retVal = retVal.Substring(0, retVal.Length &lt;= 240 ? retVal.Length : 240).Trim(); // cut and trim it   
+                retVal = Regex.Replace(retVal, @&quot;\s&quot;, &quot;-&quot;); // hyphens   
+            }
+            return retVal;
+        }
+
+        //http://www.ietf.org/rfc/rfc3986.txt
+        //section 4.2 Relative reference
+        //Remove leading protocol scheme from uri. http://host/path -&gt; //host/path
+        public static string RemoveLeadingUriScheme(this string str)
+        {
+            if (!string.IsNullOrEmpty(str) &amp;&amp; Uri.IsWellFormedUriString(str, UriKind.Absolute))
+            {
+                //remove scheme from image url
+                //http://www.ietf.org/rfc/rfc3986.txt
+                //section 4.2
+                var uri = new Uri(str);
+                str = &quot;//&quot; + uri.Authority + uri.PathAndQuery;
+            }
+            return str;
+        }
+
+        public static string ReplaceLastOccurrence(this string source, string find, string replace)
+        {
+            var place = source.LastIndexOf(find);
+            var result = source;
+            if (place &gt;= 0)
+            {
+                result = source.Remove(place, find.Length).Insert(place, replace);
+            }
+            return result;
+        }
+        /// &lt;summary&gt;
+        /// Add provided suffix to the end of file name
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;originalFileUrl&quot;&gt;File url&lt;/param&gt;
+        /// &lt;param name=&quot;suffix&quot;&gt;Suffix&lt;/param&gt;
+        /// Example: &quot;1428965138000_1133723.jpg&quot;.AddSuffixToFileUrl(&quot;grande&quot;) 
+        /// Result: 1428965138000_1133723_grande.jpg
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string AddSuffixToFileUrl(this string originalFileUrl, string suffix)
+        {
+            if (originalFileUrl == null)
+            {
+                throw new ArgumentNullException(nameof(originalFileUrl));
+            }
+            var result = originalFileUrl;
+            var fileName = Path.GetFileName(originalFileUrl);
+            if(!string.IsNullOrEmpty(fileName))
+            {
+                var newFileName = Path.GetFileNameWithoutExtension(fileName) + suffix;
+                var extension = Path.GetExtension(fileName);
+                if(!string.IsNullOrEmpty(extension))
+                {
+                    newFileName += extension;
+                }
+                result = result.ReplaceLastOccurrence(fileName, newFileName);
+            }
+            return result;
+        }
+        
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,9,18,10,0],[19,13,19,43,0],[20,17,20,28,0],[24,13,24,59,0],[25,18,25,27,0],[25,29,25,43,0],[25,45,25,48,0],[26,13,26,14,0],[27,17,27,42,0],[28,21,28,39,0],[29,17,29,35,0],[30,13,30,14,0],[31,13,31,53,0],[32,9,32,10,0],[41,9,41,10,1],[42,13,42,82,1],[43,9,43,10,1],[46,9,46,10,0],[47,13,47,158,0],[48,13,48,43,0],[49,9,49,10,0],[52,9,52,10,0],[54,13,54,47,0],[55,13,55,14,0],[56,17,56,31,0],[58,13,58,25,0],[59,9,59,10,0],[62,9,62,10,0],[63,13,63,31,0],[64,13,64,14,0],[65,17,65,58,0],[68,13,68,49,0],[69,13,69,124,0],[70,9,70,10,0],[73,9,73,10,0],[74,13,74,54,0],[75,13,75,52,0],[76,9,76,10,0],[79,9,79,10,0],[80,13,80,33,0],[81,13,81,32,0],[82,13,82,14,0],[83,17,83,58,0],[85,17,85,69,0],[86,17,86,68,0],[87,17,87,97,0],[88,17,88,60,0],[89,13,89,14,0],[90,13,90,27,0],[91,9,91,10,0],[97,9,97,10,0],[98,13,98,96,0],[99,13,99,14,0],[103,17,103,40,0],[104,17,104,63,0],[105,13,105,14,0],[106,13,106,24,0],[107,9,107,10,0],[110,9,110,10,0],[111,13,111,50,0],[112,13,112,33,0],[113,13,113,28,0],[114,13,114,14,0],[115,17,115,83,0],[116,13,116,14,0],[117,13,117,27,0],[118,9,118,10,0],[128,9,128,10,0],[129,13,129,41,0],[130,13,130,14,0],[131,17,131,74,0],[133,13,133,42,0],[134,13,134,62,0],[135,13,135,48,0],[136,13,136,14,0],[137,17,137,87,0],[138,17,138,61,0],[139,17,139,53,0],[140,17,140,18,0],[141,21,141,46,0],[142,17,142,18,0],[143,17,143,78,0],[144,13,144,14,0],[145,13,145,27,0],[146,9,146,10,0]]);
+    </script>
+  </body>
+</html>

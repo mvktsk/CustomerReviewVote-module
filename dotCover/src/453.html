@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\security\notifications\remindusernamenotification.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Domain.Security.Notifications
+{
+    public class RemindUserNameNotification : EmailNotificationBase
+    {
+        public RemindUserNameNotification(string storeId, Language language)
+            : base(storeId, language)
+        {
+        }
+
+        public string UserName { get; set; }
+
+
+        public override IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt; GetNotificationParameters()
+        {
+            var result = base.GetNotificationParameters().ToList();
+            result.Add(new KeyValuePair&lt;string, string&gt;(nameof(UserName), UserName));
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,15,11,38,0],[12,9,12,10,0],[13,9,13,10,0],[15,34,15,38,0],[15,39,15,43,0],[19,9,19,10,0],[20,13,20,68,0],[21,13,21,86,0],[22,13,22,27,0],[23,9,23,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\accountcontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using VirtoCommerce.Storefront.AutoRestClients.HruCustomersModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.PlatformModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.PlatformModuleApi.Models;
+using VirtoCommerce.Storefront.Domain;
+using VirtoCommerce.Storefront.Domain.Common;
+using VirtoCommerce.Storefront.Domain.Security;
+using VirtoCommerce.Storefront.Domain.Security.Notifications;
+using VirtoCommerce.Storefront.Domain.Stores;
+using VirtoCommerce.Storefront.Extensions;
+using VirtoCommerce.Storefront.Infrastructure;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Common.Events;
+using VirtoCommerce.Storefront.Model.Security;
+using VirtoCommerce.Storefront.Model.Security.Events;
+using VirtoCommerce.Storefront.Model.Security.Specifications;
+
+namespace VirtoCommerce.Storefront.Controllers
+{
+    public class AccountController : StorefrontControllerBase
+    {
+        private readonly SignInManager&lt;User&gt; _signInManager;
+        private readonly IEventPublisher _publisher;
+        private readonly StorefrontOptions _options;
+        private readonly INotifications _platformNotificationApi;
+        private readonly IAuthorizationService _authorizationService;
+        private readonly ISecurity _platformSecurityApi;
+        private readonly IHruInvitations _hruInvitationsApi;
+
+        private readonly string[] _firstNameClaims = { ClaimTypes.GivenName, &quot;urn:github:name&quot;, ClaimTypes.Name };
+
+        public AccountController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder, SignInManager&lt;User&gt; signInManager,
+            IEventPublisher publisher, INotifications platformNotificationApi, IAuthorizationService authorizationService, IOptions&lt;StorefrontOptions&gt; options, ISecurity platformSecurityApi, IHruInvitations hruInvitations)
+            : base(workContextAccessor, urlBuilder)
+        {
+            _signInManager = signInManager;
+            _publisher = publisher;
+            _options = options.Value;
+            _platformNotificationApi = platformNotificationApi;
+            _authorizationService = authorizationService;
+            _platformSecurityApi = platformSecurityApi;
+            _hruInvitationsApi = hruInvitations;
+        }
+
+        //GET: /account
+        [HttpGet]
+        [Authorize(OnlyRegisteredUserAuthorizationRequirement.PolicyName)]
+        public ActionResult GetAccount()
+        {
+            WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Личный кабинет&quot; };
+
+            //Customer should be already populated in WorkContext middle-ware
+            return View(&quot;customers/account&quot;, WorkContext);
+        }
+
+        // GET: /account/settings
+        [HttpGet]
+        [Authorize(OnlyRegisteredUserAuthorizationRequirement.PolicyName)]
+        public ActionResult AccountSettings()
+        {
+            WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Profile Settings&quot; };
+
+            return View(&quot;customers/settings&quot;, WorkContext);
+        }
+
+        [HttpGet]
+        [Authorize(OnlyRegisteredUserAuthorizationRequirement.PolicyName)]
+        public ActionResult GetOrderDetails(string number)
+        {
+            var order = WorkContext.CurrentUser?.Orders.FirstOrDefault(x =&gt; x.Number.EqualsInvariant(number));
+            if (order != null)
+            {
+                WorkContext.CurrentOrder = order;
+            }
+
+            return View(&quot;customers/order&quot;, WorkContext);
+        }
+
+        [HttpGet]
+        [Authorize(OnlyRegisteredUserAuthorizationRequirement.PolicyName)]
+        public ActionResult GetAddresses()
+        {
+            return View(&quot;customers/addresses&quot;, WorkContext);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult Register()
+        {
+            return View(&quot;customers/register&quot;, WorkContext);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; Register([FromForm] UserRegistration registration)
+        {
+            registration.UserName = registration.UserName?.Trim();
+            TryValidateModel(registration);
+
+            if (ModelState.IsValid)
+            {
+                //Register user
+                var user = registration.ToUser();
+                user.Contact = registration.ToContact();
+                user.StoreId = WorkContext.CurrentStore.Id;
+
+                var result = await _signInManager.UserManager.CreateAsync(user, registration.Password);
+                if (result.Succeeded)
+                {
+                    user = await _signInManager.UserManager.FindByNameAsync(user.UserName);
+                    await _publisher.Publish(new UserRegisteredEvent(WorkContext, user, registration));
+
+                    await _signInManager.SignInAsync(user, isPersistent: true);
+                    await _publisher.Publish(new UserLoginEvent(WorkContext, user));
+
+                    if (_options.SendAccountConfirmation)
+                    {
+                        var token = await _signInManager.UserManager.GenerateEmailConfirmationTokenAsync(user);
+                        var callbackUrl = Url.Action(&quot;ConfirmEmail&quot;, &quot;Account&quot;, new { UserId = user.Id, Token = token }, protocol: Request.Scheme);
+                        var emailConfirmationNotification = new EmailConfirmationNotification(WorkContext.CurrentStore.Id, WorkContext.CurrentLanguage)
+                        {
+                            Url = callbackUrl,
+                            Sender = WorkContext.CurrentStore.Email,
+                            Recipient = GetUserEmail(user)
+                        };
+                        await _platformNotificationApi.SendNotificationAsync(emailConfirmationNotification.ToNotificationDto());
+                    }
+
+                    return StoreFrontRedirect(&quot;~/account&quot;);
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(&quot;form&quot;, error.Description);
+                    }
+                }
+            }
+
+            WorkContext.Form = registration;
+            return View(&quot;customers/register&quot;, WorkContext);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task&lt;ActionResult&gt; ConfirmInvitation(string organizationId, string email, string token)
+        {
+            WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Confirm Invitation&quot; };
+
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(email))
+            {
+                WorkContext.ErrorMessage = &quot;Error in URL format&quot;;
+                return View(&quot;error&quot;, WorkContext);
+            }
+
+            var user = await _signInManager.UserManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                WorkContext.ErrorMessage = &quot;User was not found.&quot;;
+                return View(&quot;error&quot;, WorkContext);
+            }
+
+            if (!string.IsNullOrEmpty(user.PasswordHash))
+            {
+                WorkContext.ErrorMessage = &quot;Sorry, this invitation can be used only once.&quot;;
+                return View(&quot;error&quot;, WorkContext);
+            }
+
+            var isValidToken = await _signInManager.UserManager.VerifyUserTokenAsync(user, _signInManager.UserManager.Options.Tokens.PasswordResetTokenProvider, UserManager&lt;User&gt;.ResetPasswordTokenPurpose, token);
+            if (!isValidToken)
+            {
+                WorkContext.ErrorMessage = &quot;Invitation token is invalid or expired&quot;;
+                return View(&quot;error&quot;, WorkContext);
+            }
+
+            WorkContext.Form = new UserRegistrationByInvitation
+            {
+                Email = email,
+                OrganizationId = organizationId,
+                Token = token
+            };
+
+            return View(&quot;customers/confirm_invitation&quot;, WorkContext);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; ConfirmInvitation([FromForm] UserRegistrationByInvitation register)
+        {
+            var result = IdentityResult.Success;
+            register.Email = register.Email?.Trim();
+            register.UserName = register.UserName?.Trim();
+            TryValidateModel(register);
+
+            if (ModelState.IsValid)
+            {
+                var user = await _signInManager.UserManager.FindByEmailAsync(register.Email);
+                if (user != null)
+                {
+                    result = await _signInManager.UserManager.ResetPasswordAsync(user, register.Token, register.Password);
+                    if (result.Succeeded)
+                    {
+                        user.UserName = register.UserName;
+                        user.Contact = register.ToContact();
+                        user.Contact.OrganizationId = register.OrganizationId;
+
+                        result = await _signInManager.UserManager.UpdateAsync(user);
+                        if (result.Succeeded)
+                        {
+                            await _publisher.Publish(new UserRegisteredEvent(WorkContext, user, register));
+                            await _signInManager.SignInAsync(user, isPersistent: true);
+                            await _publisher.Publish(new UserLoginEvent(WorkContext, user));
+                        }
+
+                        return StoreFrontRedirect(&quot;~/account&quot;);
+                    }
+                }
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            WorkContext.Form = register;
+            return View(&quot;customers/confirm_invitation&quot;, WorkContext);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task&lt;ActionResult&gt; ConfirmEmail(string token)
+        {
+            WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Confirm Email&quot; };
+
+            var result = await _signInManager.UserManager.ConfirmEmailAsync(WorkContext.CurrentUser, token);
+            var viewName = result.Succeeded ? &quot;confirmation-done&quot; : &quot;error&quot;;
+            return View(viewName);
+        }
+
+        public async Task&lt;IActionResult&gt; ImpersonateUser(string userId)
+        {
+            if (User.Identity.Name == SecurityConstants.AnonymousUsername)
+            {
+                return StoreFrontRedirect($&quot;~/account/login?ReturnUrl={Request.Path}&quot;);
+            }
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, null, CanImpersonateAuthorizationRequirement.PolicyName);
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+            var impersonateUser = await _signInManager.UserManager.FindByIdAsync(userId);
+            if (impersonateUser != null)
+            {
+                impersonateUser.OperatorUserId = WorkContext.CurrentUser.Id;
+                impersonateUser.OperatorUserName = WorkContext.CurrentUser.UserName;
+
+                // sign out the current user
+                await _signInManager.SignOutAsync();
+
+                await _signInManager.SignInAsync(impersonateUser, isPersistent: false);
+
+                if (impersonateUser.UserType.EqualsInvariant(UserType.Distributor))
+                {
+                    return StoreFrontRedirect(&quot;/distributor/new-orders&quot;);
+                }
+
+                if (impersonateUser.UserType.EqualsInvariant(UserType.Dispatcher))
+                {
+                    return StoreFrontRedirect(&quot;/dispatcher/orders&quot;);
+                }
+            }
+            return StoreFrontRedirect(&quot;~/&quot;);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult Login()
+        {
+            WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Вход&quot; };
+
+            return View(&quot;customers/login&quot;);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; Login([FromForm] Login login, string returnUrl)
+        {
+            login.Username = login.Username?.Trim();
+            TryValidateModel(login);
+
+            if (!ModelState.IsValid)
+            {
+                return View(&quot;customers/login&quot;, WorkContext);
+            }
+            login.Username = login.Username?.Trim();
+
+            var loginResult = await _signInManager.PasswordSignInAsync(login.Username, login.Password, login.RememberMe, lockoutOnFailure: true);
+
+            if (loginResult.Succeeded)
+            {
+                var user = await _signInManager.UserManager.FindByNameAsync(login.Username);
+
+                // Find a store that current user can sign in to
+                var spec = new CanUserLoginToStoreSpecification(user);
+                var newReturnUrl = WorkContext.ReplaceStore(returnUrl, spec);
+                if (newReturnUrl != null)
+                {
+                    await _publisher.Publish(new UserLoginEvent(WorkContext, user));
+
+                    if (user.UserType.EqualsInvariant(UserType.Distributor) &amp;&amp; !newReturnUrl.Contains(&quot;distributor&quot;, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return StoreFrontRedirect(&quot;/distributor/new-orders&quot;);
+                    }
+
+                    if (user.UserType.EqualsInvariant(UserType.Dispatcher) &amp;&amp; !newReturnUrl.Contains(&quot;dispatcher&quot;, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return StoreFrontRedirect(&quot;/dispatcher/orders&quot;);
+                    }
+
+                    return StoreFrontRedirect(newReturnUrl);
+                }
+                else
+                {
+                    ModelState.AddModelError(&quot;form&quot;, &quot;User cannot login to current store.&quot;);
+                }
+            }
+
+            if (loginResult.IsLockedOut)
+            {
+                return View(&quot;lockedout&quot;, WorkContext);
+            }
+
+            if (loginResult.RequiresTwoFactor)
+            {
+                return StoreFrontRedirect(&quot;~/account/sendcode&quot;);
+            }
+
+            if (loginResult is CustomSignInResult signInResult &amp;&amp; signInResult.IsRejected)
+            {
+                ModelState.AddModelError(&quot;form&quot;, &quot;Administrator suspended this account&quot;);
+            }
+
+            ModelState.AddModelError(&quot;form&quot;, &quot;Login attempt failed.&quot;);
+            WorkContext.Form = login;
+
+            return View(&quot;customers/login&quot;, WorkContext);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task&lt;ActionResult&gt; Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return StoreFrontRedirect(&quot;~/&quot;);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult ExternalLogin(string authType, string returnUrl)
+        {
+            if (string.IsNullOrEmpty(authType))
+            {
+                return new BadRequestResult();
+            }
+
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(authType, Url.Action(&quot;ExternalLoginCallback&quot;, &quot;Account&quot;, new { returnUrl }));
+            return Challenge(properties, authType);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task&lt;ActionResult&gt; ExternalLoginCallback(string returnUrl)
+        {
+            var loginInfo = await _signInManager.GetExternalLoginInfoAsync();
+            if (loginInfo == null)
+            {
+                return View(&quot;customers/login&quot;, WorkContext);
+            }
+
+            User user;
+
+            // Sign in the user with this external login provider if the user already has a login.
+            var externalLoginResult = await _signInManager.ExternalLoginSignInAsync(loginInfo.LoginProvider, loginInfo.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+            if (!externalLoginResult.Succeeded)
+            {
+                //TODO: Locked out not work. Need to add some API methods to support lockout data.
+                if (externalLoginResult.IsLockedOut)
+                {
+                    return View(&quot;lockedout&quot;, WorkContext);
+                }
+
+                IdentityResult identityResult;
+
+                var currentUser = WorkContext.CurrentUser;
+                if (currentUser.IsRegisteredUser)
+                {
+                    identityResult = await _signInManager.UserManager.AddLoginAsync(currentUser, loginInfo);
+                }
+                else
+                {
+                    user = new User
+                    {
+                        Email = loginInfo.Principal.FindFirstValue(ClaimTypes.Email),
+                        UserName = $&quot;{loginInfo.LoginProvider}--{loginInfo.ProviderKey}&quot;,
+                        StoreId = WorkContext.CurrentStore.Id,
+                    };
+
+                    user.ExternalLogins.Add(new ExternalUserLoginInfo { ProviderKey = loginInfo.ProviderKey, LoginProvider = loginInfo.LoginProvider });
+
+                    var userRegistration = new UserRegistration
+                    {
+                        FirstName = loginInfo.Principal.FindFirstValue(_firstNameClaims, &quot;unknown&quot;),
+                        LastName = loginInfo.Principal.FindFirstValue(ClaimTypes.Surname),
+                        UserName = user.UserName,
+                        Email = user.Email
+                    };
+                    user.Contact = userRegistration.ToContact();
+
+                    identityResult = await _signInManager.UserManager.CreateAsync(user);
+                    if (identityResult.Succeeded)
+                    {
+                        await _publisher.Publish(new UserRegisteredEvent(WorkContext, user, userRegistration));
+                    }
+                }
+
+                if (!identityResult.Succeeded)
+                {
+                    foreach (var error in identityResult.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    return View(&quot;customers/login&quot;, WorkContext);
+                }
+            }
+
+            user = await _signInManager.UserManager.FindByLoginAsync(loginInfo.LoginProvider, loginInfo.ProviderKey);
+
+            if (!externalLoginResult.Succeeded)
+            {
+                await _signInManager.SignInAsync(user, isPersistent: false);
+            }
+            await _publisher.Publish(new UserLoginEvent(WorkContext, user));
+
+            return StoreFrontRedirect(returnUrl);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult ForgotPassword()
+        {
+            WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Восстановление пароля&quot; };
+
+            return View(&quot;customers/forgot_password&quot;, WorkContext);
+        }
+
+        // Removed &#39;user not found&#39; error due security requerements
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; ForgotPassword([FromForm]ForgotPassword formModel)
+        {
+            formModel.UserName = formModel.UserName?.Trim();
+            var user = await _signInManager.UserManager.FindByNameAsync(formModel.UserName);
+            if (user == null)
+            {
+                ModelState.AddModelError(&quot;form&quot;, &quot;User not found&quot;);
+                return View(&quot;customers/forgot_password&quot;, WorkContext);
+            }
+
+            var token = await _signInManager.UserManager.GeneratePasswordResetTokenAsync(user);
+            var callbackUrl = Url.Action(&quot;ResetPassword&quot;, &quot;Account&quot;, new { UserId = user.Id, Token = token }, protocol: Request.Scheme);
+
+            var resetPasswordEmailNotification = new ResetPasswordEmailNotification(WorkContext.CurrentStore.Id, WorkContext.CurrentLanguage)
+            {
+                Url = callbackUrl,
+                Sender = WorkContext.CurrentStore.Email,
+                Recipient = GetUserEmail(user)
+            };
+
+            var sendingResult = await _platformNotificationApi.SendNotificationAsync(resetPasswordEmailNotification.ToNotificationDto());
+            if (sendingResult.IsSuccess != true)
+            {
+                ModelState.AddModelError(&quot;form&quot;, sendingResult.ErrorMessage);
+            }
+
+            return View(&quot;customers/forgot_password&quot;, WorkContext);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult ForgotLogin()
+        {
+            return View(&quot;customers/forgot_login&quot;, WorkContext);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; ForgotLogin(ForgotPassword formModel)
+        {
+            var user = await _signInManager.UserManager.FindByEmailAsync(formModel.Email);
+            if (user != null)
+            {
+                var remindUserNameNotification = new RemindUserNameNotification(WorkContext.CurrentStore.Id, WorkContext.CurrentLanguage)
+                {
+                    UserName = user.UserName,
+                    Sender = WorkContext.CurrentStore.Email,
+                    Recipient = GetUserEmail(user)
+                };
+
+                var sendingResult = await _platformNotificationApi.SendNotificationAsync(remindUserNameNotification.ToNotificationDto());
+                if (sendingResult.IsSuccess != true)
+                {
+                    ModelState.AddModelError(&quot;form&quot;, sendingResult.ErrorMessage);
+                }
+            }
+            else
+            {
+                ModelState.AddModelError(&quot;form&quot;, &quot;User not found&quot;);
+            }
+            return View(&quot;customers/forgot_login&quot;, WorkContext);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task&lt;ActionResult&gt; ResetPassword(string token, string userId, bool activateAccount = false)
+        {
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(userId))
+            {
+                WorkContext.ErrorMessage = &quot;Error in URL format&quot;;
+                return View(&quot;error&quot;, WorkContext);
+            }
+
+            var user = await _signInManager.UserManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                WorkContext.ErrorMessage = &quot;User was not found.&quot;;
+                return View(&quot;error&quot;, WorkContext);
+            }
+
+            WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Reset Password&quot; };
+
+            WorkContext.Form = new ResetPassword
+            {
+                Token = token,
+                UserName = user.UserName,
+                ActivateAccount = activateAccount,
+                UserId = userId
+            };
+
+            if (activateAccount)
+            {
+                var status = user.Contact?.DynamicProperties?.GetDynamicPropertyValue(&quot;Invitation status&quot;);
+                var invitationExpirationDate = user.Contact?.DynamicProperties?.GetDateTimeValue(&quot;Invitation Expiration Date&quot;);
+
+                if (status.EqualsInvariant(&quot;Accepted&quot;))
+                {
+                    return StoreFrontRedirect(&quot;~/account/login&quot;);
+                }
+
+                if (DateTime.UtcNow &gt; invitationExpirationDate)
+                {
+                    WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Request invite link&quot; };
+                    return View(&quot;customers/request_invite&quot;, WorkContext);
+                }
+
+                WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Активация пользователя&quot; };
+                return View(&quot;customers/activate_account&quot;, WorkContext);
+            }
+            else
+            {
+                var isValidToken = await _signInManager.UserManager.VerifyUserTokenAsync(user, _signInManager.UserManager.Options.Tokens.PasswordResetTokenProvider, UserManager&lt;User&gt;.ResetPasswordTokenPurpose, token);
+                if (!isValidToken)
+                {
+                    WorkContext.ErrorMessage = &quot;Reset password token is invalid or expired&quot;;
+                    return View(&quot;error&quot;, WorkContext);
+                }
+            }
+
+            WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Reset Password&quot; };
+            return View(&quot;customers/reset_password&quot;, WorkContext);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; RequestInvitationLink(ResetPassword formModel)
+        {
+            if (string.IsNullOrEmpty(formModel?.UserId))
+            {
+                ModelState.AddModelError(&quot;form&quot;, &quot;Not enough info for resending invite&quot;);
+            }
+            else
+            {
+                var sendingResult = await _hruInvitationsApi.SendInvitationAsync(formModel.UserId);
+                if (sendingResult.IsSuccess != true)
+                {
+                    ModelState.AddModelError(&quot;form&quot;, sendingResult.Message);
+                }
+            }
+
+            return View(&quot;customers/request_invite&quot;, WorkContext);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; ResetPassword(ResetPassword formModel)
+        {
+            if (formModel.UserName == null || formModel.Token == null)
+            {
+                WorkContext.ErrorMessage = &quot;Not enough info for resetting the password&quot;;
+
+                return View(&quot;error&quot;, WorkContext);
+            }
+
+            formModel.UserName = formModel.UserName?.Trim();
+            if (formModel.Password != formModel.PasswordConfirmation)
+            {
+                ModelState.AddModelError(&quot;form&quot;, &quot;Passwords are not equal&quot;);
+                WorkContext.Form = formModel;
+
+                return View(formModel.ActivateAccount ? &quot;customers/activate_account&quot; : &quot;customers/reset_password&quot;, WorkContext);
+            }
+
+            var user = await _signInManager.UserManager.FindByNameAsync(formModel.UserName);
+            if (user == null)
+            {
+                // Don&#39;t reveal that the user does not exist
+                return RedirectToPage(&quot;./ResetPasswordConfirmation&quot;);
+            }
+
+            IdentityResult result;
+
+            if (formModel.ActivateAccount)
+            {
+                // Call platform API because platform token doesn&#39;t work for storefront
+                var platformResult = await _platformSecurityApi.ResetPasswordByTokenAsync(user.Id, new ResetPasswordInfo { NewPassword = formModel.Password, Token = formModel.Token });
+                result = platformResult.ToIdentityResult();
+
+                if (result.Succeeded)
+                {
+                    await _hruInvitationsApi.AcceptInvitationAsync(user.Id);
+                    SecurityCacheRegion.ExpireUser(user.Id);
+                    user = await _signInManager.UserManager.FindByIdAsync(user.Id);
+                    if (user.Contact != null)
+                    {
+                        user.Contact.DefaultLanguage = WorkContext.CurrentLanguage.CultureName;
+                    }
+                    await _signInManager.UserManager.UpdateAsync(user);
+                    await _signInManager.SignInAsync(user, true);
+
+                    if (user.UserType.EqualsInvariant(UserType.Distributor))
+                    {
+                        return StoreFrontRedirect(&quot;~/distributor/products&quot;);
+                    }
+
+                    if (user.UserType.EqualsInvariant(UserType.Dispatcher))
+                    {
+                        return StoreFrontRedirect(&quot;~/dispatcher/orders&quot;);
+                    }
+
+                    return StoreFrontRedirect(&quot;~/&quot;);
+                }
+            }
+            else
+            {
+                result = await _signInManager.UserManager.ResetPasswordAsync(user, formModel.Token, formModel.Password);
+            }
+
+            if (result.Succeeded)
+            {
+                return View(&quot;customers/reset_password_confirmation&quot;, WorkContext);
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            WorkContext.Form = formModel;
+
+            return View(formModel.ActivateAccount ? &quot;customers/activate_account&quot; : &quot;customers/reset_password&quot;, WorkContext);
+        }
+
+        [HttpPost]
+        public async Task&lt;ActionResult&gt; ChangePassword(ChangePassword formModel)
+        {
+            var result = await _signInManager.UserManager.ChangePasswordAsync(WorkContext.CurrentUser, formModel.OldPassword, formModel.NewPassword);
+
+            if (result.Succeeded)
+            {
+                return StoreFrontRedirect(&quot;~/account&quot;);
+            }
+            else
+            {
+                ModelState.AddModelError(&quot;form&quot;, result.Errors.FirstOrDefault()?.Description);
+                return View(&quot;customers/account&quot;, WorkContext);
+            }
+        }
+
+
+        private static string GetUserEmail(User user)
+        {
+            string email = null;
+            if (user != null)
+            {
+                email = user.Email ?? user.UserName;
+                if (user.Contact != null)
+                {
+                    email = user.Contact?.Email ?? email;
+                }
+            }
+            return email;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[38,9,38,115,0],[42,15,42,52,0],[43,9,43,10,0],[44,13,44,44,0],[45,13,45,36,0],[46,13,46,38,0],[47,13,47,64,0],[48,13,48,58,0],[49,13,49,56,0],[50,13,50,49,0],[51,9,51,10,0],[57,9,57,10,0],[58,13,58,83,0],[61,13,61,59,0],[62,9,62,10,0],[68,9,68,10,0],[69,13,69,85,0],[71,13,71,60,0],[72,9,72,10,0],[77,9,77,10,0],[78,13,78,111,0],[78,77,78,109,0],[79,13,79,31,0],[80,13,80,14,0],[81,17,81,50,0],[82,13,82,14,0],[84,13,84,57,0],[85,9,85,10,0],[90,9,90,10,0],[91,13,91,61,0],[92,9,92,10,0],[97,9,97,10,0],[98,13,98,60,0],[99,9,99,10,0],[105,9,105,10,0],[106,13,106,67,0],[107,13,107,44,0],[109,13,109,36,0],[110,13,110,14,0],[112,17,112,50,0],[113,17,113,57,0],[114,17,114,60,0],[116,17,116,104,0],[117,17,117,38,0],[118,17,118,18,0],[119,21,119,92,0],[120,21,120,104,0],[122,21,122,80,0],[123,21,123,85,0],[125,21,125,58,0],[126,21,126,22,0],[127,25,127,112,0],[128,25,128,148,0],[129,25,134,27,0],[135,25,135,129,0],[136,21,136,22,0],[138,21,138,60,0],[141,17,141,18,0],[142,21,142,28,0],[142,30,142,39,0],[142,40,142,42,0],[142,43,142,56,0],[143,21,143,22,0],[144,25,144,77,0],[145,21,145,22,0],[146,17,146,18,0],[147,13,147,14,0],[149,13,149,45,0],[150,13,150,60,0],[151,9,151,10,0],[156,9,156,10,0],[157,13,157,87,0],[159,13,159,76,0],[160,13,160,14,0],[161,17,161,66,0],[162,17,162,51,0],[165,13,165,81,0],[166,13,166,30,0],[167,13,167,14,0],[168,17,168,66,0],[169,17,169,51,0],[172,13,172,58,0],[173,13,173,14,0],[174,17,174,92,0],[175,17,175,51,0],[178,13,178,214,0],[179,13,179,31,0],[180,13,180,14,0],[181,17,181,85,0],[182,17,182,51,0],[185,13,190,15,0],[192,13,192,70,0],[193,9,193,10,0],[199,9,199,10,0],[200,13,200,49,0],[201,13,201,53,0],[202,13,202,59,0],[203,13,203,40,0],[205,13,205,36,0],[206,13,206,14,0],[207,17,207,94,0],[208,17,208,34,0],[209,17,209,18,0],[210,21,210,123,0],[211,21,211,42,0],[212,21,212,22,0],[213,25,213,59,0],[214,25,214,61,0],[215,25,215,79,0],[217,25,217,85,0],[218,25,218,46,0],[219,25,219,26,0],[220,29,220,108,0],[221,29,221,88,0],[222,29,222,93,0],[223,25,223,26,0],[225,25,225,64,0],[227,17,227,18,0],[228,13,228,14,0],[230,13,230,20,0],[230,22,230,31,0],[230,32,230,34,0],[230,35,230,48,0],[231,13,231,14,0],[232,17,232,75,0],[233,13,233,14,0],[235,13,235,41,0],[236,13,236,70,0],[237,9,237,10,0],[242,9,242,10,0],[243,13,243,82,0],[245,13,245,109,0],[246,13,246,77,0],[247,13,247,35,0],[248,9,248,10,0],[251,9,251,10,0],[252,13,252,75,0],[253,13,253,14,0],[254,17,254,88,0],[256,13,256,145,0],[257,13,257,48,0],[258,13,258,14,0],[259,17,259,33,0],[261,13,261,90,0],[262,13,262,41,0],[263,13,263,14,0],[264,17,264,77,0],[265,17,265,85,0],[268,17,268,53,0],[270,17,270,88,0],[272,17,272,84,0],[273,17,273,18,0],[274,21,274,74,0],[277,17,277,83,0],[278,17,278,18,0],[279,21,279,69,0],[281,13,281,14,0],[282,13,282,45,0],[283,9,283,10,0],[288,9,288,10,0],[289,13,289,73,0],[291,13,291,44,0],[292,9,292,10,0],[298,9,298,10,0],[299,13,299,53,0],[300,13,300,37,0],[302,13,302,37,0],[303,13,303,14,0],[304,17,304,61,0],[306,13,306,53,0],[308,13,308,146,0],[310,13,310,39,0],[311,13,311,14,0],[312,17,312,93,0],[315,17,315,71,0],[316,17,316,78,0],[317,17,317,42,0],[318,17,318,18,0],[319,21,319,85,0],[321,21,321,154,0],[322,21,322,22,0],[323,25,323,78,0],[326,21,326,152,0],[327,21,327,22,0],[328,25,328,73,0],[331,21,331,61,0],[334,17,334,18,0],[335,21,335,93,0],[336,17,336,18,0],[337,13,337,14,0],[339,13,339,41,0],[340,13,340,14,0],[341,17,341,55,0],[344,13,344,47,0],[345,13,345,14,0],[346,17,346,65,0],[349,13,349,91,0],[350,13,350,14,0],[351,17,351,90,0],[352,13,352,14,0],[354,13,354,71,0],[355,13,355,38,0],[357,13,357,57,0],[358,9,358,10,0],[363,9,363,10,0],[364,13,364,49,0],[365,13,365,45,0],[366,9,366,10,0],[371,9,371,10,0],[372,13,372,48,0],[373,13,373,14,0],[374,17,374,47,0],[377,13,377,164,0],[378,13,378,52,0],[379,9,379,10,0],[384,9,384,10,0],[385,13,385,78,0],[386,13,386,35,0],[387,13,387,14,0],[388,17,388,61,0],[394,13,394,177,0],[395,13,395,48,0],[396,13,396,14,0],[398,17,398,53,0],[399,17,399,18,0],[400,21,400,59,0],[405,17,405,59,0],[406,17,406,50,0],[407,17,407,18,0],[408,21,408,109,0],[409,17,409,18,0],[411,17,411,18,0],[412,21,417,23,0],[419,21,419,153,0],[421,21,427,23,0],[428,21,428,65,0],[430,21,430,89,0],[431,21,431,50,0],[432,21,432,22,0],[433,25,433,112,0],[434,21,434,22,0],[435,17,435,18,0],[437,17,437,47,0],[438,17,438,18,0],[439,21,439,28,0],[439,30,439,39,0],[439,40,439,42,0],[439,43,439,64,0],[440,21,440,22,0],[441,25,441,83,0],[442,21,442,22,0],[443,21,443,65,0],[445,13,445,14,0],[447,13,447,118,0],[449,13,449,48,0],[450,13,450,14,0],[451,17,451,77,0],[452,13,452,14,0],[453,13,453,77,0],[455,13,455,50,0],[456,9,456,10,0],[461,9,461,10,0],[462,13,462,90,0],[464,13,464,67,0],[465,9,465,10,0],[472,9,472,10,0],[473,13,473,61,0],[474,13,474,93,0],[475,13,475,30,0],[476,13,476,14,0],[477,17,477,68,0],[478,17,478,71,0],[481,13,481,96,0],[482,13,482,137,0],[484,13,489,15,0],[491,13,491,138,0],[492,13,492,49,0],[493,13,493,14,0],[494,17,494,78,0],[495,13,495,14,0],[497,13,497,67,0],[498,9,498,10,0],[503,9,503,10,0],[504,13,504,64,0],[505,9,505,10,0],[511,9,511,10,0],[512,13,512,91,0],[513,13,513,30,0],[514,13,514,14,0],[515,17,520,19,0],[522,17,522,138,0],[523,17,523,53,0],[524,17,524,18,0],[525,21,525,82,0],[526,17,526,18,0],[527,13,527,14,0],[529,13,529,14,0],[530,17,530,68,0],[531,13,531,14,0],[532,13,532,64,0],[533,9,533,10,0],[538,9,538,10,0],[539,13,539,77,0],[540,13,540,14,0],[541,17,541,66,0],[542,17,542,51,0],[545,13,545,79,0],[546,13,546,30,0],[547,13,547,14,0],[548,17,548,66,0],[549,17,549,51,0],[552,13,552,83,0],[554,13,560,15,0],[562,13,562,33,0],[563,13,563,14,0],[564,17,564,108,0],[565,17,565,128,0],[567,17,567,56,0],[568,17,568,18,0],[569,21,569,66,0],[572,17,572,64,0],[573,17,573,18,0],[574,21,574,96,0],[575,21,575,74,0],[578,17,578,95,0],[579,17,579,72,0],[582,13,582,14,0],[583,17,583,218,0],[584,17,584,35,0],[585,17,585,18,0],[586,21,586,93,0],[587,21,587,55,0],[589,13,589,14,0],[591,13,591,83,0],[592,13,592,66,0],[593,9,593,10,0],[599,9,599,10,0],[600,13,600,57,0],[601,13,601,14,0],[602,17,602,90,0],[603,13,603,14,0],[605,13,605,14,0],[606,17,606,100,0],[607,17,607,53,0],[608,17,608,18,0],[609,21,609,77,0],[610,17,610,18,0],[611,13,611,14,0],[613,13,613,66,0],[614,9,614,10,0],[620,9,620,10,0],[621,13,621,71,0],[622,13,622,14,0],[623,17,623,89,0],[625,17,625,51,0],[628,13,628,61,0],[629,13,629,70,0],[630,13,630,14,0],[631,17,631,77,0],[632,17,632,46,0],[634,17,634,129,0],[637,13,637,93,0],[638,13,638,30,0],[639,13,639,14,0],[641,17,641,70,0],[646,13,646,43,0],[647,13,647,14,0],[649,17,649,185,0],[650,17,650,60,0],[652,17,652,38,0],[653,17,653,18,0],[654,21,654,77,0],[655,21,655,61,0],[656,21,656,84,0],[657,21,657,46,0],[658,21,658,22,0],[659,25,659,96,0],[660,21,660,22,0],[661,21,661,72,0],[662,21,662,66,0],[664,21,664,77,0],[665,21,665,22,0],[666,25,666,77,0],[669,21,669,76,0],[670,21,670,22,0],[671,25,671,74,0],[674,21,674,53,0],[676,13,676,14,0],[678,13,678,14,0],[679,17,679,121,0],[680,13,680,14,0],[682,13,682,34,0],[683,13,683,14,0],[684,17,684,83,0],[687,13,687,20,0],[687,22,687,31,0],[687,32,687,34,0],[687,35,687,48,0],[688,13,688,14,0],[689,17,689,75,0],[690,13,690,14,0],[692,13,692,42,0],[694,13,694,125,0],[695,9,695,10,0],[699,9,699,10,0],[700,13,700,150,0],[702,13,702,34,0],[703,13,703,14,0],[704,17,704,56,0],[707,13,707,14,0],[708,17,708,95,0],[709,17,709,63,0],[711,9,711,10,0],[715,9,715,10,0],[716,13,716,33,0],[717,13,717,30,0],[718,13,718,14,0],[719,17,719,53,0],[720,17,720,42,0],[721,17,721,18,0],[722,21,722,58,0],[723,17,723,18,0],[724,13,724,14,0],[725,13,725,26,0],[726,9,726,10,0]]);
+    </script>
+  </body>
+</html>

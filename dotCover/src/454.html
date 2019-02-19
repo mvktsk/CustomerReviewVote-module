@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\security\notifications\resetpasswordemailnotification.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Domain.Security.Notifications
+{
+    public class ResetPasswordEmailNotification : EmailNotificationBase
+    {
+        public ResetPasswordEmailNotification(string storeId, Language language)
+            :base(storeId, language)
+        {
+        }
+
+        public string Url { get; set; }
+
+        public override IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt; GetNotificationParameters()
+        {
+            var result = base.GetNotificationParameters().ToList();
+            result.Add(new KeyValuePair&lt;string, string&gt;(nameof(Url), Url));
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,14,11,37,0],[12,9,12,10,0],[13,9,13,10,0],[15,29,15,33,0],[15,34,15,38,0],[18,9,18,10,0],[19,13,19,68,0],[20,13,20,76,0],[21,13,21,27,0],[22,9,22,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\api\apiordercontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Storefront.AutoRestClients.OrdersModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.StoreModuleApi;
+using VirtoCommerce.Storefront.Domain;
+using VirtoCommerce.Storefront.Export;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Cart;
+using VirtoCommerce.Storefront.Model.Cart.Services;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Common.Exceptions;
+using VirtoCommerce.Storefront.Model.Order;
+using VirtoCommerce.Storefront.Model.Services;
+using orderModel = VirtoCommerce.Storefront.AutoRestClients.OrdersModuleApi.Models;
+
+namespace VirtoCommerce.Storefront.Controllers.Api
+{
+    public class ApiOrderController : StorefrontControllerBase
+    {
+        private readonly IOrderModule _orderApi;
+        private readonly IStoreModule _storeApi;
+        private readonly ICartBuilder _cartBuilder;
+        private readonly ICatalogService _catalogService;
+        private readonly IOrderExportHandler _orderExportHandler;
+
+        public ApiOrderController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder, IOrderModule orderApi, IStoreModule storeApi, ICartBuilder cartBuilder, ICatalogService catalogService, IOrderExportHandler orderExportHandler)
+            : base(workContextAccessor, urlBuilder)
+        {
+            _orderApi = orderApi;
+            _storeApi = storeApi;
+            _cartBuilder = cartBuilder;
+            _catalogService = catalogService;
+            _orderExportHandler = orderExportHandler;
+        }
+
+        // POST: storefrontapi/orders/search
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; SearchCustomerOrders([FromBody] OrderSearchCriteria criteria)
+        {
+            if (criteria == null)
+            {
+                criteria = new OrderSearchCriteria();
+            }
+            //Does not allow to see a other customer orders
+            criteria.CustomerId = WorkContext.CurrentUser.Id;
+            criteria.OutletIds = new[] { WorkContext.CurrentUser.Contact?.Outlet?.Id };
+
+            var result = await _orderApi.SearchAsync(criteria.ToSearchCriteriaDto());
+
+            return Json(new
+            {
+                Results = result.CustomerOrders.Select(x =&gt; x.ToCustomerOrder(WorkContext.AllCurrencies, WorkContext.CurrentLanguage)),
+                result.TotalCount
+            });
+        }
+
+        // GET: storefrontapi/orders/{orderNumber}
+        [HttpGet]
+        public async Task&lt;ActionResult&gt; GetCustomerOrder(string orderNumber)
+        {
+            var retVal = await GetOrderByNumber(orderNumber);
+            return Json(retVal);
+        }
+
+        // GET: storefrontapi/orders/{orderNumber}/newpaymentdata
+        [HttpGet]
+        public async Task&lt;ActionResult&gt; GetNewPaymentData(string orderNumber)
+        {
+            var order = await GetOrderByNumber(orderNumber);
+
+            var storeDto = await _storeApi.GetStoreByIdAsync(order.StoreId);
+            var paymentMethods = storeDto.PaymentMethods
+                                        .Where(x =&gt; x.IsActive == true)
+                                        .Select(x =&gt; x.ToPaymentMethod(order));
+
+            var paymentDto = await _orderApi.GetNewPaymentAsync(order.Id);
+            var payment = paymentDto.ToOrderInPayment(WorkContext.AllCurrencies, WorkContext.CurrentLanguage);
+
+            return Json(new
+            {
+                Payment = payment,
+                PaymentMethods = paymentMethods,
+                Order = order
+            });
+        }
+
+        // POST: storefrontapi/orders/{orderNumber}/payments/{paymentNumber}/cancel
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; CancelPayment(string orderNumber, string paymentNumber)
+        {
+            //Need lock to prevent concurrent access to same object
+            using (await AsyncLock.GetLockByKey(GetAsyncLockKey(orderNumber, WorkContext)).LockAsync())
+            {
+                var orderDto = await GetOrderDtoByNumber(orderNumber);
+                var payment = orderDto.InPayments.FirstOrDefault(x =&gt; x.Number.EqualsInvariant(paymentNumber));
+                if (payment != null)
+                {
+                    payment.IsCancelled = true;
+                    payment.CancelReason = &quot;Canceled by customer&quot;;
+                    payment.CancelledDate = DateTime.UtcNow;
+                    payment.PaymentStatus = &quot;Cancelled&quot;;
+                    await _orderApi.UpdateAsync(orderDto);
+                }
+            }
+            return Ok();
+        }
+
+        // POST: storefrontapi/orders/{orderNumber}/payments/{paymentNumber}/process
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; ProcessOrderPayment(string orderNumber, string paymentNumber, [FromBody] orderModel.BankCardInfo bankCardInfo)
+        {
+            //Need lock to prevent concurrent access to same order
+            using (await AsyncLock.GetLockByKey(GetAsyncLockKey(orderNumber, WorkContext)).LockAsync())
+            {
+                var orderDto = await GetOrderDtoByNumber(orderNumber);
+                var paymentDto = orderDto.InPayments.FirstOrDefault(x =&gt; x.Number.EqualsInvariant(paymentNumber));
+                if (paymentDto == null)
+                {
+                    throw new StorefrontException(&quot;payment &quot; + paymentNumber + &quot; not found&quot;);
+                }
+                var processingResult = await _orderApi.ProcessOrderPaymentsAsync(orderDto.Id, paymentDto.Id, bankCardInfo);
+                return Json(new { orderProcessingResult = processingResult, paymentMethod = paymentDto.PaymentMethod });
+            }
+        }
+
+        // POST: storefrontapi/orders/{orderNumber}/payments
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; AddOrUpdateOrderPayment(string orderNumber, [FromBody] PaymentIn payment)
+        {
+            if (payment.Sum.Amount == 0)
+            {
+                throw new StorefrontException(&quot;Valid payment amount is required&quot;);
+            }
+            //Need to lock to prevent concurrent access to same object
+            using (await AsyncLock.GetLockByKey(GetAsyncLockKey(orderNumber, WorkContext)).LockAsync())
+            {
+                var orderDto = await GetOrderDtoByNumber(orderNumber);
+                var paymentDto = orderDto.InPayments.FirstOrDefault(x =&gt; x.Id.EqualsInvariant(payment.Id));
+                if (paymentDto == null)
+                {
+                    paymentDto = payment.ToOrderPaymentInDto();
+                    paymentDto.CustomerId = WorkContext.CurrentUser.Id;
+                    paymentDto.CustomerName = WorkContext.CurrentUser.UserName;
+                    paymentDto.Status = &quot;New&quot;;
+                    orderDto.InPayments.Add(paymentDto);
+                }
+                else
+                {
+                    paymentDto.BillingAddress = payment.BillingAddress != null ? payment.BillingAddress.ToOrderAddressDto() : null;
+                }
+
+                await _orderApi.UpdateAsync(orderDto);
+                //Need to return payment with generated id
+                orderDto = await _orderApi.GetByIdAsync(orderDto.Id);
+                if (string.IsNullOrEmpty(paymentDto.Id))
+                {
+                    //Because we don&#39;t know the new payment id we need to get latest payment with same gateway code
+                    paymentDto = orderDto.InPayments.Where(x =&gt; x.GatewayCode.EqualsInvariant(payment.GatewayCode)).OrderByDescending(x =&gt; x.CreatedDate).FirstOrDefault();
+                }
+                return Json(paymentDto);
+            }
+        }
+
+        // GET: storefrontapi/orders/{orderNumber}/invoice
+        [HttpGet]
+        public async Task&lt;ActionResult&gt; GetInvoicePdf(string orderNumber)
+        {
+            var stream = await _orderApi.GetInvoicePdfAsync(orderNumber);
+
+            return File(stream, &quot;application/pdf&quot;);
+        }
+
+        // POST: storefrontapi/orders/{orderNumber}/reorder
+        [HttpPost]
+        public async Task&lt;ActionResult&gt; Reorder(string orderNumber)
+        {
+            var order = await GetOrderByNumber(orderNumber);
+
+            var productIds = order.Items.Select(i =&gt; i.ProductId).ToArray();
+            var products = await _catalogService.GetProductsAsync(productIds, ItemResponseGroup.Inventory | ItemResponseGroup.ItemWithPrices | ItemResponseGroup.ItemProperties);
+
+            if (products?.Any() == true)
+            {
+                using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(WorkContext.CurrentCart.Value)).LockAsync())
+                {
+                    var cart = WorkContext.CurrentCart.Value;
+                    await _cartBuilder.LoadOrCreateNewTransientCartAsync(cart.Name, WorkContext.CurrentStore, cart.Customer, cart.Language, cart.Currency);
+
+                    foreach (var orderItem in order.Items.Where(i =&gt; i.IsGift != true))
+                    {
+                        var product = products.FirstOrDefault(p =&gt; p.Id.EqualsInvariant(orderItem.ProductId));
+                        if (product != null)
+                        {
+                            await _cartBuilder.AddItemAsync(product, orderItem.Quantity ?? 1);
+                        }
+                    }
+
+                    await _cartBuilder.SaveAsync();
+                }
+            }
+
+            return Ok();
+        }
+
+        // GET: storefrontapi/orders/export/{id}
+        [HttpGet]
+        public async Task&lt;IActionResult&gt; ExportOrder(string id)
+        {
+            return await _orderExportHandler.GetExportedOrdersAsync(id);
+        }
+
+        // GET: storefrontapi/orders/export/bulk
+        [HttpGet]
+        public async Task&lt;IActionResult&gt; BulkExportOrders(DateTime? startDate, DateTime? endDate, string status, int? pagesize)
+        {
+            return await _orderExportHandler.GetExportedOrdersAsync(WorkContext.CurrentUser.Id, WorkContext.CurrentUser.Contact.Outlet.Id, startDate, endDate, status, pagesize);
+        }
+
+        private async Task&lt;CustomerOrder&gt; GetOrderByNumber(string number)
+        {
+            var order = await GetOrderDtoByNumber(number);
+
+            WorkContext.CurrentOrder = order.ToCustomerOrder(WorkContext.AllCurrencies, WorkContext.CurrentLanguage);
+            return WorkContext.CurrentOrder;
+        }
+
+        private async Task&lt;orderModel.CustomerOrder&gt; GetOrderDtoByNumber(string number)
+        {
+            var order = await _orderApi.GetByNumberAsync(number);
+
+            if (order == null || order.CustomerId != WorkContext.CurrentUser.Id)
+            {
+                throw new StorefrontException($&quot;Order with number {number} not found (or not belongs to current user)&quot;);
+            }
+
+            return order;
+        }
+
+        private static string GetAsyncLockKey(string orderNumber, WorkContext ctx)
+        {
+            return string.Join(&quot;:&quot;, &quot;Order&quot;, orderNumber, ctx.CurrentStore.Id, ctx.CurrentUser.Id);
+        }
+
+        private static string GetAsyncLockCartKey(ShoppingCart cart)
+        {
+            return string.Join(&quot;:&quot;, &quot;Cart&quot;, cart.Id, cart.Name, cart.CustomerId);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[30,15,30,52,0],[31,9,31,10,0],[32,13,32,34,0],[33,13,33,34,0],[34,13,34,40,0],[35,13,35,46,0],[36,13,36,54,0],[37,9,37,10,0],[43,9,43,10,0],[44,13,44,34,0],[45,13,45,14,0],[46,17,46,54,0],[47,13,47,14,0],[49,13,49,62,0],[50,13,50,88,0],[52,13,52,86,0],[54,13,58,16,0],[56,61,56,134,0],[59,9,59,10,0],[64,9,64,10,0],[65,13,65,62,0],[66,13,66,33,0],[67,9,67,10,0],[72,9,72,10,0],[73,13,73,61,0],[75,13,75,77,0],[76,13,78,80,0],[77,53,77,71,0],[78,54,78,78,0],[80,13,80,75,0],[81,13,81,111,0],[83,13,88,16,0],[89,9,89,10,0],[95,9,95,10,0],[97,13,97,104,0],[98,13,98,14,0],[99,17,99,71,0],[100,17,100,112,0],[100,71,100,110,0],[101,17,101,37,0],[102,17,102,18,0],[103,21,103,48,0],[104,21,104,67,0],[105,21,105,61,0],[106,21,106,57,0],[107,21,107,59,0],[108,17,108,18,0],[109,13,109,14,0],[110,13,110,25,0],[111,9,111,10,0],[117,9,117,10,0],[119,13,119,104,0],[120,13,120,14,0],[121,17,121,71,0],[122,17,122,115,0],[122,74,122,113,0],[123,17,123,40,0],[124,17,124,18,0],[125,21,125,94,0],[127,17,127,124,0],[128,17,128,121,0],[130,9,130,10,0],[136,9,136,10,0],[137,13,137,41,0],[138,13,138,14,0],[139,17,139,83,0],[142,13,142,104,0],[143,13,143,14,0],[144,17,144,71,0],[145,17,145,108,0],[145,74,145,106,0],[146,17,146,40,0],[147,17,147,18,0],[148,21,148,64,0],[149,21,149,72,0],[150,21,150,80,0],[151,21,151,47,0],[152,21,152,57,0],[153,17,153,18,0],[155,17,155,18,0],[156,21,156,132,0],[157,17,157,18,0],[159,17,159,55,0],[161,17,161,70,0],[162,17,162,57,0],[163,17,163,18,0],[165,21,165,172,0],[165,65,165,115,0],[165,140,165,153,0],[166,17,166,18,0],[167,17,167,41,0],[169,9,169,10,0],[174,9,174,10,0],[175,13,175,74,0],[177,13,177,52,0],[178,9,178,10,0],[183,9,183,10,0],[184,13,184,61,0],[186,13,186,77,0],[186,54,186,65,0],[187,13,187,178,0],[189,13,189,41,0],[190,13,190,14,0],[191,17,191,117,0],[192,17,192,18,0],[193,21,193,62,0],[194,21,194,156,0],[196,21,196,28,0],[196,30,196,43,0],[196,44,196,46,0],[196,47,196,87,0],[196,70,196,86,0],[197,21,197,22,0],[198,25,198,111,0],[198,68,198,109,0],[199,25,199,45,0],[200,25,200,26,0],[201,29,201,95,0],[202,25,202,26,0],[203,21,203,22,0],[205,21,205,52,0],[206,17,206,18,0],[207,13,207,14,0],[209,13,209,25,0],[210,9,210,10,0],[215,9,215,10,0],[216,13,216,73,0],[217,9,217,10,0],[222,9,222,10,0],[223,13,223,178,0],[224,9,224,10,0],[227,9,227,10,0],[228,13,228,59,0],[230,13,230,118,0],[231,13,231,45,0],[232,9,232,10,0],[235,9,235,10,0],[236,13,236,66,0],[238,13,238,81,0],[239,13,239,14,0],[240,17,240,121,0],[243,13,243,26,0],[244,9,244,10,0],[247,9,247,10,0],[248,13,248,100,0],[249,9,249,10,0],[252,9,252,10,0],[253,13,253,82,0],[254,9,254,10,0]]);
+    </script>
+  </body>
+</html>

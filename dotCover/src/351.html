@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\extensions\seoextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Storefront.Domain;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Stores;
+using VirtoCommerce.Tools;
+using catalogDto = VirtoCommerce.Storefront.AutoRestClients.CatalogModuleApi.Models;
+using coreDto = VirtoCommerce.Storefront.AutoRestClients.CoreModuleApi.Models;
+using toolsDto = VirtoCommerce.Tools.Models;
+
+namespace VirtoCommerce.Storefront.Common
+{
+    public static class SeoExtensions
+    {
+        /// &lt;summary&gt;
+        /// Returns SEO path if all outline items of the first outline have SEO keywords, otherwise returns default value.
+        /// Path: GrandParentCategory/ParentCategory/ProductCategory/Product
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;outlines&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;store&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;language&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;defaultValue&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static string GetSeoPath(this IEnumerable&lt;catalogDto.Outline&gt; outlines, Store store, Language language, string defaultValue)
+        {
+            return outlines
+                ?.Select(o =&gt; o.JsonConvert&lt;toolsDto.Outline&gt;())
+                .GetSeoPath(store.ToToolsStore(), language.CultureName, defaultValue);
+        }
+
+        /// &lt;summary&gt;
+        /// Returns SEO records with highest score
+        /// http://docs.virtocommerce.com/display/vc2devguide/SEO
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;seoRecords&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;store&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;language&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;slug&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static IList&lt;coreDto.SeoInfo&gt; GetBestMatchingSeoInfos(this IEnumerable&lt;coreDto.SeoInfo&gt; seoRecords, Store store, Language language, string slug = null)
+        {
+            return seoRecords
+                ?.Select(s =&gt; s.JsonConvert&lt;toolsDto.SeoInfo&gt;())
+                .GetBestMatchingSeoInfos(store.Id, store.DefaultLanguage.CultureName, language.CultureName, slug)
+                .Select(s =&gt; s.JsonConvert&lt;coreDto.SeoInfo&gt;())
+                .ToList();
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[25,9,25,10,0],[26,13,28,87,0],[27,31,27,64,0],[29,9,29,10,0],[41,9,41,10,0],[42,13,46,27,0],[43,31,43,64,0],[45,30,45,62,0],[47,9,47,10,0]]);
+    </script>
+  </body>
+</html>

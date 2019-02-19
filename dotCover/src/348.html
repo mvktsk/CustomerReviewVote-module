@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\infrastructure\applicationinsights\usertelemetryinitializer.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.ApplicationInsights.AspNetCore.TelemetryInitializers;
+using Microsoft.ApplicationInsights.Channel;
+using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.AspNetCore.Http;
+
+namespace VirtoCommerce.Storefront.Infrastructure.ApplicationInsights
+{
+    /// &lt;summary&gt;
+    /// A telemetry initializer that will gather user identity context information.
+    /// &lt;/summary&gt;
+    public class UserTelemetryInitializer : TelemetryInitializerBase
+    {
+        public UserTelemetryInitializer(IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
+        {
+        }
+
+        /// &lt;summary&gt;
+        /// Initializes user id and name for Azure Web App case.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;platformContext&quot;&gt;Platform context.&lt;/param&gt;
+        /// &lt;param name=&quot;requestTelemetry&quot;&gt;Request telemetry.&lt;/param&gt;
+        /// &lt;param name=&quot;telemetry&quot;&gt;Telemetry item.&lt;/param&gt;
+        protected override void OnInitializeTelemetry(HttpContext platformContext, RequestTelemetry requestTelemetry, ITelemetry telemetry)
+        {
+            if (platformContext.User != null &amp;&amp; platformContext.User.Identity.IsAuthenticated &amp;&amp; platformContext.User.Identity.Name != null)
+            {
+                telemetry.Context.User.AuthenticatedUserId = platformContext.User.Identity.Name;
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,15,14,40,0],[15,9,15,10,0],[16,9,16,10,0],[25,9,25,10,0],[26,13,26,141,0],[27,13,27,14,0],[28,17,28,97,0],[29,13,29,14,0],[30,9,30,10,0]]);
+    </script>
+  </body>
+</html>

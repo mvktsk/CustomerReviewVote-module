@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\shop.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using DotLiquid;
+using System.Runtime.Serialization;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// Represents the shop object
+    /// &lt;/summary&gt;
+    /// &lt;remarks&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/objects/shop
+    /// &lt;/remarks&gt;
+    [DataContract]
+    public partial class Shop : Drop
+    {
+        /// &lt;summary&gt;
+        /// Shop id
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Id { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the shop&#39;s currency in three-letter format (ex: USD).
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Currency { get; set; }
+
+        
+        public IMutablePagedList&lt;Collection&gt; Collections { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the number of collections in a shop.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public int CollectionsCount { get { return Collections.GetTotalCount(); } }
+
+        /// &lt;summary&gt;
+        /// Returns the description of the shop.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Description { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the primary domain of the shop.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Domain { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the shop&#39;s email address.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Email { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns a string that is used by Shopify to format money without showing the currency.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string MoneyFormat { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns a string that is used by Shopify to format money while also displaying the currency.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string MoneyWithCurrencyFormat { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the shop&#39;s name.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Name { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the full URL of a shop.
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Url { get; set; }
+
+        /// &lt;summary&gt;
+        /// All shop currencies
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string[] Currencies { get; set; }
+
+        /// &lt;summary&gt;
+        /// All shop languages
+        /// &lt;/summary&gt;
+        public Language[] Languages { get; set; }
+
+        /// &lt;summary&gt;
+        /// Shop catalog
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Catalog { get; set; }
+
+        [DataMember]
+        public bool QuotesEnabled { get; set; }
+
+        [DataMember]
+        public bool SubscriptionEnabled { get; set; }
+
+        /// &lt;summary&gt;
+        /// Shop metafields
+        /// &lt;/summary&gt;
+        public MetaFieldNamespacesCollection Metafields { get; set; }
+
+        public bool CustomerAccountsEnabled { get; set; }
+
+        public bool CustomerAccountsOptional { get; set; }
+
+        public string Status { get; set; }
+
+        public int MinimumOrderItemsQuantity { get; set; }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[20,28,20,32,0],[20,33,20,37,0],[26,34,26,38,0],[26,39,26,43,0],[29,60,29,64,0],[29,65,29,69,0],[35,43,35,44,0],[35,45,35,80,0],[35,81,35,82,0],[41,37,41,41,0],[41,42,41,46,0],[47,32,47,36,0],[47,37,47,41,0],[53,31,53,35,0],[53,36,53,40,0],[59,37,59,41,0],[59,42,59,46,0],[65,49,65,53,0],[65,54,65,58,0],[71,30,71,34,0],[71,35,71,39,0],[77,29,77,33,0],[77,34,77,38,0],[83,38,83,42,0],[83,43,83,47,0],[88,39,88,43,0],[88,44,88,48,0],[94,33,94,37,0],[94,38,94,42,0],[97,37,97,41,0],[97,42,97,46,0],[100,43,100,47,0],[100,48,100,52,0],[105,59,105,63,0],[105,64,105,68,0],[107,47,107,51,0],[107,52,107,56,0],[109,48,109,52,0],[109,53,109,57,0],[111,32,111,36,0],[111,37,111,41,0],[113,48,113,52,0],[113,53,113,57,0]]);
+    </script>
+  </body>
+</html>

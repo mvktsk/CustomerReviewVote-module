@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\security\events\userregisteredevent.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using VirtoCommerce.Storefront.Model.Common.Events;
+
+namespace VirtoCommerce.Storefront.Model.Security.Events
+{
+    public class UserRegisteredEvent : DomainEvent
+    {
+        public UserRegisteredEvent(WorkContext workContext, User user, UserRegistration registration)
+        {
+            WorkContext = workContext;
+            User = user;
+            UserRegistration = registration;
+        }
+
+        public WorkContext WorkContext { get; set; }
+        public User User { get; set; }
+        public UserRegistration UserRegistration { get; set; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[7,9,7,102,0],[8,9,8,10,0],[9,13,9,39,0],[10,13,10,25,0],[11,13,11,45,0],[12,9,12,10,0],[14,42,14,46,0],[14,47,14,51,0],[15,28,15,32,0],[15,33,15,37,0],[16,52,16,56,0],[16,57,16,61,0]]);
+    </script>
+  </body>
+</html>

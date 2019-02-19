@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\converters\orderconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.LiquidThemeEngine.Objects;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Order;
+using Discount = VirtoCommerce.LiquidThemeEngine.Objects.Discount;
+
+namespace VirtoCommerce.LiquidThemeEngine.Converters
+{
+    public static class OrderConverter
+    {
+        public static Order ToShopifyModel(this CustomerOrder order, Storefront.Model.Language language, IStorefrontUrlBuilder urlBuilder)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidOrder(order, language, urlBuilder);
+        }
+    }
+
+    public partial class ShopifyModelConverter
+    {
+        public virtual Order ToLiquidOrder(CustomerOrder order, Storefront.Model.Language language, IStorefrontUrlBuilder urlBuilder)
+        {
+            var result = new Order();
+            result.Cancelled = order.IsCancelled == true;
+            result.CancelledAt = order.CancelledDate;
+            result.CancelReason = order.CancelReason;
+            result.CancelReasonLabel = order.CancelReason;
+            result.CreatedAt = order.CreatedDate ?? DateTime.MinValue;
+            result.Name = order.Number;
+            result.OrderNumber = order.Number;
+            result.CurrencyCode = order.Currency.Code;
+            result.CustomerUrl = urlBuilder.ToAppAbsolute(&quot;/account/order/&quot; + order.Number);
+
+            if (order.Addresses != null)
+            {
+                var shippingAddress = order.Addresses
+                    .FirstOrDefault(a =&gt; (a.Type &amp; AddressType.Shipping) == AddressType.Shipping);
+
+                if (shippingAddress != null)
+                {
+                    result.ShippingAddress = ToLiquidAddress(shippingAddress);
+                }
+
+                var billingAddress = order.Addresses
+                    .FirstOrDefault(a =&gt; (a.Type &amp; AddressType.Billing) == AddressType.Billing);
+
+                if (billingAddress != null)
+                {
+                    result.BillingAddress = ToLiquidAddress(billingAddress);
+                }
+                else if (shippingAddress != null)
+                {
+                    result.BillingAddress = ToLiquidAddress(shippingAddress);
+                }
+
+                result.Email = order.Addresses
+                    .Where(a =&gt; !string.IsNullOrEmpty(a.Email))
+                    .Select(a =&gt; a.Email)
+                    .FirstOrDefault();
+            }
+
+
+            var discountTotal = order.DiscountTotal;
+            var discounts = new List&lt;Discount&gt;();
+
+            if (order.Discount != null)
+            {
+                discounts.Add(ToLiquidDiscount(order.Discount));
+            }
+
+            var taxLines = new List&lt;Objects.TaxLine&gt;();
+
+            if (order.InPayments != null)
+            {
+                var inPayment = order.InPayments.OrderByDescending(p =&gt; p.CreatedDate)
+                    .FirstOrDefault();
+
+                if (inPayment != null)
+                {
+                    if (string.IsNullOrEmpty(inPayment.Status))
+                    {
+                        result.FinancialStatus = inPayment.IsApproved == true ? &quot;Paid&quot; : &quot;Pending&quot;;
+                        result.FinancialStatusLabel = inPayment.IsApproved == true ? &quot;Paid&quot; : &quot;Pending&quot;;
+                    }
+                    else
+                    {
+                        result.FinancialStatus = inPayment.Status;
+                        result.FinancialStatusLabel = inPayment.Status;
+                    }
+                }
+            }
+
+            if (order.Shipments != null)
+            {
+                result.ShippingMethods = order.Shipments.Select(s =&gt; ToLiquidShippingMethod(s)).ToArray();
+                result.ShippingPrice = result.ShippingMethods.Sum(s =&gt; s.Price);
+                result.ShippingPriceWithTax = result.ShippingMethods.Sum(s =&gt; s.PriceWithTax);
+
+                var orderShipment = order.Shipments.FirstOrDefault();
+
+                if (orderShipment != null)
+                {
+                    if (string.IsNullOrEmpty(orderShipment.Status))
+                    {
+                        result.FulfillmentStatus = orderShipment.IsApproved == true ? &quot;Sent&quot; : &quot;Not sent&quot;;
+                        result.FulfillmentStatusLabel = orderShipment.IsApproved == true ? &quot;Sent&quot; : &quot;Not sent&quot;;
+                    }
+                    else
+                    {
+                        result.FulfillmentStatus = orderShipment.Status;
+                        result.FulfillmentStatusLabel = orderShipment.Status;
+                    }
+                }
+
+                if (order.ShippingTaxTotal.Amount &gt; 0)
+                {
+                    taxLines.Add(new Objects.TaxLine
+                    {
+                        Title = &quot;Shipping&quot;,
+                        Price = order.ShippingTaxTotal.Amount * 100,
+                        Rate = order.Shipments.Average(s =&gt; s.TaxPercentRate)
+                    });
+                }
+                if (order.ShippingDiscountTotal.Amount &gt; 0)
+                {
+                    discounts.Add(new Discount
+                    {
+                        Type = &quot;ShippingDiscount&quot;,
+                        Code = &quot;Shipping&quot;,
+                        Amount = order.ShippingDiscountTotal.Amount * 100,
+                    });
+                }
+            }
+
+            if (order.Items != null)
+            {
+                result.LineItems = order.Items.Select(i =&gt; ToLiquidLineItem(i, language, urlBuilder)).ToArray();
+                result.SubtotalPrice = order.SubTotal.Amount * 100;
+                result.SubtotalPriceWithTax = order.SubTotalWithTax.Amount * 100;
+
+                if (order.SubTotalTaxTotal.Amount &gt; 0)
+                {
+                    taxLines.Add(new Objects.TaxLine
+                    {
+                        Title = &quot;Line items&quot;,
+                        Price = order.SubTotalTaxTotal.Amount * 100,
+                        Rate = order.Items.Average(i =&gt; i.TaxPercentRate)
+                    });
+                }
+            }
+
+
+            if (order.DiscountAmount.Amount &gt; 0)
+            {
+                discounts.Add(new Discount
+                {
+                    Type = &quot;Order subtotal&quot;,
+                    Code = &quot;Order&quot;,
+                    Amount = order.DiscountAmount.Amount * 100
+                });
+            }
+
+            if (!order.InPayments.IsNullOrEmpty())
+            {
+                result.Transactions = order.InPayments.Select(x =&gt; ToLiquidTransaction(x)).ToArray();
+            }
+
+            result.TaxLines = taxLines.ToArray();
+            result.TaxPrice = taxLines.Sum(t =&gt; t.Price);
+
+            result.Discounts = discounts.ToArray();
+
+            result.TotalPrice = order.Total.Amount * 100;
+
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,10,0],[16,13,16,57,0],[17,13,17,73,0],[18,9,18,10,0],[24,9,24,10,0],[25,13,25,38,0],[26,13,26,58,0],[27,13,27,54,0],[28,13,28,54,0],[29,13,29,59,0],[30,13,30,71,0],[31,13,31,40,0],[32,13,32,47,0],[33,13,33,55,0],[34,13,34,93,0],[36,13,36,41,0],[37,13,37,14,0],[38,17,39,99,0],[39,42,39,97,0],[41,17,41,45,0],[42,17,42,18,0],[43,21,43,79,0],[44,17,44,18,0],[46,17,47,97,0],[47,42,47,95,0],[49,17,49,44,0],[50,17,50,18,0],[51,21,51,77,0],[52,17,52,18,0],[53,22,53,50,0],[54,17,54,18,0],[55,21,55,78,0],[56,17,56,18,0],[58,17,61,39,0],[59,33,59,63,0],[60,34,60,41,0],[62,13,62,14,0],[65,13,65,53,0],[66,13,66,50,0],[68,13,68,40,0],[69,13,69,14,0],[70,17,70,65,0],[71,13,71,14,0],[73,13,73,56,0],[75,13,75,42,0],[76,13,76,14,0],[77,17,78,39,0],[77,73,77,86,0],[80,17,80,39,0],[81,17,81,18,0],[82,21,82,64,0],[83,21,83,22,0],[84,25,84,100,0],[85,25,85,105,0],[86,21,86,22,0],[88,21,88,22,0],[89,25,89,67,0],[90,25,90,72,0],[91,21,91,22,0],[92,17,92,18,0],[93,13,93,14,0],[95,13,95,41,0],[96,13,96,14,0],[97,17,97,107,0],[97,70,97,95,0],[98,17,98,81,0],[98,72,98,79,0],[99,17,99,95,0],[99,79,99,93,0],[101,17,101,70,0],[103,17,103,43,0],[104,17,104,18,0],[105,21,105,68,0],[106,21,106,22,0],[107,25,107,107,0],[108,25,108,112,0],[109,21,109,22,0],[111,21,111,22,0],[112,25,112,73,0],[113,25,113,78,0],[114,21,114,22,0],[115,17,115,18,0],[117,17,117,55,0],[118,17,118,18,0],[119,21,124,24,0],[123,61,123,77,0],[125,17,125,18,0],[126,17,126,60,0],[127,17,127,18,0],[128,21,133,24,0],[134,17,134,18,0],[135,13,135,14,0],[137,13,137,37,0],[138,13,138,14,0],[139,17,139,113,0],[139,60,139,101,0],[140,17,140,68,0],[141,17,141,82,0],[143,17,143,55,0],[144,17,144,18,0],[145,21,150,24,0],[149,57,149,73,0],[151,17,151,18,0],[152,13,152,14,0],[155,13,155,49,0],[156,13,156,14,0],[157,17,162,20,0],[163,13,163,14,0],[165,13,165,51,0],[166,13,166,14,0],[167,17,167,102,0],[167,68,167,90,0],[168,13,168,14,0],[170,13,170,50,0],[171,13,171,58,0],[171,49,171,56,0],[173,13,173,52,0],[175,13,175,58,0],[177,13,177,27,0],[178,9,178,10,0]]);
+    </script>
+  </body>
+</html>

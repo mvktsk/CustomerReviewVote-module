@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\security\onlyregistereduserauthorizationhandler.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using VirtoCommerce.Storefront.Model;
+
+namespace VirtoCommerce.Storefront.Domain.Security
+{
+    public class OnlyRegisteredUserAuthorizationRequirement : IAuthorizationRequirement
+    {
+        public const string PolicyName = &quot;OnlyRegisteredUser&quot;;
+    }
+    /// &lt;summary&gt;
+    /// We need this policy as alternative for [Authorize] attribute, because in the storefront all users are registered in terms of ASP.NET authorization.
+    /// &lt;/summary&gt;
+    public class OnlyRegisteredUserAuthorizationHandler : AuthorizationHandler&lt;OnlyRegisteredUserAuthorizationRequirement&gt;
+    {
+        private readonly IWorkContextAccessor _workContextAccessor;
+        public OnlyRegisteredUserAuthorizationHandler(IWorkContextAccessor workContextAccessor)
+        {
+            _workContextAccessor = workContextAccessor;
+        }
+
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, OnlyRegisteredUserAuthorizationRequirement requirement)
+        {
+            var workContext = _workContextAccessor.WorkContext;
+            if (workContext.CurrentUser.IsRegisteredUser)
+            {
+                context.Succeed(requirement);
+            }
+            return Task.CompletedTask;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,9,17,96,0],[18,9,18,10,0],[19,13,19,56,0],[20,9,20,10,0],[23,9,23,10,0],[24,13,24,64,0],[25,13,25,58,0],[26,13,26,14,0],[27,17,27,46,0],[28,13,28,14,0],[29,13,29,39,0],[30,9,30,10,0]]);
+    </script>
+  </body>
+</html>

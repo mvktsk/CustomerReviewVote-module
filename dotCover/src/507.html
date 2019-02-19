@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\api\apiinvoicescontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Storefront.Extensions;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Invoices.Services;
+
+namespace VirtoCommerce.Storefront.Controllers.Api
+{
+    public class ApiInvoicesController : StorefrontControllerBase
+    {
+        private readonly IHruInvoicesService _invoicesService;
+
+        public ApiInvoicesController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder, IHruInvoicesService invoicesService)
+         : base(workContextAccessor, urlBuilder)
+        {
+            _invoicesService = invoicesService;
+        }
+
+        // GET: storefrontapi/invoices
+        [HttpGet]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; GetInvoices(string salePointId, string beginDate, string endDate)
+        {
+            var invoices = await _invoicesService.GetInvoices(salePointId, beginDate.ParseMillisecondsToDate(), endDate.ParseMillisecondsToDate()).ConfigureAwait(false);
+            
+            return Ok(invoices);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,12,15,49,0],[16,9,16,10,0],[17,13,17,48,0],[18,9,18,10,0],[24,9,24,10,0],[25,13,25,170,0],[27,13,27,33,0],[28,9,28,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\security\customusermanager.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using VirtoCommerce.Storefront.AutoRestClients.CoreModuleApi;
+using VirtoCommerce.Storefront.Model.Security;
+
+namespace VirtoCommerce.Storefront.Domain.Security
+{
+    public class CustomUserManager : AspNetUserManager&lt;User&gt;
+    {
+        public CustomUserManager(IUserStore&lt;User&gt; userStore, IOptions&lt;IdentityOptions&gt; optionsAccessor, IPasswordHasher&lt;User&gt; passwordHasher,
+                                IEnumerable&lt;IUserValidator&lt;User&gt;&gt; userValidators, IEnumerable&lt;IPasswordValidator&lt;User&gt;&gt; passwordValidators,
+                                ILookupNormalizer keyNormalizer, IdentityErrorDescriber errors, IServiceProvider services, ILogger&lt;UserManager&lt;User&gt;&gt; logger)
+            : base(userStore, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger)
+        {
+        }
+
+        public async override Task&lt;User&gt; GetUserAsync(ClaimsPrincipal principal)
+        {
+            //User can be anonymous and also should be signed-in 
+            var user = new User
+            {
+                Id = principal.FindFirstValue(ClaimTypes.NameIdentifier),
+                UserName = principal.FindFirstValue(ClaimTypes.Name),
+                SecurityStamp = principal.FindFirstValue(&quot;AspNet.Identity.SecurityStamp&quot;)
+            };
+            //For registered users need to load it  from storage
+            if (principal.Identity.IsAuthenticated &amp;&amp; user.UserName != SecurityConstants.AnonymousUsername)
+            {
+                user = await FindByIdAsync(user.Id);
+            }
+            //Restore some properties from cookies
+            if (user != null)
+            {
+                user.OperatorUserId = principal.FindFirstValue(SecurityConstants.Claims.OperatorUserIdClaimType);
+                user.OperatorUserName = principal.FindFirstValue(SecurityConstants.Claims.OperatorUserNameClaimType);
+                user.SelectedCurrencyCode = principal.FindFirstValue(SecurityConstants.Claims.CurrencyClaimType);
+            }
+            return user;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,15,18,140,0],[19,9,19,10,0],[20,9,20,10,0],[23,9,23,10,0],[25,13,30,15,0],[32,13,32,108,0],[33,13,33,14,0],[34,17,34,53,0],[35,13,35,14,0],[37,13,37,30,0],[38,13,38,14,0],[39,17,39,114,0],[40,17,40,118,0],[41,17,41,114,0],[42,13,42,14,0],[43,13,43,25,0],[44,9,44,10,0]]);
+    </script>
+  </body>
+</html>

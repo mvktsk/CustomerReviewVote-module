@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\orderscontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Cart;
+using VirtoCommerce.Storefront.Model.Cart.Services;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Common.Exceptions;
+using VirtoCommerce.Storefront.Model.Order.Services;
+using VirtoCommerce.Storefront.Model.Services;
+
+namespace VirtoCommerce.Storefront.Controllers
+{
+    public class OrdersController : StorefrontControllerBase
+    {
+        private readonly ICustomerOrderService _orderService;
+        private readonly ICartBuilder _cartBuilder;
+        private readonly ICatalogService _catalogService;
+
+        public OrdersController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder, ICustomerOrderService orderService, ICartBuilder cartBuilder, ICatalogService catalogService)
+            : base(workContextAccessor, urlBuilder)
+        {
+            _orderService = orderService;
+            _cartBuilder = cartBuilder;
+            _catalogService = catalogService;
+        }
+
+        [HttpGet]
+        public ActionResult PreviousOrders()
+        {
+            WorkContext.CurrentPageSeo = new SeoInfo { Title = &quot;Заказы&quot; };
+
+            return View(&quot;orders&quot;);
+        }
+
+        [HttpGet]
+        public async Task&lt;ActionResult&gt; Reorder(string number)
+        {
+            var order = await _orderService.GetOrderByNumberAsync(number);
+            if (order == null || order.CustomerId != WorkContext.CurrentUser.Id)
+            {
+                return NotFound();
+            }
+
+            if (WorkContext.CurrentCart.Value == null)
+            {
+                throw new StorefrontException(&quot;Cart not found&quot;);
+            }
+
+            using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(WorkContext.CurrentCart.Value)).LockAsync())
+            {
+                var cartBuilder = await LoadOrCreateCartAsync();
+                var productIds = order.Items.Where(i=&gt;i.IsGift == false).Select(i =&gt; i.ProductId);
+                var products = await _catalogService.GetProductsAsync(productIds.ToArray(), ItemResponseGroup.Inventory | ItemResponseGroup.ItemWithPrices | ItemResponseGroup.ItemProperties);
+                foreach (var item in order.Items)
+                {
+                    var product = products.FirstOrDefault(p =&gt; p.Id == item.ProductId);
+                    if (product != null)
+                    {
+                        await cartBuilder.AddItemAsync(product, (int)item.Quantity);    
+                    }
+                }
+                await cartBuilder.SaveAsync();
+            }
+
+            return StoreFrontRedirect(&quot;~/cart&quot;);
+        }
+
+        private static string GetAsyncLockCartKey(ShoppingCart cart)
+        {
+            return string.Join(&quot;:&quot;, &quot;Cart&quot;, cart.Id, cart.Name, cart.CustomerId);
+        }
+
+        private async Task&lt;ICartBuilder&gt; LoadOrCreateCartAsync()
+        {
+            var cart = WorkContext.CurrentCart.Value;
+            //Need to try load fresh cart from cache or service to prevent parallel update conflict
+            //because WorkContext.CurrentCart may contains old cart
+            await _cartBuilder.LoadOrCreateNewTransientCartAsync(cart.Name, WorkContext.CurrentStore, cart.Customer, cart.Language, cart.Currency);
+            return _cartBuilder;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[22,15,22,52,0],[23,9,23,10,0],[24,13,24,42,0],[25,13,25,40,0],[26,13,26,46,0],[27,9,27,10,0],[31,9,31,10,0],[32,13,32,75,0],[34,13,34,35,0],[35,9,35,10,0],[39,9,39,10,0],[40,13,40,75,0],[41,13,41,81,0],[42,13,42,14,0],[43,17,43,35,0],[46,13,46,55,0],[47,13,47,14,0],[48,17,48,65,0],[51,13,51,113,0],[52,13,52,14,0],[53,17,53,65,0],[54,17,54,99,0],[54,55,54,72,0],[54,86,54,97,0],[55,17,55,192,0],[56,17,56,24,0],[56,26,56,34,0],[56,35,56,37,0],[56,38,56,49,0],[57,17,57,18,0],[58,21,58,88,0],[58,64,58,86,0],[59,21,59,41,0],[60,21,60,22,0],[61,25,61,85,0],[62,21,62,22,0],[63,17,63,18,0],[64,17,64,47,0],[65,13,65,14,0],[67,13,67,49,0],[68,9,68,10,0],[71,9,71,10,0],[72,13,72,82,0],[73,9,73,10,0],[76,9,76,10,0],[77,13,77,54,0],[80,13,80,148,0],[81,13,81,33,0],[82,9,82,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\quote\quoteservice.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using PagedList.Core;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.AutoRestClients.QuoteModuleApi;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Quote;
+using VirtoCommerce.Storefront.Model.Quote.Services;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public class QuoteService : IQuoteService
+    {
+        private readonly IQuoteModule _quoteApi;
+        private readonly IWorkContextAccessor _workContextAccessor;
+        public QuoteService(IQuoteModule quoteApi, IWorkContextAccessor workContextAccessor)
+        {
+            _quoteApi = quoteApi;
+            _workContextAccessor = workContextAccessor;
+        }
+
+        public IPagedList&lt;QuoteRequest&gt; SearchQuotes(QuoteSearchCriteria criteria)
+        {
+            var workContext = _workContextAccessor.WorkContext;
+            return InnerSearchQuotesAsync(criteria, workContext).GetAwaiter().GetResult();
+        }
+
+        public async Task&lt;IPagedList&lt;QuoteRequest&gt;&gt; SearchQuotesAsync(QuoteSearchCriteria criteria)
+        {
+            var workContext = _workContextAccessor.WorkContext;
+            return await InnerSearchQuotesAsync(criteria, workContext);
+        }
+
+        protected virtual async Task&lt;IPagedList&lt;QuoteRequest&gt;&gt; InnerSearchQuotesAsync(QuoteSearchCriteria criteria, WorkContext workContext)
+        {
+            if (criteria == null)
+            {
+                throw new ArgumentNullException(nameof(criteria));
+            }
+            var result = await _quoteApi.SearchAsync(criteria.ToQuoteSearchCriteriaDto());
+            return new StaticPagedList&lt;QuoteRequest&gt;(result.QuoteRequests.Select(x =&gt; x.ToQuoteRequest(workContext.CurrentCurrency, workContext.CurrentLanguage)),
+                                                     criteria.PageNumber, criteria.PageSize, result.TotalCount.Value);
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,9,17,93,0],[18,9,18,10,0],[19,13,19,34,0],[20,13,20,56,0],[21,9,21,10,0],[24,9,24,10,0],[25,13,25,64,0],[26,13,26,91,0],[27,9,27,10,0],[30,9,30,10,0],[31,13,31,64,0],[32,13,32,72,0],[33,9,33,10,0],[36,9,36,10,0],[37,13,37,34,0],[38,13,38,14,0],[39,17,39,67,0],[41,13,41,91,0],[42,13,43,119,0],[42,87,42,161,0],[44,9,44,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\converters\vendorconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using PagedList.Core;
+using System.Linq;
+using VirtoCommerce.LiquidThemeEngine.Objects;
+using VirtoCommerce.Storefront.Model.Common;
+using StorefrontModel = VirtoCommerce.Storefront.Model;
+
+namespace VirtoCommerce.LiquidThemeEngine.Converters
+{
+    public static class VendorConverter
+    {
+        public static Vendor ToShopifyModel(this StorefrontModel.Vendor vendor)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidVendor(vendor);
+        }
+    }
+
+    public partial class ShopifyModelConverter
+    {
+        public virtual Vendor ToLiquidVendor(Storefront.Model.Vendor vendor)
+        {
+            var result = new Vendor();
+            result.Description = vendor.Description;
+            result.GroupName = vendor.GroupName;
+            result.Id = vendor.Id;
+            result.LogoUrl = vendor.LogoUrl;
+            result.Name = vendor.Name;
+            result.SiteUrl = vendor.SiteUrl;
+           
+            result.Handle = vendor.SeoInfo != null ? vendor.SeoInfo.Slug : vendor.Id;
+
+            var shopifyAddressModels = vendor.Addresses.Select(a =&gt; ToLiquidAddress(a));
+            result.Addresses = new MutablePagedList&lt;Address&gt;(shopifyAddressModels);
+            result.DynamicProperties = vendor.DynamicProperties;
+
+            if (vendor.Products != null)
+            {
+                result.Products = new MutablePagedList&lt;Product&gt;((pageNumber, pageSize, sortInfos) =&gt;
+                {
+                    vendor.Products.Slice(pageNumber, pageSize, sortInfos);
+                    return new StaticPagedList&lt;Product&gt;(vendor.Products.Select(x =&gt; ToLiquidProduct(x)), vendor.Products);
+                }, vendor.Products.PageNumber, vendor.Products.PageSize);
+            }
+
+            return result;
+        }
+    }
+
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,10,0],[13,13,13,57,0],[14,13,14,53,0],[15,9,15,10,0],[21,9,21,10,0],[22,13,22,39,0],[23,13,23,53,0],[24,13,24,49,0],[25,13,25,35,0],[26,13,26,45,0],[27,13,27,39,0],[28,13,28,45,0],[30,13,30,86,0],[32,13,32,89,0],[32,69,32,87,0],[33,13,33,84,0],[34,13,34,65,0],[36,13,36,41,0],[37,13,37,14,0],[38,17,42,74,0],[39,17,39,18,0],[40,21,40,76,0],[41,21,41,123,0],[41,85,41,103,0],[42,17,42,18,0],[43,13,43,14,0],[45,13,45,27,0],[46,9,46,10,0]]);
+    </script>
+  </body>
+</html>

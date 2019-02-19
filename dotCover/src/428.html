@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\subscriptions\pollingapisubscriptionschangetoken.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Primitives;
+using VirtoCommerce.Storefront.AutoRestClients.SubscriptionModuleApi;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Subscriptions;
+
+namespace VirtoCommerce.Storefront.Domain.Subscriptions
+{
+    public class PollingApiSubscriptionsChangeToken : IChangeToken
+    {
+        private readonly ISubscriptionModule _subscriptionApi;
+        private static DateTime _previousChangeTimeUtcStatic;
+        private static DateTime _lastCheckedTimeUtcStatic;
+        private DateTime _previousChangeTimeUtc;
+        private readonly TimeSpan _pollingInterval;
+        private static readonly object _lock = new object();
+
+        static PollingApiSubscriptionsChangeToken()
+        {
+            _previousChangeTimeUtcStatic = _lastCheckedTimeUtcStatic = DateTime.UtcNow;
+        }
+        public PollingApiSubscriptionsChangeToken(ISubscriptionModule subscriptionApi, TimeSpan poolingInterval)
+        {
+            _pollingInterval = poolingInterval;
+            _subscriptionApi = subscriptionApi;
+            _previousChangeTimeUtc = _previousChangeTimeUtcStatic;
+        }
+
+        /// &lt;summary&gt;
+        /// Always false.
+        /// &lt;/summary&gt;
+        public bool ActiveChangeCallbacks =&gt; false;
+
+        public bool HasChanged
+        {
+            get
+            {
+                var currentTime = DateTime.UtcNow;
+                if (currentTime - _lastCheckedTimeUtcStatic &lt; _pollingInterval)
+                {
+                    return false;
+                }
+
+                //Need to prevent API flood for multiple token instances
+                var lockTaken = Monitor.TryEnter(_lock);
+                try
+                {
+                    if (lockTaken)
+                    {
+                        var result = _subscriptionApi.SearchSubscriptions(new AutoRestClients.SubscriptionModuleApi.Models.SubscriptionSearchCriteria
+                        {
+                            Skip = 0,
+                            Take = int.MaxValue,
+                            ResponseGroup = ((int)SubscriptionResponseGroup.Default).ToString(),
+                            ModifiedSinceDate = _previousChangeTimeUtcStatic
+                        });
+                        if (result.TotalCount &gt; 0)
+                        {
+                            _previousChangeTimeUtcStatic = currentTime;
+                            foreach (var customerId in result.Subscriptions.Select(x =&gt; x.CustomerId))
+                            {
+                                SubscriptionCacheRegion.ExpireCustomerSubscription(customerId);
+                            }
+                        }
+                        _lastCheckedTimeUtcStatic = currentTime;
+                    }
+                }
+                finally
+                {
+                    if (lockTaken)
+                    {
+                        Monitor.Exit(_lock);
+                    }
+                }
+                //Always return false, do expiration only through direct SubscriptionCacheRegion.ExpireCustomerSubscription call
+                return false;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Does not actually register callbacks.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;callback&quot;&gt;This parameter is ignored&lt;/param&gt;
+        /// &lt;param name=&quot;state&quot;&gt;This parameter is ignored&lt;/param&gt;
+        /// &lt;returns&gt;A disposable object that noops when disposed&lt;/returns&gt;
+        public IDisposable RegisterChangeCallback(Action&lt;object&gt; callback, object state) =&gt; EmptyDisposable.Instance;
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[20,9,20,61,0],[23,9,23,10,0],[24,13,24,88,0],[25,9,25,10,0],[26,9,26,113,0],[27,9,27,10,0],[28,13,28,48,0],[29,13,29,48,0],[30,13,30,67,0],[31,9,31,10,0],[36,46,36,51,0],[41,13,41,14,0],[42,17,42,51,0],[43,17,43,80,0],[44,17,44,18,0],[45,21,45,34,0],[49,17,49,57,0],[51,17,51,18,0],[52,21,52,35,0],[53,21,53,22,0],[54,25,60,28,0],[61,25,61,51,0],[62,25,62,26,0],[63,29,63,72,0],[64,29,64,36,0],[64,38,64,52,0],[64,53,64,55,0],[64,56,64,102,0],[64,89,64,101,0],[65,29,65,30,0],[66,33,66,96,0],[67,29,67,30,0],[68,25,68,26,0],[69,25,69,65,0],[70,21,70,22,0],[71,17,71,18,0],[73,17,73,18,0],[74,21,74,35,0],[75,21,75,22,0],[76,25,76,45,0],[77,21,77,22,0],[78,17,78,18,0],[80,17,80,30,0],[81,13,81,14,0],[90,93,90,117,0]]);
+    </script>
+  </body>
+</html>

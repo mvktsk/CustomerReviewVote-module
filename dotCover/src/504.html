@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\api\apicommoncontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.AutoRestClients.StoreModuleApi;
+using VirtoCommerce.Storefront.Domain;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Controllers.Api
+{
+    public class ApiCommonController : StorefrontControllerBase
+    {
+        private readonly IStoreModule _storeApi;
+        private readonly Country[] _countriesWithoutRegions;
+
+        public ApiCommonController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder, IStoreModule storeApi)
+            : base(workContextAccessor, urlBuilder)
+        {
+            _storeApi = storeApi;
+            _countriesWithoutRegions = WorkContext.AllCountries
+             .Select(c =&gt; new Country { Name = c.Name, Code2 = c.Code2, Code3 = c.Code3, RegionType = c.RegionType })
+             .ToArray();
+        }
+
+        // GET: storefrontapi/countries
+        [HttpGet]
+        public ActionResult GetCountries()
+        {
+            return Json(_countriesWithoutRegions);
+        }
+
+        // GET: storefrontapi/countries/{countryCode}/regions
+        [HttpGet]
+        public ActionResult GetCountryRegions(string countryCode)
+        {
+            var country = WorkContext.AllCountries.FirstOrDefault(c =&gt; c.Code2.Equals(countryCode, StringComparison.InvariantCultureIgnoreCase) || c.Code3.Equals(countryCode, StringComparison.InvariantCultureIgnoreCase));
+            if (country != null)
+            {
+                return Json(country.Regions);
+            }
+            return Ok();
+        }
+
+        // POST: storefrontapi/feedback
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; Feedback([FromBody] ContactForm model)
+        {
+            await _storeApi.SendDynamicNotificationAnStoreEmailAsync(model.ToServiceModel(WorkContext));
+
+            return Ok();
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,15,18,52,0],[19,9,19,10,0],[20,13,20,34,0],[21,13,23,25,0],[22,27,22,117,0],[24,9,24,10,0],[29,9,29,10,0],[30,13,30,51,0],[31,9,31,10,0],[36,9,36,10,0],[37,13,37,222,0],[37,72,37,220,0],[38,13,38,33,0],[39,13,39,14,0],[40,17,40,46,0],[42,13,42,25,0],[43,9,43,10,0],[49,9,49,10,0],[50,13,50,105,0],[52,13,52,25,0],[53,9,53,10,0]]);
+    </script>
+  </body>
+</html>

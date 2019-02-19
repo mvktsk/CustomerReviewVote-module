@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\mutablepagedlistextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace VirtoCommerce.Storefront.Model.Common
+{
+    public static class MutablePagedListExtensions
+    {
+        /// &lt;summary&gt;
+        /// Loads current page and returns total items count.
+        /// &lt;/summary&gt;
+        /// &lt;typeparam name=&quot;T&quot;&gt;&lt;/typeparam&gt;
+        /// &lt;param name=&quot;list&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public static int GetTotalCount&lt;T&gt;(this IMutablePagedList&lt;T&gt; list)
+        {
+            var result = 0;
+
+            if (list != null)
+            {
+                using (list.GetEnumerator()) { }
+                result = list.TotalItemCount;
+            }
+
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,10,0],[13,13,13,28,0],[15,13,15,30,0],[16,13,16,14,0],[17,17,17,45,0],[17,46,17,47,0],[17,48,17,49,0],[18,17,18,46,0],[19,13,19,14,0],[21,13,21,27,0],[22,9,22,10,0]]);
+    </script>
+  </body>
+</html>

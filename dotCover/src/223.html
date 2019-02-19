@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\customer\contact.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+
+namespace VirtoCommerce.Storefront.Model.Customer
+{
+    /// &lt;summary&gt;
+    /// Represent customer information structure 
+    /// &lt;/summary&gt;
+    public partial class Contact : Member
+    {  
+        public string FullName { get; set; }
+        /// &lt;summary&gt;
+        /// Returns the first name of the customer.
+        /// &lt;/summary&gt;
+        public string FirstName { get; set; }
+        /// &lt;summary&gt;
+        /// Returns the last name of the customer.
+        /// &lt;/summary&gt;
+        public string LastName { get; set; }
+
+        public string MiddleName { get; set; }
+
+        public string Salutation { get; set; }
+
+        public string PhotoUrl { get; set; }
+
+        public string TimeZone { get; set; }
+        public string DefaultLanguage { get; set; }
+
+        public Address DefaultBillingAddress { get; set; }
+        public Address DefaultShippingAddress { get; set; }
+
+        public string OrganizationId { get; set; }
+        public Organization Organization { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns true if the customer accepts marketing, returns false if the customer does not.
+        /// &lt;/summary&gt;
+        public bool AcceptsMarketing { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the default customer_address.
+        /// &lt;/summary&gt;
+        public Address DefaultAddress { get; set; }
+
+        /// &lt;summary&gt;
+        /// All contact security accounts
+        /// &lt;/summary&gt;
+        public IEnumerable&lt;SecurityAccount&gt; SecurityAccounts { get; set; }   
+
+        public Organization Outlet { get; set; }
+
+        public IList&lt;Organization&gt; Outlets { get; set; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,34,10,38,0],[10,39,10,43,0],[14,35,14,39,0],[14,40,14,44,0],[18,34,18,38,0],[18,39,18,43,0],[20,36,20,40,0],[20,41,20,45,0],[22,36,22,40,0],[22,41,22,45,0],[24,34,24,38,0],[24,39,24,43,0],[26,34,26,38,0],[26,39,26,43,0],[27,41,27,45,0],[27,46,27,50,0],[29,48,29,52,0],[29,53,29,57,0],[30,49,30,53,0],[30,54,30,58,0],[32,40,32,44,0],[32,45,32,49,0],[33,44,33,48,0],[33,49,33,53,0],[38,40,38,44,0],[38,45,38,49,0],[43,41,43,45,0],[43,46,43,50,0],[48,64,48,68,0],[48,69,48,73,0],[50,38,50,42,0],[50,43,50,47,0],[52,46,52,50,0],[52,51,52,55,0]]);
+    </script>
+  </body>
+</html>

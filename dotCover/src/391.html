@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\marketing\marketingconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Storefront.AutoRestClients.HruMarketingModuleApi.Models;
+using VirtoCommerce.Storefront.Common;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Marketing;
+using coreDto = VirtoCommerce.Storefront.AutoRestClients.CoreModuleApi.Models;
+using marketingDto = VirtoCommerce.Storefront.AutoRestClients.MarketingModuleApi.Models;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public static partial class MarketingConverter
+    {
+        public static HruTrend ToHruTrend(this Trend trendDto)
+        {
+            return new HruTrend
+            {
+                Id = trendDto.Id,
+                CreatedDate = trendDto.CreatedDate,
+                Name = trendDto.Name,
+                DesktopBannerUrl = trendDto.DesktopBannerUrl,
+                MobileBannerUrl = trendDto.MobileBannerUrl,
+                Color = trendDto.Color,
+                Html = trendDto.Html,
+                ProductIds = trendDto.ProductIds,
+                Keywords = trendDto.Keywords,
+                Code = !string.IsNullOrEmpty(trendDto.Code) ? trendDto.Code : trendDto.Id, // TODO: Fix when all insights will have code
+            };
+        }
+
+        public static DynamicProperty ToDynamicProperty(this marketingDto.DynamicObjectProperty propertyDto)
+        {
+            return propertyDto.JsonConvert&lt;coreDto.DynamicObjectProperty&gt;().ToDynamicProperty();
+        }
+
+        public static marketingDto.DynamicObjectProperty ToMarketingDynamicPropertyDto(this DynamicProperty property)
+        {
+            return property.ToDynamicPropertyDto().JsonConvert&lt;marketingDto.DynamicObjectProperty&gt;();
+        }
+
+        public static DynamicContentItem ToDynamicContentItem(this marketingDto.DynamicContentItem contentItemDto)
+        {
+            var result = new DynamicContentItem
+            {
+                ContentType = contentItemDto.ContentType,
+                Description = contentItemDto.Description,
+                FolderId = contentItemDto.FolderId,
+                Id = contentItemDto.Id,
+                Name = contentItemDto.Name,
+                Outline = contentItemDto.Outline,
+                Path = contentItemDto.Path
+            };
+
+            if (contentItemDto.DynamicProperties != null)
+            {
+                result.DynamicProperties = contentItemDto.DynamicProperties.Select(ToDynamicProperty).ToList();
+            }
+
+            return result;
+        }
+
+        public static PromotionReward ToPromotionReward(this marketingDto.PromotionReward rewardDto, Currency currency)
+        {
+            var result = new PromotionReward
+            {
+                CategoryId = rewardDto.CategoryId,
+                Coupon = rewardDto.Coupon,
+                Description = rewardDto.Description,
+                IsValid = rewardDto.IsValid ?? false,
+                LineItemId = rewardDto.LineItemId,
+                MeasureUnit = rewardDto.MeasureUnit,
+                ProductId = rewardDto.ProductId,
+                PromotionId = rewardDto.PromotionId,
+                Quantity = rewardDto.Quantity ?? 0,
+                MaxLimit = (decimal)(rewardDto.MaxLimit ?? 0),
+                Amount = (decimal)(rewardDto.Amount ?? 0),
+                AmountType = EnumUtility.SafeParse(rewardDto.AmountType, AmountType.Absolute),
+                CouponAmount = new Money(rewardDto.CouponAmount ?? 0, currency),
+                CouponMinOrderAmount = new Money(rewardDto.CouponMinOrderAmount ?? 0, currency),
+                Promotion = rewardDto.Promotion?.ToPromotion(),
+                RewardType = EnumUtility.SafeParse(rewardDto.RewardType, PromotionRewardType.CatalogItemAmountReward),
+                ShippingMethodCode = rewardDto.ShippingMethod
+            };
+
+            return result;
+        }
+
+        public static Promotion ToPromotion(this marketingDto.Promotion promotionDto)
+        {
+            var result = new Promotion
+            {
+                Id = promotionDto.Id,
+                Name = promotionDto.Name,
+                Description = promotionDto.Description,
+            };
+
+            return result;
+        }
+
+        public static PromotionEvaluationContext ToPromotionEvaluationContext(this WorkContext workContext, IEnumerable&lt;Product&gt; products = null)
+        {
+            var result = new PromotionEvaluationContext(workContext.CurrentLanguage, workContext.CurrentCurrency)
+            {
+                Currency = workContext.CurrentCurrency,
+                User = workContext.CurrentUser,
+                Language = workContext.CurrentLanguage,
+                StoreId = workContext.CurrentStore.Id,
+
+                Product = workContext.CurrentProduct
+            };
+
+            if (products != null)
+            {
+                result.Products = products.ToList();
+            }
+
+            return result;
+        }
+
+        public static marketingDto.PromotionEvaluationContext ToPromotionEvaluationContextDto(this PromotionEvaluationContext promoEvalContext)
+        {
+            var result = new marketingDto.PromotionEvaluationContext();
+
+            if (promoEvalContext.Cart != null)
+            {
+                result.CartPromoEntries = promoEvalContext.Cart.Items.Where(x =&gt; !x.IsGift).Select(x =&gt; x.ToProductPromoEntryDto()).ToList();
+
+                result.CartTotal = (double)promoEvalContext.Cart.SubTotal.Amount;
+                result.Coupon = promoEvalContext.Cart.Coupon != null ? promoEvalContext.Cart.Coupon.Code : null;
+                result.Currency = promoEvalContext.Cart.Currency.Code;
+                result.CustomerId = promoEvalContext.Cart.Customer.Id;
+                result.UserGroups = promoEvalContext.Cart.Customer?.Contact?.UserGroups;
+                result.IsRegisteredUser = promoEvalContext.Cart.Customer.IsRegisteredUser;
+                result.Language = promoEvalContext.Cart.Language.CultureName;
+                //Set cart line items as default promo items
+                result.PromoEntries = result.CartPromoEntries;
+
+                if (!promoEvalContext.Cart.Shipments.IsNullOrEmpty())
+                {
+                    var shipment = promoEvalContext.Cart.Shipments.First();
+                    result.ShipmentMethodCode = shipment.ShipmentMethodCode;
+                    result.ShipmentMethodOption = shipment.ShipmentMethodOption;
+                    result.ShipmentMethodPrice = (double)shipment.Price.Amount;
+                }
+                if (!promoEvalContext.Cart.Payments.IsNullOrEmpty())
+                {
+                    var payment = promoEvalContext.Cart.Payments.First();
+                    result.PaymentMethodCode = payment.PaymentGatewayCode;
+                    result.PaymentMethodPrice = (double)payment.Price.Amount;
+                }
+            }
+
+            if (!promoEvalContext.Products.IsNullOrEmpty())
+            {
+                result.PromoEntries = promoEvalContext.Products.Select(x =&gt; x.ToProductPromoEntryDto()).ToList();
+            }
+
+            if (promoEvalContext.Product != null)
+            {
+                result.PromoEntry = promoEvalContext.Product.ToProductPromoEntryDto();
+            }
+
+            result.UserGroups = promoEvalContext.User?.Contact?.UserGroups;
+
+            result.IsEveryone = true;
+            result.CustomerId = promoEvalContext.User?.Id;
+            result.IsRegisteredUser = promoEvalContext.User?.IsRegisteredUser;
+            result.IsFirstTimeBuyer = promoEvalContext.User?.IsFirstTimeBuyer;
+            result.OrdersDate = new List&lt;DateTime?&gt;();
+            result.Currency = promoEvalContext.Currency != null ? promoEvalContext.Currency.Code : null;
+            result.Language = promoEvalContext.Language != null ? promoEvalContext.Language.CultureName : null;
+            result.StoreId = promoEvalContext.StoreId;
+
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,9,18,10,0],[19,13,31,15,0],[32,9,32,10,0],[35,9,35,10,0],[36,13,36,97,0],[37,9,37,10,0],[40,9,40,10,0],[41,13,41,102,0],[42,9,42,10,0],[45,9,45,10,0],[46,13,55,15,0],[57,13,57,58,0],[58,13,58,14,0],[59,17,59,112,0],[60,13,60,14,0],[62,13,62,27,0],[63,9,63,10,0],[66,9,66,10,0],[67,13,86,15,0],[88,13,88,27,0],[89,9,89,10,0],[92,9,92,10,0],[93,13,98,15,0],[100,13,100,27,0],[101,9,101,10,0],[104,9,104,10,0],[105,13,113,15,0],[115,13,115,34,0],[116,13,116,14,0],[117,17,117,53,0],[118,13,118,14,0],[120,13,120,27,0],[121,9,121,10,0],[124,9,124,10,0],[125,13,125,72,0],[127,13,127,47,0],[128,13,128,14,0],[129,17,129,142,0],[129,82,129,91,0],[129,105,129,131,0],[131,17,131,82,0],[132,17,132,113,0],[133,17,133,71,0],[134,17,134,71,0],[135,17,135,89,0],[136,17,136,91,0],[137,17,137,78,0],[139,17,139,63,0],[141,17,141,70,0],[142,17,142,18,0],[143,21,143,76,0],[144,21,144,77,0],[145,21,145,81,0],[146,21,146,80,0],[147,17,147,18,0],[148,17,148,69,0],[149,17,149,18,0],[150,21,150,74,0],[151,21,151,75,0],[152,21,152,78,0],[153,17,153,18,0],[154,13,154,14,0],[156,13,156,60,0],[157,13,157,14,0],[158,17,158,114,0],[158,77,158,103,0],[159,13,159,14,0],[161,13,161,50,0],[162,13,162,14,0],[163,17,163,87,0],[164,13,164,14,0],[166,13,166,76,0],[168,13,168,38,0],[169,13,169,59,0],[170,13,170,79,0],[171,13,171,79,0],[172,13,172,55,0],[173,13,173,105,0],[174,13,174,112,0],[175,13,175,55,0],[177,13,177,27,0],[178,9,178,10,0]]);
+    </script>
+  </body>
+</html>

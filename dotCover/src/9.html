@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\dotliquidthemedview.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using DotLiquid;
+using DotLiquid.Exceptions;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewEngines;
+using VirtoCommerce.LiquidThemeEngine.Converters;
+using VirtoCommerce.LiquidThemeEngine.Objects;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.LiquidThemeEngine
+{
+    public class DotLiquidThemedView : IView
+    {
+        private readonly ILiquidThemeEngine _liquidThemeEngine;
+        private readonly string _viewName;
+        private readonly bool _isMainPage;
+        private readonly IWorkContextAccessor _workContextAccessor;
+        private readonly IStorefrontUrlBuilder _urlBuilder;
+        public DotLiquidThemedView(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder, ILiquidThemeEngine themeEngine, string viewName, string path, bool isMainPage)
+        {
+            if (string.IsNullOrEmpty(viewName))
+                throw new ArgumentNullException(nameof(viewName));
+
+            _workContextAccessor = workContextAccessor;
+            _urlBuilder = urlBuilder;
+            _liquidThemeEngine = themeEngine ?? throw new ArgumentNullException(nameof(themeEngine));
+            _viewName = viewName;
+            _isMainPage = isMainPage;
+            Path = path;
+        }
+
+        public string Path { get; private set; }
+
+        #region IView members
+
+        public void Render(ViewContext viewContext, TextWriter writer)
+        {
+        }
+
+        public async Task RenderAsync(ViewContext context)
+        {
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+
+            var shopifyContext = _workContextAccessor.WorkContext.ToShopifyModel(_urlBuilder);
+            //Set current template
+            shopifyContext.Template = _viewName;
+
+            var formErrors = new FormErrors(context.ViewData.ModelState);
+            if (shopifyContext.Form == null)
+            {
+                //Set single Form object with errors for shopify compilance
+                shopifyContext.Form = new Form();
+            }
+            shopifyContext.Form.PostedSuccessfully = !string.Equals(context.HttpContext.Request.Method, &quot;GET&quot;, StringComparison.InvariantCultureIgnoreCase);
+            if (formErrors.Any())
+            {
+                shopifyContext.Form.Errors = formErrors;
+                shopifyContext.Form.PostedSuccessfully = false;
+            }
+
+            //EU General Data Protection Regulation (GDPR) support 
+            var consentFeature = context.HttpContext.Features.Get&lt;ITrackingConsentFeature&gt;();
+            if (consentFeature != null)
+            {
+                shopifyContext.CanTrack = !consentFeature?.CanTrack ?? false;
+                shopifyContext.ConsentCookie = consentFeature?.CreateConsentCookie();
+            }
+
+            // Copy data from the view context over to DotLiquid
+            var parameters = shopifyContext.ToLiquid() as Dictionary&lt;string, object&gt;;
+
+            //Add settings to context
+            parameters.Add(&quot;settings&quot;, _liquidThemeEngine.GetSettings());
+
+            foreach (var item in context.ViewData)
+            {
+                parameters.Add(Template.NamingConvention.GetMemberName(item.Key), item.Value);
+            }
+            foreach (var item in context.TempData)
+            {
+                parameters.Add(Template.NamingConvention.GetMemberName(item.Key), item.Value);
+            }
+
+            if (!parameters.ContainsKey(&quot;error_message&quot;) &amp;&amp; !string.IsNullOrEmpty(_workContextAccessor.WorkContext.ErrorMessage))
+            {
+                parameters.Add(&quot;error_message&quot;, _workContextAccessor.WorkContext.ErrorMessage);
+            }
+
+            var viewTemplate = _liquidThemeEngine.RenderTemplateByName(_viewName, parameters);
+
+            // don&#39;t use layouts for partial views when masterViewName is not specified
+            if (_isMainPage)
+            {
+                var masterViewName = &quot;theme&quot;;
+                if (parameters.TryGetValue(&quot;layout&quot;, out object layoutFromTemplate))
+                {
+                    if (layoutFromTemplate != null &amp;&amp; !string.IsNullOrEmpty(layoutFromTemplate.ToString()))
+                    {
+                        masterViewName = layoutFromTemplate.ToString();
+                    }
+                }
+                var headerTemplate = _liquidThemeEngine.RenderTemplateByName(&quot;content_header&quot;, parameters);
+
+                //add special placeholder &#39;content_for_layout&#39; to content it will be replaced in master page by main content
+                parameters.Add(&quot;content_for_layout&quot;, viewTemplate);
+                parameters.Add(&quot;content_for_header&quot;, headerTemplate);
+
+                parameters.Add(&quot;version&quot;, Assembly.GetExecutingAssembly().GetName().Version.ToString());
+
+                try
+                {
+                    viewTemplate = _liquidThemeEngine.RenderTemplateByName(masterViewName, parameters);
+                }
+                catch (FileSystemException ex)
+                {
+                    var message = ex.Message.Replace(&quot;&lt;br/&gt;&quot;, &quot;\r\n&quot;);
+                    throw new InvalidOperationException(message);
+                }
+
+            }
+            await context.Writer.WriteAsync(viewTemplate);
+        }
+
+        #endregion
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[26,9,26,190,0],[27,9,27,10,0],[28,13,28,48,0],[29,17,29,67,0],[31,13,31,56,0],[32,13,32,38,0],[33,13,33,102,0],[34,13,34,34,0],[35,13,35,38,0],[36,13,36,25,0],[37,9,37,10,0],[39,30,39,34,0],[39,35,39,47,0],[44,9,44,10,0],[45,9,45,10,0],[48,9,48,10,0],[49,13,49,33,0],[50,17,50,66,0],[52,13,52,95,0],[54,13,54,49,0],[56,13,56,74,0],[57,13,57,45,0],[58,13,58,14,0],[60,17,60,50,0],[61,13,61,14,0],[62,13,62,157,0],[63,13,63,34,0],[64,13,64,14,0],[65,17,65,57,0],[66,17,66,64,0],[67,13,67,14,0],[70,13,70,94,0],[71,13,71,40,0],[72,13,72,14,0],[73,17,73,78,0],[74,17,74,86,0],[75,13,75,14,0],[78,13,78,86,0],[81,13,81,74,0],[83,13,83,20,0],[83,22,83,30,0],[83,31,83,33,0],[83,34,83,50,0],[84,13,84,14,0],[85,17,85,95,0],[86,13,86,14,0],[87,13,87,20,0],[87,22,87,30,0],[87,31,87,33,0],[87,34,87,50,0],[88,13,88,14,0],[89,17,89,95,0],[90,13,90,14,0],[92,13,92,130,0],[93,13,93,14,0],[94,17,94,96,0],[95,13,95,14,0],[97,13,97,95,0],[100,13,100,29,0],[101,13,101,14,0],[102,17,102,46,0],[103,17,103,85,0],[104,17,104,18,0],[105,21,105,108,0],[106,21,106,22,0],[107,25,107,72,0],[108,21,108,22,0],[109,17,109,18,0],[110,17,110,108,0],[113,17,113,68,0],[114,17,114,70,0],[116,17,116,105,0],[119,17,119,18,0],[120,21,120,104,0],[121,17,121,18,0],[122,17,122,47,0],[123,17,123,18,0],[124,21,124,71,0],[125,21,125,66,0],[128,13,128,14,0],[129,13,129,59,0],[130,9,130,10,0]]);
+    </script>
+  </body>
+</html>

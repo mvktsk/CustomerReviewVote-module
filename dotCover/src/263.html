@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\bus\inprocessbus.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.Model.Common.Events;
+using VirtoCommerce.Storefront.Model.Common.Messages;
+
+namespace VirtoCommerce.Storefront.Model.Common.Bus
+{
+    public class InProcessBus : IEventPublisher, IHandlerRegistrar
+    {
+        private readonly Dictionary&lt;Type, List&lt;Func&lt;IMessage, CancellationToken, Task&gt;&gt;&gt; _routes = new Dictionary&lt;Type, List&lt;Func&lt;IMessage, CancellationToken, Task&gt;&gt;&gt;();
+
+        public void RegisterHandler&lt;T&gt;(Func&lt;T, CancellationToken, Task&gt; handler) where T : class, IMessage
+        {
+            if (!_routes.TryGetValue(typeof(T), out var handlers))
+            {
+                handlers = new List&lt;Func&lt;IMessage, CancellationToken, Task&gt;&gt;();
+                _routes.Add(typeof(T), handlers);
+            }
+            handlers.Add((message, token) =&gt; handler((T)message, token));
+        }
+
+        public async Task Publish&lt;T&gt;(T @event, CancellationToken cancellationToken = default(CancellationToken)) where T : class, IEvent
+        {
+            if (_routes.TryGetValue(@event.GetType(), out var handlers))
+            {
+                await Task.WhenAll(handlers.Select(handler =&gt; handler(@event, cancellationToken)));
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,170,0],[16,9,16,10,0],[17,13,17,67,0],[18,13,18,14,0],[19,17,19,80,0],[20,17,20,50,0],[21,13,21,14,0],[22,13,22,74,0],[22,46,22,72,0],[23,9,23,10,0],[26,9,26,10,0],[27,13,27,73,0],[28,13,28,14,0],[29,17,29,100,0],[29,63,29,97,0],[30,13,30,14,0],[31,9,31,10,0]]);
+    </script>
+  </body>
+</html>

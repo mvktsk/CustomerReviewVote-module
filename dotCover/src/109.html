@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\converters\shopconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using PagedList.Core;
+using System.Linq;
+using VirtoCommerce.LiquidThemeEngine.Objects;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Stores;
+using storefrontModel = VirtoCommerce.Storefront.Model;
+
+namespace VirtoCommerce.LiquidThemeEngine.Converters
+{
+    public static class ShopStaticConverter
+    {
+        public static Shop ToShopifyModel(this Store store, storefrontModel.WorkContext workContext)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidShop(store, workContext);
+        }
+    }
+
+    public partial class ShopifyModelConverter
+    {
+        public virtual Shop ToLiquidShop(Store store, storefrontModel.WorkContext workContext)
+        {
+            var result = new Shop();
+
+            result.Catalog = store.Catalog;
+            result.Id = store.Id;
+            result.Name = store.Name;
+            result.SubscriptionEnabled = store.SubscriptionEnabled;
+            result.QuotesEnabled = store.QuotesEnabled;
+            result.CustomerAccountsEnabled = true;
+            result.CustomerAccountsOptional = true;
+            result.Currency = workContext.CurrentCurrency.Code;
+            result.Description = store.Description;
+            result.Domain = store.Url;
+            result.Email = store.Email;
+            result.MoneyFormat = &quot;&quot;;
+            result.MoneyWithCurrencyFormat = &quot;&quot;;
+            result.Url = store.Url ?? &quot;~/&quot;;
+            result.Currencies = workContext.AllCurrencies.Select(x =&gt; x.Code).ToArray();
+            result.Languages = store.Languages.Select(x =&gt; x.ToShopifyModel()).ToArray();
+            result.Catalog = store.Catalog;
+            result.Status = store.StoreState.ToString();
+            result.MinimumOrderItemsQuantity = store.MinimumOrderItemsQuantity;
+
+            result.Metafields = new MetaFieldNamespacesCollection(new[]
+            {
+                new MetafieldsCollection(&quot;dynamic_properties&quot;, workContext.CurrentLanguage, store.DynamicProperties),
+                new MetafieldsCollection(&quot;settings&quot;, store.Settings)
+            });
+
+            if (workContext.Categories != null)
+            {
+                result.Collections = new MutablePagedList&lt;Collection&gt;((pageNumber, pageSize, sortInfos) =&gt;
+                {
+                    workContext.Categories.Slice(pageNumber, pageSize, sortInfos);
+                    return new StaticPagedList&lt;Collection&gt;(workContext.Categories.Select(x =&gt; ToLiquidCollection(x, workContext)), workContext.Categories);
+                }, 1, workContext.Categories.PageSize);
+            }
+
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,10,0],[14,13,14,57,0],[15,13,15,63,0],[16,9,16,10,0],[22,9,22,10,0],[23,13,23,37,0],[25,13,25,44,0],[26,13,26,34,0],[27,13,27,38,0],[28,13,28,68,0],[29,13,29,56,0],[30,13,30,51,0],[31,13,31,52,0],[32,13,32,64,0],[33,13,33,52,0],[34,13,34,39,0],[35,13,35,40,0],[36,13,36,37,0],[37,13,37,49,0],[38,13,38,44,0],[39,13,39,89,0],[39,71,39,77,0],[40,13,40,90,0],[40,60,40,78,0],[41,13,41,44,0],[42,13,42,57,0],[43,13,43,80,0],[45,13,49,16,0],[51,13,51,48,0],[52,13,52,14,0],[53,17,57,56,0],[54,17,54,18,0],[55,21,55,83,0],[56,21,56,156,0],[56,95,56,129,0],[57,17,57,18,0],[58,13,58,14,0],[60,13,60,27,0],[61,9,61,10,0]]);
+    </script>
+  </body>
+</html>

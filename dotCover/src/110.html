@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\converters\shopifycontextconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using DotLiquid;
+using PagedList.Core;
+using VirtoCommerce.LiquidThemeEngine.Objects;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.StaticContent;
+using storefrontModel = VirtoCommerce.Storefront.Model;
+using Tag = VirtoCommerce.LiquidThemeEngine.Objects.Tag;
+
+namespace VirtoCommerce.LiquidThemeEngine.Converters
+{
+    public static class ShopifyContextStaticConverter
+    {
+        public static ShopifyThemeWorkContext ToShopifyModel(this storefrontModel.WorkContext workContext, IStorefrontUrlBuilder urlBuilder)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidContext(workContext, urlBuilder);
+        }
+    }
+
+    public partial class ShopifyModelConverter
+    {
+        private static readonly string[] _poweredLinks = {
+                                             &quot;&lt;a href=\&quot;http://virtocommerce.com\&quot; rel=\&quot;nofollow\&quot; target=\&quot;_blank\&quot;&gt;.NET ecommerce platform&lt;/a&gt; by Virto&quot;,
+                                             &quot;&lt;a href=\&quot;http://virtocommerce.com/shopping-cart\&quot; rel=\&quot;nofollow\&quot; target=\&quot;_blank\&quot;&gt;Shopping Cart&lt;/a&gt; by Virto&quot;,
+                                             &quot;&lt;a href=\&quot;http://virtocommerce.com/shopping-cart\&quot; rel=\&quot;nofollow\&quot; target=\&quot;_blank\&quot;&gt;.NET Shopping Cart&lt;/a&gt; by Virto&quot;,
+                                             &quot;&lt;a href=\&quot;http://virtocommerce.com/shopping-cart\&quot; rel=\&quot;nofollow\&quot; target=\&quot;_blank\&quot;&gt;ASP.NET Shopping Cart&lt;/a&gt; by Virto&quot;,
+                                             &quot;&lt;a href=\&quot;http://virtocommerce.com\&quot; rel=\&quot;nofollow\&quot; target=\&quot;_blank\&quot;&gt;.NET ecommerce&lt;/a&gt; by Virto&quot;,
+                                             &quot;&lt;a href=\&quot;http://virtocommerce.com\&quot; rel=\&quot;nofollow\&quot; target=\&quot;_blank\&quot;&gt;.NET ecommerce framework&lt;/a&gt; by Virto&quot;,
+                                             &quot;&lt;a href=\&quot;http://virtocommerce.com\&quot; rel=\&quot;nofollow\&quot; target=\&quot;_blank\&quot;&gt;ASP.NET ecommerce&lt;/a&gt; by Virto Commerce&quot;,
+                                             &quot;&lt;a href=\&quot;http://virtocommerce.com\&quot; rel=\&quot;nofollow\&quot; target=\&quot;_blank\&quot;&gt;ASP.NET ecommerce platform&lt;/a&gt; by Virto&quot;,
+                                             &quot;&lt;a href=\&quot;http://virtocommerce.com\&quot; rel=\&quot;nofollow\&quot; target=\&quot;_blank\&quot;&gt;ASP.NET ecommerce framework&lt;/a&gt; by Virto&quot;,
+                                             &quot;&lt;a href=\&quot;http://virtocommerce.com\&quot; rel=\&quot;nofollow\&quot; target=\&quot;_blank\&quot;&gt;Enterprise ecommerce&lt;/a&gt; by Virto&quot;,
+                                             &quot;&lt;a href=\&quot;http://virtocommerce.com\&quot; rel=\&quot;nofollow\&quot; target=\&quot;_blank\&quot;&gt;Enterprise ecommerce platform&lt;/a&gt; by Virto&quot;,
+                                         };
+
+        public virtual ShopifyThemeWorkContext ToLiquidContext(storefrontModel.WorkContext workContext, IStorefrontUrlBuilder urlBuilder)
+        {
+            var result = new ShopifyThemeWorkContext();
+
+
+            result.CurrentPage = 1;
+            result.Layout = workContext.Layout;
+            result.CountryOptionTags = string.Join(&quot;\r\n&quot;, workContext.AllCountries.OrderBy(c =&gt; c.Name).Select(c =&gt; c.ToOptionTag()));
+            result.PageDescription = workContext.CurrentPageSeo != null ? workContext.CurrentPageSeo.MetaDescription : string.Empty;
+            result.PageTitle = workContext.CurrentPageSeo != null ? workContext.CurrentPageSeo.Title : string.Empty;
+            result.PageImageUrl = workContext.CurrentPageSeo != null ? workContext.CurrentPageSeo.ImageUrl : string.Empty;
+            result.CanonicalUrl = workContext.CurrentPageSeo != null ? urlBuilder.ToAppAbsolute(workContext.CurrentPageSeo.Slug) : null;
+            result.Shop = workContext.CurrentStore != null ? ToLiquidShop(workContext.CurrentStore, workContext) : null;
+            result.Cart = workContext.CurrentCart != null &amp;&amp; workContext.CurrentCart.IsValueCreated ? ToLiquidCart(workContext.CurrentCart.Value, workContext.CurrentLanguage, urlBuilder) : null;
+            result.Product = workContext.CurrentProduct != null ? ToLiquidProduct(workContext.CurrentProduct) : null;
+            result.Vendor = workContext.CurrentVendor != null ? ToLiquidVendor(workContext.CurrentVendor) : null;
+            result.Customer = workContext.CurrentUser != null &amp;&amp; workContext.CurrentUser.IsRegisteredUser ? ToLiquidCustomer(workContext.CurrentUser, workContext, urlBuilder) : null;
+            result.AllStores = workContext.AllStores.Select(x =&gt; ToLiquidShop(x, workContext)).ToArray();
+            result.CurrentCurrency = workContext.CurrentCurrency != null ? ToLiquidCurrency(workContext.CurrentCurrency) : null;
+            result.CurrentLanguage = workContext.CurrentLanguage != null ? ToLiquidLanguage(workContext.CurrentLanguage) : null;
+            result.Brands = workContext.Brands;
+
+
+            if (workContext.Aggregations != null)
+            {
+                result.AllTags = new TagCollection(new MutablePagedList&lt;Tag&gt;((pageNumber, pageSize, sortInfos) =&gt;
+                {
+                    workContext.Aggregations.Slice(pageNumber, pageSize, sortInfos);
+                    var tags = workContext.Aggregations
+                        .Where(a =&gt; a.Items != null)
+                        .SelectMany(a =&gt; a.Items.Select(item =&gt; item.ToShopifyModel(a)));
+                    return new StaticPagedList&lt;Tag&gt;(tags, workContext.Aggregations);
+
+                }, workContext.Aggregations.PageNumber, workContext.Aggregations.PageSize));
+            }
+
+            if (workContext.CurrentProductSearchCriteria != null)
+            {
+                result.ProductSearchCriteria = ToLiquidProductSearchCriteria(workContext.CurrentProductSearchCriteria);
+            }
+
+            if (workContext.CurrentProductSearchCriteria != null &amp;&amp; workContext.CurrentProductSearchCriteria.Terms.Any())
+            {
+                result.CurrentTags =
+                    new TagCollection(
+                        workContext.CurrentProductSearchCriteria.Terms.Select(t =&gt; ToLiquidTag(t)).ToList());
+            }
+
+            if (workContext.CurrentCategory != null)
+            {
+                result.Collection = ToLiquidCollection(workContext.CurrentCategory, workContext);
+            }
+
+            if (workContext.Categories != null)
+            {
+                result.Collections = new Collections(new MutablePagedList&lt;Collection&gt;((pageNumber, pageSize, sortInfos) =&gt;
+                {
+                    workContext.Categories.Slice(pageNumber, pageSize, sortInfos);
+                    return new StaticPagedList&lt;Collection&gt;(workContext.Categories.Select(x =&gt; ToLiquidCollection(x, workContext)), workContext.Categories);
+                }, 1, workContext.Categories.PageSize));
+            }
+
+            if (workContext.Types != null)
+            {
+                result.Types = new TagCollection(new MutablePagedList&lt;Tag&gt;((pageNumber, pageSize, sortInfos) =&gt;
+                {
+                    var tags = workContext.Types.Where(a =&gt; a.Items != null).SelectMany(a =&gt; a.Items.Select(item =&gt; ToLiquidTag(item, a))).ToList();
+                    return new StaticPagedList&lt;Tag&gt;(tags, workContext.Aggregations);
+
+                }, workContext.Aggregations.PageNumber, workContext.Aggregations.PageSize));
+            }
+
+            if (workContext.Products != null)
+            {
+                result.Products = new MutablePagedList&lt;Product&gt;((pageNumber, pageSize, sortInfos) =&gt;
+                {
+                    workContext.Products.Slice(pageNumber, pageSize, sortInfos);
+                    return new StaticPagedList&lt;Product&gt;(workContext.Products.Select(x =&gt; ToLiquidProduct(x)), workContext.Products);
+                }, workContext.Products.PageNumber, workContext.Products.PageSize);
+            }
+
+            if (workContext.Vendors != null)
+            {
+                result.Vendors = new MutablePagedList&lt;Vendor&gt;((pageNumber, pageSize, sortInfos) =&gt;
+                {
+                    workContext.Vendors.Slice(pageNumber, pageSize, sortInfos);
+                    return new StaticPagedList&lt;Vendor&gt;(workContext.Vendors.Select(x =&gt; ToLiquidVendor(x)), workContext.Vendors);
+                }, workContext.Vendors.PageNumber, workContext.Vendors.PageSize);
+            }
+
+            if (workContext.CurrentProductSearchCriteria != null &amp;&amp; !string.IsNullOrEmpty(workContext.CurrentProductSearchCriteria.Keyword) &amp;&amp; workContext.Products != null)
+            {
+                result.Search = ToLiquidSearch(workContext.Products, workContext);
+            }
+            else if (workContext.CurrentStaticSearchCriteria != null &amp;&amp; !string.IsNullOrEmpty(workContext.CurrentStaticSearchCriteria.Keyword))
+            {
+                result.Search = new Search
+                {
+                    Performed = true,
+                    SearchIn = workContext.CurrentStaticSearchCriteria.SearchIn,
+                    Terms = workContext.CurrentStaticSearchCriteria.Keyword
+                };
+                if (workContext.StaticContentSearchResult != null &amp;&amp; workContext.StaticContentSearchResult.Any())
+                {
+                    result.Search.Results = new MutablePagedList&lt;Drop&gt;((pageNumber, pageSize, sortInfos) =&gt;
+                    {
+                        var pagedContentItems = new MutablePagedList&lt;ContentItem&gt;(workContext.StaticContentSearchResult);
+                        pagedContentItems.Slice(pageNumber, pageSize, sortInfos);
+                        return new StaticPagedList&lt;Drop&gt;(workContext.StaticContentSearchResult.Select(x =&gt; ToLiquidPage(x)), pagedContentItems);
+                    }, 1, workContext.StaticContentSearchResult.PageSize);
+                }
+            }
+
+            if (workContext.CurrentLinkLists != null)
+            {
+                result.Linklists = new Linklists(new MutablePagedList&lt;Linklist&gt;((pageNumber, pageSize, sortInfos) =&gt;
+                {
+                    var liquidLists = workContext.CurrentLinkLists.Select(x =&gt; ToLiquidLinklist(x, workContext, urlBuilder));
+                    return new StaticPagedList&lt;Linklist&gt;(liquidLists, workContext.CurrentLinkLists);
+                }, workContext.CurrentLinkLists.PageNumber, workContext.CurrentLinkLists.PageSize));
+            }
+
+            if (workContext.Pages != null)
+            {
+                result.Pages = new Pages(new MutablePagedList&lt;Page&gt;((pageNumber, pageSize, sortInfos) =&gt;
+                {
+                    //Do not paginate data, because it already all preloaded
+                    var pages = workContext.Pages.OfType&lt;ContentPage&gt;().Select(x =&gt; ToLiquidPage(x));
+                    return new StaticPagedList&lt;Page&gt;(pages, workContext.Pages);
+                }, workContext.Pages.PageNumber, workContext.Pages.PageSize));
+
+                result.Blogs = new Blogs(new MutablePagedList&lt;Objects.Blog&gt;((pageNumber, pageSize, sortInfos) =&gt;
+                {
+                    //Do not paginate data, because it already all preloaded
+                    var blogs = workContext.Blogs.Select(x =&gt; ToLiquidBlog(x, workContext.CurrentLanguage));
+                    return new StaticPagedList&lt;Objects.Blog&gt;(blogs, workContext.Blogs);
+                }, workContext.Blogs.PageNumber, workContext.Blogs.PageSize));
+            }
+
+            if (workContext.CurrentOrder != null)
+            {
+                result.Order = ToLiquidOrder(workContext.CurrentOrder, workContext.CurrentLanguage, urlBuilder);
+            }
+
+            if (workContext.CurrentQuoteRequest != null &amp;&amp; workContext.CurrentQuoteRequest.IsValueCreated)
+            {
+                result.QuoteRequest = ToLiquidQuoteRequest(workContext.CurrentQuoteRequest.Value);
+            }
+
+            result.PaymentFormHtml = workContext.PaymentFormHtml;
+
+            if (workContext.CurrentPage != null)
+            {
+                result.Page = ToLiquidPage(workContext.CurrentPage);
+            }
+
+            if (workContext.CurrentBlog != null)
+            {
+                result.Blog = ToLiquidBlog(workContext.CurrentBlog, workContext.CurrentLanguage);
+            }
+            if (workContext.CurrentBlogSearchCritera != null)
+            {
+                result.BlogSearch = ToLiquidBlogSearch(workContext.CurrentBlogSearchCritera);
+            }
+
+            if (workContext.CurrentBlogArticle != null)
+            {
+                result.Article = ToLiquidArticle(workContext.CurrentBlogArticle);
+            }
+
+            if (workContext.Form != null)
+            {
+                result.Form = new Form
+                {
+                    Properties = new Dictionary&lt;string, object&gt;()
+                };
+                var formProps = workContext.Form.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+                var formPropNames = formProps.Select(x =&gt; x.Name).ToArray();
+                foreach (var property in formProps)
+                {
+                    var propertyValue = property.GetValue(workContext.Form);
+                    if (propertyValue != null)
+                    {
+                        result.Form.Properties[Template.NamingConvention.GetMemberName(property.Name)] = propertyValue;
+                        if (typeof(IEntity).IsAssignableFrom(property.PropertyType) || typeof(IValueObject).IsAssignableFrom(property.PropertyType))
+                        {
+                            //For it is user type need to register this type as Drop in Liquid Template
+                            Template.RegisterSafeType(property.GetType(), formPropNames);
+                            var allChildEntities = propertyValue.GetFlatObjectsListWithInterface&lt;IEntity&gt;();
+                            foreach (var type in allChildEntities.Select(x =&gt; x.GetType()).Distinct())
+                            {
+                                Template.RegisterSafeType(type, formPropNames);
+                            }
+                            var allChildLiquidObjects = propertyValue.GetFlatObjectsListWithInterface&lt;IValueObject&gt;();
+                            foreach (var type in allChildLiquidObjects.Select(x =&gt; x.GetType()).Distinct())
+                            {
+                                Template.RegisterSafeType(type, formPropNames);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (workContext.StorefrontNotification != null)
+            {
+                result.Notification = ToLiquidNotification(workContext.StorefrontNotification);
+            }
+
+            result.ExternalLoginProviders = workContext.ExternalLoginProviders.Select(p =&gt; new LoginProvider
+            {
+                AuthenticationType = p.AuthenticationType,
+                Caption = p.Caption,
+                Properties = p.Properties
+            }).ToList();
+
+            result.ApplicationSettings = new MetafieldsCollection(&quot;application_settings&quot;, workContext.ApplicationSettings);
+
+            //Powered by link
+            if (workContext.CurrentStore != null)
+            {
+                var storeName = workContext.CurrentStore.Name;
+                var hashCode = (uint)storeName.GetHashCode();
+                result.PoweredByLink = _poweredLinks[hashCode % _poweredLinks.Length];
+            }
+
+            if (workContext.RequestUrl != null)
+            {
+                result.RequestUrl = workContext.RequestUrl.ToString();
+
+                //Populate current page number
+                result.CurrentPage = workContext.PageNumber ?? 1;
+                result.PageSize = workContext.PageSize ?? 0;
+            }
+
+            if (workContext.AvailableRoles != null)
+            {
+                result.AvailableRoles = workContext.AvailableRoles.Select(x =&gt; new Role
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                }).ToArray();
+            }
+
+            if (workContext.CurrentFulfillmentCenter != null)
+            {
+                result.FulfillmentCenter = workContext.CurrentFulfillmentCenter.ToShopifyModel();
+            }
+
+            if (workContext.FulfillmentCenters != null)
+            {
+                result.FulfillmentCenters = new MutablePagedList&lt;FulfillmentCenter&gt;((pageNumber, pageSize, sortInfos) =&gt;
+                 {
+                     workContext.FulfillmentCenters.Slice(pageNumber, pageSize, sortInfos);
+                     return new StaticPagedList&lt;FulfillmentCenter&gt;(workContext.FulfillmentCenters.Select(x =&gt; x.ToShopifyModel()), workContext.FulfillmentCenters);
+                 }, workContext.FulfillmentCenters.PageNumber, workContext.FulfillmentCenters.PageSize);
+            }
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,9,17,10,0],[18,13,18,57,0],[19,13,19,71,0],[20,9,20,10,0],[25,9,37,44,0],[40,9,40,10,0],[41,13,41,56,0],[44,13,44,36,0],[45,13,45,48,0],[46,13,46,136,0],[46,98,46,104,0],[46,118,46,133,0],[47,13,47,133,0],[48,13,48,117,0],[49,13,49,123,0],[50,13,50,137,0],[51,13,51,121,0],[52,13,52,195,0],[53,13,53,118,0],[54,13,54,114,0],[55,13,55,183,0],[56,13,56,106,0],[56,66,56,94,0],[57,13,57,129,0],[58,13,58,129,0],[59,13,59,48,0],[62,13,62,50,0],[63,13,63,14,0],[64,17,72,93,0],[65,17,65,18,0],[66,21,66,85,0],[67,21,69,90,0],[68,37,68,52,0],[69,42,69,88,0],[69,65,69,87,0],[70,21,70,85,0],[72,17,72,18,0],[73,13,73,14,0],[75,13,75,66,0],[76,13,76,14,0],[77,17,77,120,0],[78,13,78,14,0],[80,13,80,122,0],[81,13,81,14,0],[82,17,84,110,0],[84,84,84,98,0],[85,13,85,14,0],[87,13,87,53,0],[88,13,88,14,0],[89,17,89,98,0],[90,13,90,14,0],[92,13,92,48,0],[93,13,93,14,0],[94,17,98,57,0],[95,17,95,18,0],[96,21,96,83,0],[97,21,97,156,0],[97,95,97,129,0],[98,17,98,18,0],[99,13,99,14,0],[101,13,101,43,0],[102,13,102,14,0],[103,17,108,93,0],[104,17,104,18,0],[105,21,105,149,0],[105,61,105,76,0],[105,94,105,138,0],[105,117,105,137,0],[106,21,106,85,0],[108,17,108,18,0],[109,13,109,14,0],[111,13,111,46,0],[112,13,112,14,0],[113,17,117,84,0],[114,17,114,18,0],[115,21,115,81,0],[116,21,116,133,0],[116,90,116,108,0],[117,17,117,18,0],[118,13,118,14,0],[120,13,120,45,0],[121,13,121,14,0],[122,17,126,82,0],[123,17,123,18,0],[124,21,124,80,0],[125,21,125,129,0],[125,88,125,105,0],[126,17,126,18,0],[127,13,127,14,0],[129,13,129,173,0],[130,13,130,14,0],[131,17,131,83,0],[132,13,132,14,0],[133,18,133,144,0],[134,13,134,14,0],[135,17,140,19,0],[141,17,141,114,0],[142,17,142,18,0],[143,21,148,75,0],[144,21,144,22,0],[145,25,145,122,0],[146,25,146,82,0],[147,25,147,145,0],[147,108,147,123,0],[148,21,148,22,0],[149,17,149,18,0],[150,13,150,14,0],[152,13,152,54,0],[153,13,153,14,0],[154,17,158,101,0],[155,17,155,18,0],[156,21,156,126,0],[156,80,156,124,0],[157,21,157,101,0],[158,17,158,18,0],[159,13,159,14,0],[161,13,161,43,0],[162,13,162,14,0],[163,17,168,79,0],[164,17,164,18,0],[166,21,166,102,0],[166,85,166,100,0],[167,21,167,80,0],[168,17,168,18,0],[170,17,175,79,0],[171,17,171,18,0],[173,21,173,109,0],[173,63,173,107,0],[174,21,174,88,0],[175,17,175,18,0],[176,13,176,14,0],[178,13,178,50,0],[179,13,179,14,0],[180,17,180,113,0],[181,13,181,14,0],[183,13,183,107,0],[184,13,184,14,0],[185,17,185,99,0],[186,13,186,14,0],[188,13,188,66,0],[190,13,190,49,0],[191,13,191,14,0],[192,17,192,69,0],[193,13,193,14,0],[195,13,195,49,0],[196,13,196,14,0],[197,17,197,98,0],[198,13,198,14,0],[199,13,199,62,0],[200,13,200,14,0],[201,17,201,94,0],[202,13,202,14,0],[204,13,204,56,0],[205,13,205,14,0],[206,17,206,82,0],[207,13,207,14,0],[209,13,209,42,0],[210,13,210,14,0],[211,17,214,19,0],[215,17,215,119,0],[216,17,216,77,0],[216,59,216,65,0],[217,17,217,24,0],[217,26,217,38,0],[217,39,217,41,0],[217,42,217,51,0],[218,17,218,18,0],[219,21,219,77,0],[220,21,220,47,0],[221,21,221,22,0],[222,25,222,120,0],[223,25,223,149,0],[224,25,224,26,0],[226,29,226,90,0],[227,29,227,109,0],[228,29,228,36,0],[228,38,228,46,0],[228,47,228,49,0],[228,50,228,102,0],[228,79,228,90,0],[229,29,229,30,0],[230,33,230,80,0],[231,29,231,30,0],[232,29,232,119,0],[233,29,233,36,0],[233,38,233,46,0],[233,47,233,49,0],[233,50,233,107,0],[233,84,233,95,0],[234,29,234,30,0],[235,33,235,80,0],[236,29,236,30,0],[237,25,237,26,0],[238,21,238,22,0],[239,17,239,18,0],[240,13,240,14,0],[242,13,242,60,0],[243,13,243,14,0],[244,17,244,96,0],[245,13,245,14,0],[247,13,252,25,0],[247,92,252,14,0],[254,13,254,124,0],[257,13,257,50,0],[258,13,258,14,0],[259,17,259,63,0],[260,17,260,62,0],[261,17,261,87,0],[262,13,262,14,0],[264,13,264,48,0],[265,13,265,14,0],[266,17,266,71,0],[269,17,269,66,0],[270,17,270,61,0],[271,13,271,14,0],[273,13,273,52,0],[274,13,274,14,0],[275,17,279,30,0],[275,80,279,18,0],[280,13,280,14,0],[282,13,282,62,0],[283,13,283,14,0],[284,17,284,98,0],[285,13,285,14,0],[287,13,287,56,0],[288,13,288,14,0],[289,17,293,105,0],[290,18,290,19,0],[291,22,291,92,0],[292,22,292,164,0],[292,111,292,129,0],[293,18,293,19,0],[294,13,294,14,0],[295,13,295,27,0],[296,9,296,10,0]]);
+    </script>
+  </body>
+</html>

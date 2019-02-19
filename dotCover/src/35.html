@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\form.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Linq;
+using DotLiquid;
+using System;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// The form object is used within the form tag. It contains attributes of its parent form.
+    /// &lt;/summary&gt;
+    /// &lt;remarks&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/objects/form
+    /// &lt;/remarks&gt;
+    public partial class Form : Drop
+    {
+        public Form()
+        {
+            PostedSuccessfully = true;
+            Properties = new Dictionary&lt;string, object&gt;();
+        }
+
+   
+        /// &lt;summary&gt;
+        /// Returns an array of strings if the form was not submitted successfully.
+        /// The strings returned depend on which fields of the form were left empty or contained errors.
+        /// &lt;/summary&gt;
+        public FormErrors Errors { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns true if the form was submitted successfully, or false if the form contained errors.
+        /// All forms but the address form set that property.
+        /// The address form is always submitted successfully.
+        /// &lt;/summary&gt;
+        public bool? PostedSuccessfully { get; set; }
+
+
+        public IDictionary&lt;string, object&gt; Properties { get; set; }
+
+        public override object BeforeMethod(string method)
+        {
+            var val = Properties.Where(x =&gt; x.Key.Equals(method, StringComparison.OrdinalIgnoreCase)).Select(x =&gt; x.Value).SingleOrDefault();
+            return val;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,9,16,22,0],[17,9,17,10,0],[18,13,18,39,0],[19,13,19,59,0],[20,9,20,10,0],[27,36,27,40,0],[27,41,27,45,0],[34,43,34,47,0],[34,48,34,52,0],[37,57,37,61,0],[37,62,37,66,0],[40,9,40,10,0],[41,13,41,142,0],[41,45,41,101,0],[41,115,41,122,0],[42,13,42,24,0],[43,9,43,10,0]]);
+    </script>
+  </body>
+</html>

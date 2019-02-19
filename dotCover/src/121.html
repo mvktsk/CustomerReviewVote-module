@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\cart\paymentmethod.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Marketing;
+
+namespace VirtoCommerce.Storefront.Model
+{
+    public partial class PaymentMethod : ITaxable, IDiscountable
+    {
+      
+        public PaymentMethod(Currency currency)
+        {
+            Currency = currency;
+
+            Price = new Money(currency);
+            DiscountAmount = new Money(currency);
+            TaxDetails = new List&lt;TaxDetail&gt;();
+            Discounts = new List&lt;Discount&gt;();
+        }
+
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of payment gateway code
+        /// &lt;/summary&gt;
+        public string Code { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of payment method name
+        /// &lt;/summary&gt;
+        public string Name { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of payment method logo absolute URL
+        /// &lt;/summary&gt;
+        public string LogoUrl { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of payment method description
+        /// &lt;/summary&gt;
+        public string Description { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of payment method type
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;
+        /// &quot;Unknown&quot;, &quot;Standard&quot;, &quot;Redirection&quot;, &quot;PreparedForm&quot;
+        /// &lt;/value&gt;
+        public string PaymentMethodType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of payment method group type
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;
+        /// &quot;Paypal&quot;, &quot;BankCard&quot;, &quot;Alternative&quot;, &quot;Manual&quot;
+        /// &lt;/value&gt;
+        public string PaymentMethodGroupType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of payment method priority
+        /// &lt;/summary&gt;
+        public int Priority { get; set; }
+
+        /// &lt;summary&gt;
+        /// Is payment method available for partial payments
+        /// &lt;/summary&gt;
+        public bool IsAvailableForPartial { get; set; }
+
+        /// &lt;summary&gt;
+        /// Custom properties for payment method
+        /// &lt;/summary&gt;
+        public List&lt;SettingEntry&gt; Settings { get; set; }
+
+        public Currency Currency { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shipping price
+        /// &lt;/summary&gt;
+        public Money Price { get; set; }
+
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shipping price including tax
+        /// &lt;/summary&gt;
+        public Money PriceWithTax
+        {
+            get
+            {
+                return Price + Price * TaxPercentRate;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Gets the value of total shipping price without taxes
+        /// &lt;/summary&gt;
+        public Money Total
+        {
+            get
+            {
+                return Price - DiscountAmount;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Gets the value of total shipping price including taxes
+        /// &lt;/summary&gt;
+        public Money TotalWithTax
+        {
+            get
+            {
+                return PriceWithTax - DiscountAmountWithTax;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Gets the value of total shipping discount amount
+        /// &lt;/summary&gt;
+        public Money DiscountAmount { get; set; }
+        public Money DiscountAmountWithTax
+        {
+            get
+            {
+                return DiscountAmount + DiscountAmount * TaxPercentRate;
+            }
+        }
+
+        #region ITaxable Members
+        /// &lt;summary&gt;
+        /// Gets or sets the value of total shipping tax amount
+        /// &lt;/summary&gt;
+        public Money TaxTotal
+        {
+            get
+            {
+                return TotalWithTax - Total;
+            }
+        }
+
+        public decimal TaxPercentRate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the value of shipping tax type
+        /// &lt;/summary&gt;
+        public string TaxType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the collection of line item tax details lines
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;
+        /// Collection of TaxDetail objects
+        /// &lt;/value&gt;
+        public IList&lt;TaxDetail&gt; TaxDetails { get; set; }
+
+        public void ApplyTaxRates(IEnumerable&lt;TaxRate&gt; taxRates)
+        {
+            TaxPercentRate = 0m;
+            var paymentTaxRate = taxRates.FirstOrDefault(x =&gt; x.Line.Id != null &amp;&amp; x.Line.Id.EqualsInvariant(Code ?? &quot;&quot;));
+            if (paymentTaxRate != null &amp;&amp; paymentTaxRate.Rate.Amount &gt; 0)
+            {
+                var amount = Total.Amount &gt; 0 ? Total.Amount : Price.Amount;
+                if (amount &gt; 0)
+                {
+                    TaxPercentRate = TaxRate.TaxPercentRound(paymentTaxRate.Rate.Amount / amount);
+                }
+            }
+        }
+        #endregion
+
+        #region IDiscountable Members
+        public IList&lt;Discount&gt; Discounts { get; private set; }
+
+        public void ApplyRewards(IEnumerable&lt;PromotionReward&gt; rewards)
+        {
+            var paymentRewards = rewards.Where(r =&gt; r.RewardType == PromotionRewardType.PaymentReward &amp;&amp; (r.PaymentMethodCode.IsNullOrEmpty() || r.PaymentMethodCode.EqualsInvariant(Code)));
+
+            Discounts.Clear();
+
+            DiscountAmount = new Money(0m, Currency);
+
+            foreach (var reward in paymentRewards)
+            {
+                var discount = reward.ToDiscountModel(Price - DiscountAmount);
+
+                if (reward.IsValid)
+                {
+                    Discounts.Add(discount);
+                    DiscountAmount += discount.Amount;
+                }
+            }
+        }
+        #endregion
+
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,9,11,48,0],[12,9,12,10,0],[13,13,13,33,0],[15,13,15,41,0],[16,13,16,50,0],[17,13,17,48,0],[18,13,18,46,0],[19,9,19,10,0],[25,30,25,34,0],[25,35,25,39,0],[30,30,30,34,0],[30,35,30,39,0],[35,33,35,37,0],[35,38,35,42,0],[40,37,40,41,0],[40,42,40,46,0],[48,43,48,47,0],[48,48,48,52,0],[56,48,56,52,0],[56,53,56,57,0],[61,31,61,35,0],[61,36,61,40,0],[66,45,66,49,0],[66,50,66,54,0],[71,46,71,50,0],[71,51,71,55,0],[73,36,73,40,0],[73,41,73,45,0],[78,30,78,34,0],[78,35,78,39,0],[87,13,87,14,0],[88,17,88,55,0],[89,13,89,14,0],[98,13,98,14,0],[99,17,99,47,0],[100,13,100,14,0],[109,13,109,14,0],[110,17,110,61,0],[111,13,111,14,0],[117,39,117,43,0],[117,44,117,48,0],[121,13,121,14,0],[122,17,122,73,0],[123,13,123,14,0],[133,13,133,14,0],[134,17,134,45,0],[135,13,135,14,0],[138,41,138,45,0],[138,46,138,50,0],[143,33,143,37,0],[143,38,143,42,0],[151,46,151,50,0],[151,51,151,55,0],[154,9,154,10,0],[155,13,155,33,0],[156,13,156,123,0],[156,63,156,121,0],[157,13,157,74,0],[158,13,158,14,0],[159,17,159,77,0],[160,17,160,32,0],[161,17,161,18,0],[162,21,162,99,0],[163,17,163,18,0],[164,13,164,14,0],[165,9,165,10,0],[169,44,169,48,0],[169,49,169,61,0],[172,9,172,10,0],[173,13,173,190,0],[173,53,173,188,0],[175,13,175,31,0],[177,13,177,54,0],[179,13,179,20,0],[179,22,179,32,0],[179,33,179,35,0],[179,36,179,50,0],[180,13,180,14,0],[181,17,181,79,0],[183,17,183,36,0],[184,17,184,18,0],[185,21,185,45,0],[186,21,186,55,0],[187,17,187,18,0],[188,13,188,14,0],[189,9,189,10,0]]);
+    </script>
+  </body>
+</html>

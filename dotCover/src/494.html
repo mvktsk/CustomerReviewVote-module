@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\sitemapcontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using VirtoCommerce.LiquidThemeEngine;
+using VirtoCommerce.Storefront.AutoRestClients.SitemapsModuleApi;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Controllers
+{
+    public class SitemapController : StorefrontControllerBase
+    {
+        private readonly ISitemapsModuleApiOperations _siteMapApi;
+        private readonly ILiquidThemeEngine _liquidThemeEngine;
+        public SitemapController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder, ISitemapsModuleApiOperations siteMapApi,
+                                 ILiquidThemeEngine themeEngine)
+            : base(workContextAccessor, urlBuilder)
+        {
+            _liquidThemeEngine = themeEngine;
+            _siteMapApi = siteMapApi;
+        }
+
+        /// &lt;summary&gt;
+        /// GET: /sitemap.xml
+        /// Return generated sitemap index sitemap.xml
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        [HttpGet]
+        public async Task&lt;ActionResult&gt; GetSitemapIndex()
+        {
+            var stream = await TryGetSitemapStream(&quot;sitemap.xml&quot;);
+            if(stream != null)
+            {
+                return File(stream, &quot;text/xml&quot;);
+            }       
+            return NotFound(&quot;sitemap.xml&quot;);
+        }
+
+        /// &lt;summary&gt;
+        /// GET: /sitemap/sitemap-1.xml
+        /// Return generated sitemap by file
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        [HttpGet]
+        public async Task&lt;ActionResult&gt; GetSitemap(string sitemapPath)
+        {
+            var stream = await TryGetSitemapStream(&quot;sitemap/&quot; + sitemapPath);
+            if (stream != null)
+            {
+                return File(stream, &quot;text/xml&quot;);
+            }
+            return NotFound(sitemapPath);
+        }
+
+
+        private async Task&lt;Stream&gt; TryGetSitemapStream(string filePath)
+        {
+            //If sitemap files have big size for generation on the fly you might place already generated xml files in the theme/assets folder or schedule 
+            // execution of GenerateSitemapJob.GenerateStoreSitemap method for pre-generation sitemaps  
+            var stream = _liquidThemeEngine.GetAssetStream(filePath);          
+            if(stream == null)
+            {                
+                var absUrl = UrlBuilder.ToAppAbsolute(&quot;~/&quot;, WorkContext.CurrentStore, WorkContext.CurrentLanguage);
+                var storeUrl = new Uri(WorkContext.RequestUrl, absUrl).ToString(); 
+                //remove language from base url SitemapAPI will add it automatically
+                storeUrl = storeUrl.Replace(&quot;/&quot; + WorkContext.CurrentLanguage.CultureName + &quot;/&quot;, &quot;/&quot;);
+                stream = await _siteMapApi.GenerateSitemapAsync(WorkContext.CurrentStore.Id, storeUrl, filePath);
+            }
+            return stream;
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,15,18,52,0],[19,9,19,10,0],[20,13,20,46,0],[21,13,21,38,0],[22,9,22,10,0],[31,9,31,10,0],[32,13,32,67,0],[33,13,33,31,0],[34,13,34,14,0],[35,17,35,49,0],[37,13,37,44,0],[38,9,38,10,0],[47,9,47,10,0],[48,13,48,78,0],[49,13,49,32,0],[50,13,50,14,0],[51,17,51,49,0],[53,13,53,42,0],[54,9,54,10,0],[58,9,58,10,0],[61,13,61,70,0],[62,13,62,31,0],[63,13,63,14,0],[64,17,64,116,0],[65,17,65,83,0],[67,17,67,103,0],[68,17,68,114,0],[69,13,69,14,0],[70,13,70,27,0],[71,9,71,10,0]]);
+    </script>
+  </body>
+</html>

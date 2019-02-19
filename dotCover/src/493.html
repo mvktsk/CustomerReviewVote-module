@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\shopifycompatibilitycontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
+using Newtonsoft.Json;
+using VirtoCommerce.LiquidThemeEngine.Converters;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Cart;
+using VirtoCommerce.Storefront.Model.Cart.Services;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Common.Exceptions;
+using VirtoCommerce.Storefront.Model.Services;
+
+namespace VirtoCommerce.Storefront.Controllers
+{
+    public class ShopifyCompatibilityController : StorefrontControllerBase
+    {
+        private readonly ICartBuilder _cartBuilder;
+        private readonly ICatalogService _catalogService;
+
+        public ShopifyCompatibilityController(IWorkContextAccessor workContextAccesor, IStorefrontUrlBuilder urlBuilder, ICartBuilder cartBuilder, ICatalogService catalogService)
+            : base(workContextAccesor, urlBuilder)
+        {
+            _cartBuilder = cartBuilder;
+            _catalogService = catalogService;
+        }
+
+
+        // GET: /cart/change?line=...&amp;quantity=...
+        [HttpGet]
+        public async Task&lt;ActionResult&gt; Change(int line, int quantity)
+        {
+            EnsureCartExists();
+
+            using (await AsyncLock.GetLockByKey(WorkContext.CurrentCart.Value.GetCacheKey()).LockAsync())
+            {
+                var cartBuilder = await LoadOrCreateCartAsync();
+                await cartBuilder.ChangeItemQuantityAsync(line - 1, quantity);
+                await cartBuilder.SaveAsync();
+            }
+            return StoreFrontRedirect(&quot;~/cart&quot;);
+        }
+
+        // POST: /cart/add
+        [HttpPost]
+        public async Task&lt;ActionResult&gt; Add(string id, int quantity)
+        {
+            EnsureCartExists();
+            using (await AsyncLock.GetLockByKey(WorkContext.CurrentCart.Value.GetCacheKey()).LockAsync())
+            {
+                var cartBuilder = await LoadOrCreateCartAsync();
+                var product = (await _catalogService.GetProductsAsync(new[] { id }, Model.Catalog.ItemResponseGroup.ItemLarge)).FirstOrDefault();
+                if (product != null)
+                {
+                    await cartBuilder.AddItemAsync(product, quantity);
+                    await cartBuilder.SaveAsync();
+                }
+            }
+            return StoreFrontRedirect(&quot;~/cart&quot;);
+        }
+
+        // POST: /cart?updates=...&amp;update=...
+        [HttpPost]
+        public async Task&lt;ActionResult&gt; Cart(int[] updates, string checkout)
+        {
+            var virtualRedirectUrl = &quot;~/cart&quot;;
+
+            EnsureCartExists();
+            using (await AsyncLock.GetLockByKey(WorkContext.CurrentCart.Value.GetCacheKey()).LockAsync())
+            {
+                var cartBuilder = await LoadOrCreateCartAsync();
+                await cartBuilder.ChangeItemsQuantitiesAsync(updates);
+                await cartBuilder.SaveAsync();
+
+                StringValues dummy;
+                if (Request.Form.TryGetValue(&quot;checkout&quot;, out dummy))
+                {
+                    virtualRedirectUrl = &quot;~/cart/checkout&quot;;
+
+                }
+            }
+            return StoreFrontRedirect(virtualRedirectUrl);
+        }
+
+        // GET: /cart/clear
+        [HttpGet]
+        public async Task&lt;ActionResult&gt; Clear()
+        {
+            EnsureCartExists();
+            using (await AsyncLock.GetLockByKey(WorkContext.CurrentCart.Value.GetCacheKey()).LockAsync())
+            {
+                var cartBuilder = await LoadOrCreateCartAsync();
+                await cartBuilder.ClearAsync();
+                await cartBuilder.SaveAsync();
+            }
+            return StoreFrontRedirect(&quot;~/cart&quot;);
+        }
+
+        // GET: /cart.js
+        [HttpGet]
+        public async Task&lt;ActionResult&gt; CartJs()
+        {
+            EnsureCartExists();
+            var cartBuilder = await LoadOrCreateCartAsync();
+            return LiquidJson(cartBuilder.Cart.ToShopifyModel(WorkContext.CurrentLanguage, UrlBuilder));
+        }
+
+        // POST: /cart/add.js
+        [HttpPost]
+        public async Task&lt;ActionResult&gt; AddJs(string id, int quantity = 1)
+        {
+            LineItem lineItem = null;
+
+            EnsureCartExists();
+            using (await AsyncLock.GetLockByKey(WorkContext.CurrentCart.Value.GetCacheKey()).LockAsync())
+            {
+                var product = (await _catalogService.GetProductsAsync(new[] { id }, Model.Catalog.ItemResponseGroup.ItemLarge)).FirstOrDefault();
+                if (product != null)
+                {
+                    var cartBuilder = await LoadOrCreateCartAsync();
+                    await cartBuilder.AddItemAsync(product, quantity);
+                    await cartBuilder.SaveAsync();
+
+                    lineItem = cartBuilder.Cart.Items.FirstOrDefault(i =&gt; i.ProductId == id);
+                }
+            }
+            return LiquidJson(lineItem != null ? lineItem.ToShopifyModel(WorkContext.CurrentLanguage, UrlBuilder) : null);
+        }
+
+        // POST: /cart/change.js
+        [HttpPost]
+        public async Task&lt;ActionResult&gt; ChangeJs(string id, int quantity)
+        {
+            EnsureCartExists();
+            using (await AsyncLock.GetLockByKey(WorkContext.CurrentCart.Value.GetCacheKey()).LockAsync())
+            {
+                var cartBuilder = await LoadOrCreateCartAsync();
+                await cartBuilder.ChangeItemQuantityAsync(id, quantity);
+                await cartBuilder.SaveAsync();
+                return LiquidJson(cartBuilder.Cart.ToShopifyModel(WorkContext.CurrentLanguage, UrlBuilder));
+            }
+        }
+
+        // POST: /cart/update.js
+        [HttpPost]
+        public async Task&lt;ActionResult&gt; UpdateJs(int[] updates)
+        {
+            EnsureCartExists();
+            using (await AsyncLock.GetLockByKey(WorkContext.CurrentCart.Value.GetCacheKey()).LockAsync())
+            {
+                var cartBuilder = await LoadOrCreateCartAsync();
+                await cartBuilder.ChangeItemsQuantitiesAsync(updates);
+                await cartBuilder.SaveAsync();
+                return LiquidJson(cartBuilder.Cart.ToShopifyModel(WorkContext.CurrentLanguage, UrlBuilder));
+            }
+        }
+
+        // POST: /cart/clear.js
+        [HttpPost]
+        public async Task&lt;ActionResult&gt; ClearJs()
+        {
+            EnsureCartExists();
+            using (await AsyncLock.GetLockByKey(WorkContext.CurrentCart.Value.GetCacheKey()).LockAsync())
+            {
+                var cartBuilder = await LoadOrCreateCartAsync();
+                await cartBuilder.ClearAsync();
+                await cartBuilder.SaveAsync();
+                return LiquidJson(_cartBuilder.Cart.ToShopifyModel(WorkContext.CurrentLanguage, UrlBuilder));
+            }
+        }
+
+        /// GET collections
+        /// This method used for display all categories
+        /// &lt;returns&gt;&lt;/returns&gt;
+        /// TODO:
+        //[OutputCache(CacheProfile = &quot;CatalogSearchCachingProfile&quot;)]
+        public ActionResult Collections()
+        {
+            return View(&quot;list-collections&quot;, WorkContext);
+        }
+
+        private JsonResult LiquidJson(object obj)
+        {
+            return new JsonResult(obj, new JsonSerializerSettings
+            {
+                ContractResolver = new LiquidThemeEngine.Filters.RubyContractResolver(),
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
+        }
+
+        private void EnsureCartExists()
+        {
+            if (WorkContext.CurrentCart == null)
+            {
+                throw new StorefrontException(&quot;Cart not found&quot;);
+            }
+        }
+        private async Task&lt;ICartBuilder&gt; LoadOrCreateCartAsync()
+        {
+            var cart = WorkContext.CurrentCart.Value;
+            //Need to try load fresh cart from cache or service to prevent parallel update conflict
+            //because WorkContext.CurrentCart may contains old cart
+            await _cartBuilder.LoadOrCreateNewTransientCartAsync(cart.Name, WorkContext.CurrentStore, cart.Customer, cart.Language, cart.Currency);
+            return _cartBuilder;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[22,15,22,51,0],[23,9,23,10,0],[24,13,24,40,0],[25,13,25,46,0],[26,9,26,10,0],[32,9,32,10,0],[33,13,33,32,0],[35,13,35,106,0],[36,13,36,14,0],[37,17,37,65,0],[38,17,38,79,0],[39,17,39,47,0],[40,13,40,14,0],[41,13,41,49,0],[42,9,42,10,0],[47,9,47,10,0],[48,13,48,32,0],[49,13,49,106,0],[50,13,50,14,0],[51,17,51,65,0],[52,17,52,146,0],[53,17,53,37,0],[54,17,54,18,0],[55,21,55,71,0],[56,21,56,51,0],[57,17,57,18,0],[58,13,58,14,0],[59,13,59,49,0],[60,9,60,10,0],[65,9,65,10,0],[66,13,66,47,0],[68,13,68,32,0],[69,13,69,106,0],[70,13,70,14,0],[71,17,71,65,0],[72,17,72,71,0],[73,17,73,47,0],[76,17,76,69,0],[77,17,77,18,0],[78,21,78,60,0],[80,17,80,18,0],[81,13,81,14,0],[82,13,82,59,0],[83,9,83,10,0],[88,9,88,10,0],[89,13,89,32,0],[90,13,90,106,0],[91,13,91,14,0],[92,17,92,65,0],[93,17,93,48,0],[94,17,94,47,0],[95,13,95,14,0],[96,13,96,49,0],[97,9,97,10,0],[102,9,102,10,0],[103,13,103,32,0],[104,13,104,61,0],[105,13,105,105,0],[106,9,106,10,0],[111,9,111,10,0],[112,13,112,38,0],[114,13,114,32,0],[115,13,115,106,0],[116,13,116,14,0],[117,17,117,146,0],[118,17,118,37,0],[119,17,119,18,0],[120,21,120,69,0],[121,21,121,71,0],[122,21,122,51,0],[124,21,124,94,0],[124,75,124,92,0],[125,17,125,18,0],[126,13,126,14,0],[127,13,127,123,0],[128,9,128,10,0],[133,9,133,10,0],[134,13,134,32,0],[135,13,135,106,0],[136,13,136,14,0],[137,17,137,65,0],[138,17,138,73,0],[139,17,139,47,0],[140,17,140,109,0],[142,9,142,10,0],[147,9,147,10,0],[148,13,148,32,0],[149,13,149,106,0],[150,13,150,14,0],[151,17,151,65,0],[152,17,152,71,0],[153,17,153,47,0],[154,17,154,109,0],[156,9,156,10,0],[161,9,161,10,0],[162,13,162,32,0],[163,13,163,106,0],[164,13,164,14,0],[165,17,165,65,0],[166,17,166,48,0],[167,17,167,47,0],[168,17,168,110,0],[170,9,170,10,0],[178,9,178,10,0],[179,13,179,58,0],[180,9,180,10,0],[183,9,183,10,0],[184,13,188,16,0],[189,9,189,10,0],[192,9,192,10,0],[193,13,193,49,0],[194,13,194,14,0],[195,17,195,65,0],[197,9,197,10,0],[199,9,199,10,0],[200,13,200,54,0],[203,13,203,148,0],[204,13,204,33,0],[205,9,205,10,0]]);
+    </script>
+  </body>
+</html>

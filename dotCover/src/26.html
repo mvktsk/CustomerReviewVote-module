@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\cart.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using DotLiquid;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// Represents customer&#39;s shopping cart
+    /// &lt;/summary&gt;
+    /// &lt;remarks&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/objects/cart
+    /// &lt;/remarks&gt;
+    [DataContract]
+    public partial class Cart : Drop
+    {
+        /// &lt;summary&gt;
+        /// Gets an additional shopping cart information
+        /// &lt;/summary&gt;
+        public MetaFieldNamespacesCollection Attributes { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets collection of shopping cart line items
+        /// &lt;/summary&gt;
+        [DataMember]
+        public IList&lt;LineItem&gt; Items { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets the number of shopping cart line items
+        /// &lt;/summary&gt;
+        [DataMember]
+        public int ItemCount { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets the shopping cart note
+        /// &lt;/summary&gt;
+        [DataMember]
+        public string Note { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets shopping cart total price
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal TotalPrice { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets shopping cart total weight
+        /// &lt;/summary&gt;
+        [DataMember]
+        public decimal TotalWeight { get; set; }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[19,59,19,63,0],[19,64,19,68,0],[25,40,25,44,0],[25,45,25,49,0],[31,32,31,36,0],[31,37,31,41,0],[37,30,37,34,0],[37,35,37,39,0],[43,37,43,41,0],[43,42,43,46,0],[49,38,49,42,0],[49,43,49,47,0]]);
+    </script>
+  </body>
+</html>

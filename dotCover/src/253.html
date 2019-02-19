@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\settingsextension.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace VirtoCommerce.Storefront.Model.Common
+{
+    public static class SettingsExtension
+    {
+        public static T GetSettingValue&lt;T&gt;(this IEnumerable&lt;SettingEntry&gt; settings, string settingName, T defaulValue)
+        {
+            var retVal = defaulValue;
+            var setting = settings.FirstOrDefault(x =&gt; x.Name.Equals(settingName, StringComparison.OrdinalIgnoreCase));
+            if(setting != null &amp;&amp; setting.Value != null)
+            {
+                retVal = (T)Convert.ChangeType(setting.Value, typeof(T));
+            }
+            return retVal;
+        }
+          
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,10,0],[13,13,13,38,0],[14,13,14,120,0],[14,56,14,118,0],[15,13,15,57,0],[16,13,16,14,0],[17,17,17,74,0],[18,13,18,14,0],[19,13,19,27,0],[20,9,20,10,0]]);
+    </script>
+  </body>
+</html>

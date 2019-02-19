@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\filters\translationfilter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using DotLiquid;
+
+namespace VirtoCommerce.LiquidThemeEngine.Filters
+{
+    /// &lt;summary&gt;
+    /// Filter used for localization 
+    /// &lt;/summary&gt;
+    public class TranslationFilter
+    {
+        private static string[] _countSuffixes = new[] { &quot;.zero&quot;, &quot;.one&quot;, &quot;.two&quot; };
+
+        #region Public Methods and Operators
+        public static string T(string key, params object[] variables)
+        {
+            var retVal = key;
+            var themeAdaptor = (ShopifyLiquidThemeEngine)Template.FileSystem;
+            var localization = themeAdaptor.ReadLocalization();
+            var dictionary = variables != null ? variables.OfType&lt;Tuple&lt;string, object&gt;&gt;().ToDictionary(x =&gt; x.Item1, x =&gt; x.Item2) : null;
+
+            if (localization != null)
+            {
+                if (dictionary != null)
+                {
+                    //try to transform localization key
+                    key = TryTransformKey(key, dictionary);
+                }
+                retVal = (localization.SelectToken(key) ?? key).ToString();
+            }
+
+            if(dictionary != null)
+            {
+                retVal = themeAdaptor.RenderTemplate(retVal, dictionary);
+            }
+            return retVal;
+        }
+        #endregion
+
+        private static string TryTransformKey(string input, Dictionary&lt;string, object&gt; variables)
+        {
+            var retVal = input;
+
+            object countValue;
+            if (variables.TryGetValue(&quot;count&quot;, out countValue) &amp;&amp; countValue != null)
+            {
+                var count = Convert.ToUInt16(countValue);
+                retVal += count &lt; 2 ? _countSuffixes[count] : &quot;.other&quot;;
+            }
+            return retVal;
+        }
+
+
+    }
+
+
+
+
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,84,0],[19,9,19,10,0],[20,13,20,30,0],[21,13,21,78,0],[22,13,22,64,0],[23,13,23,140,0],[23,110,23,117,0],[23,124,23,131,0],[25,13,25,38,0],[26,13,26,14,0],[27,17,27,40,0],[28,17,28,18,0],[30,21,30,60,0],[31,17,31,18,0],[32,17,32,76,0],[33,13,33,14,0],[35,13,35,35,0],[36,13,36,14,0],[37,17,37,74,0],[38,13,38,14,0],[39,13,39,27,0],[40,9,40,10,0],[44,9,44,10,0],[45,13,45,32,0],[48,13,48,86,0],[49,13,49,14,0],[50,17,50,58,0],[51,17,51,72,0],[52,13,52,14,0],[53,13,53,27,0],[54,9,54,10,0]]);
+    </script>
+  </body>
+</html>

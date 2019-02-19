@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\middleware\noliquidthememiddleware.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using VirtoCommerce.LiquidThemeEngine;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Models;
+
+namespace VirtoCommerce.Storefront.Middleware
+{
+    public class NoLiquidThemeMiddleware
+    {
+        public const string NoThemeModelKey = &quot;NoLiquidThemeMiddleware.NoThemeModel&quot;;
+        private readonly RequestDelegate _next;
+        private readonly IWorkContextAccessor _workContextAccessor;
+        private readonly ILiquidThemeEngine _liquidThemeEngine;
+        public NoLiquidThemeMiddleware(RequestDelegate next, IWorkContextAccessor workContextAccessor, ILiquidThemeEngine liquidThemeEngine)
+        {
+            _next = next;
+            _workContextAccessor = workContextAccessor;
+            _liquidThemeEngine = liquidThemeEngine;
+        }
+
+        public async Task Invoke(HttpContext context)
+        {
+            var workContext = _workContextAccessor.WorkContext;
+            if (workContext != null &amp;&amp; string.IsNullOrEmpty(_liquidThemeEngine.ResolveTemplatePath(&quot;index&quot;)))
+            {
+                context.Request.Path = &quot;/common/notheme&quot;;
+                context.Items[NoThemeModelKey] = new NoThemeViewModel { SearchedLocations = _liquidThemeEngine.DiscoveryPaths.ToList() };
+            }
+
+            await _next(context);
+        }
+    }
+
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,9,17,141,0],[18,9,18,10,0],[19,13,19,26,0],[20,13,20,56,0],[21,13,21,52,0],[22,9,22,10,0],[25,9,25,10,0],[26,13,26,64,0],[27,13,27,110,0],[28,13,28,14,0],[29,17,29,58,0],[30,17,30,138,0],[31,13,31,14,0],[33,13,33,34,0],[34,9,34,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\security\noncustomerauthorizationhandler.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Security;
+
+namespace VirtoCommerce.Storefront.Domain.Security
+{
+    public class NonCustomerAuthorizationRequirement : IAuthorizationRequirement
+    {
+        public const string PolicyName = &quot;NonCustomer&quot;;
+    }
+
+    public class NonCustomerAuthorizationHandler : AuthorizationHandler&lt;NonCustomerAuthorizationRequirement&gt;
+    {
+        private readonly IWorkContextAccessor _workContextAccessor;
+
+        public NonCustomerAuthorizationHandler(IWorkContextAccessor workContextAccessor)
+        {
+            _workContextAccessor = workContextAccessor;
+        }
+
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, NonCustomerAuthorizationRequirement requirement)
+        {
+            if (context.User.IsInRole(SecurityConstants.Roles.Administrator))
+            {
+                context.Succeed(requirement);
+            }
+
+            var workContext = _workContextAccessor.WorkContext;
+            if (!workContext.CurrentUser.UserType.EqualsInvariant(UserType.Customer))
+            {
+                context.Succeed(requirement);
+            }
+
+            return Task.CompletedTask;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,9,18,89,0],[19,9,19,10,0],[20,13,20,56,0],[21,9,21,10,0],[24,9,24,10,0],[25,13,25,78,0],[26,13,26,14,0],[27,17,27,46,0],[28,13,28,14,0],[30,13,30,64,0],[31,13,31,86,0],[32,13,32,14,0],[33,17,33,46,0],[34,13,34,14,0],[36,13,36,39,0],[37,9,37,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\language.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using DotLiquid;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// Represent language for specified culture
+    /// &lt;/summary&gt;
+    public partial class Language : Drop
+    {
+        /// &lt;summary&gt;
+        /// culture name format (e.g. en-US)
+        /// &lt;/summary&gt;
+        public string CultureName { get; set; }
+        public string NativeName { get; set; }
+        /// &lt;summary&gt;
+        ///  Gets the ISO 639-2 three-letter code for the language 
+        /// &lt;/summary&gt;
+        public string ThreeLeterLanguageName { get; set; }
+        /// &lt;summary&gt;
+        ///   Gets the ISO 639-1 two-letter code for the language
+        /// &lt;/summary&gt;
+        public string TwoLetterLanguageName { get; set; }
+        /// &lt;summary&gt;
+        ///  Gets the two-letter code defined in ISO 3166 for the country/region.
+        /// &lt;/summary&gt;
+        public string TwoLetterRegionName { get; set; }
+        /// &lt;summary&gt;
+        ///  Gets the three-letter code defined in ISO 3166 for the country/region.
+        /// &lt;/summary&gt;
+        public string ThreeLetterRegionName { get; set; }
+
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[19,37,19,41,0],[19,42,19,46,0],[20,36,20,40,0],[20,41,20,45,0],[24,48,24,52,0],[24,53,24,57,0],[28,47,28,51,0],[28,52,28,56,0],[32,45,32,49,0],[32,50,32,54,0],[36,47,36,51,0],[36,52,36,56,0]]);
+    </script>
+  </body>
+</html>

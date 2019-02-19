@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\jsonconverters\recommendationjsonconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Linq;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Cart;
+using VirtoCommerce.Storefront.Model.Recommendations;
+
+namespace VirtoCommerce.Storefront.Binders
+{
+    public class RecommendationJsonConverter : JsonConverter
+    {
+        private static Type[] _knowTypes = new[] { typeof(RecommendationEvalContext)};
+
+
+        private readonly IRecommendationProviderFactory _providerFactory;
+        public RecommendationJsonConverter(IRecommendationProviderFactory providerFactory)
+        {
+            _providerFactory = providerFactory;
+        }
+        public override bool CanWrite { get { return false; } }
+        public override bool CanRead { get { return true; } }
+
+        public override bool CanConvert(Type objectType)
+        {
+            return _knowTypes.Any(x =&gt; x.IsAssignableFrom(objectType));
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            object retVal = new RecommendationEvalContext(); 
+            var obj = JObject.Load(reader);
+            var providerName = obj.SelectToken(&quot;provider&quot;);
+            if (providerName != null)
+            {
+                var provider = _providerFactory.GetProvider(providerName.Value&lt;string&gt;());
+                if(provider != null)
+                {
+                    retVal = provider.CreateEvalContext();
+                }
+            }         
+            serializer.Populate(obj.CreateReader(), retVal);
+            return retVal;
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,87,0],[17,9,17,91,0],[18,9,18,10,0],[19,13,19,48,0],[20,9,20,10,0],[21,45,21,46,0],[21,47,21,60,0],[21,61,21,62,0],[22,44,22,45,0],[22,46,22,58,0],[22,59,22,60,0],[25,9,25,10,0],[26,13,26,72,0],[26,40,26,70,0],[27,9,27,10,0],[30,9,30,10,0],[31,13,31,61,0],[32,13,32,44,0],[33,13,33,60,0],[34,13,34,38,0],[35,13,35,14,0],[36,17,36,91,0],[37,17,37,37,0],[38,17,38,18,0],[39,21,39,59,0],[40,17,40,18,0],[41,13,41,14,0],[42,13,42,61,0],[43,13,43,27,0],[44,9,44,10,0],[47,9,47,10,0],[48,13,48,49,0]]);
+    </script>
+  </body>
+</html>

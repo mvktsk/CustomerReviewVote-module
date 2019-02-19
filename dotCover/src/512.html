@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\controllers\api\apiorganizationcontroller.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Storefront.Export;
+using VirtoCommerce.Storefront.Extensions;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Customer.Services;
+
+namespace VirtoCommerce.Storefront.Controllers.Api
+{
+    public class ApiBalanceController : StorefrontControllerBase
+    {
+        private readonly IHruCustomerService _hruCustomerService;
+
+        public ApiBalanceController(IWorkContextAccessor workContextAccessor, IStorefrontUrlBuilder urlBuilder,
+            IHruCustomerService hruCustomerService)
+            : base(workContextAccessor, urlBuilder)
+        {
+            _hruCustomerService = hruCustomerService;
+        }
+
+        // GET: storefrontapi/balance
+        [HttpGet]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;ActionResult&gt; GetBalance(string salePointId, string beginDate, string endDate)
+        {
+            var balance = await _hruCustomerService
+                .GetBalanceHistory(salePointId, beginDate.ParseMillisecondsToDate(), endDate.ParseMillisecondsToDate())
+                .ConfigureAwait(false);
+            return Ok(balance);
+        }
+
+        // GET: storefrontapi/balance/export
+        [HttpGet]
+        public async Task&lt;IActionResult&gt; ExportBalanceHistory(string salePointId, string beginDate, string endDate,
+            string jeansSalePointId)
+        {
+            return await _hruCustomerService.GetExportedBalanceHistory(salePointId, beginDate.ParseMillisecondsToDate(), endDate.ParseMillisecondsToDate(), jeansSalePointId);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,15,18,52,0],[19,9,19,10,0],[20,13,20,54,0],[21,9,21,10,0],[27,9,27,10,0],[28,13,30,40,0],[31,13,31,32,0],[32,9,32,10,0],[38,9,38,10,0],[39,13,39,175,0],[40,9,40,10,0]]);
+    </script>
+  </body>
+</html>

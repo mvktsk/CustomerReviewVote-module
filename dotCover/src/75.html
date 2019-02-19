@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\filters\commercefilters.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace VirtoCommerce.LiquidThemeEngine.Filters
+{
+    public class CommerceFilters
+    {
+        #region Static Fields
+        private static readonly Lazy&lt;CultureInfo[]&gt; _cultures = new Lazy&lt;CultureInfo[]&gt;(
+            CreateCultures,
+            LazyThreadSafetyMode.ExecutionAndPublication);
+        #endregion
+
+        #region Public Properties
+        public static CultureInfo[] Cultures
+        {
+            get
+            {
+                return _cultures.Value;
+            }
+        }
+        #endregion
+
+        #region Public Methods and Operators
+        /// &lt;summary&gt;
+        ///     Return the three letter ISO currency code for the current thread.
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;current currency code in String&lt;/returns&gt;
+        public static String CurrentCurrencyCode()
+        {
+            return new RegionInfo(Thread.CurrentThread.CurrentCulture.Name).ISOCurrencySymbol;
+        }
+
+        public static string CurrentCurrencyCode(string cultureName)
+        {
+            return new RegionInfo(cultureName).ISOCurrencySymbol;
+        }
+
+
+        /// &lt;summary&gt;
+        ///     Return the object which represents the place and language which matches the currency code which
+        ///     the database is able to support.  Fall back to Current Thread&#39;s culture if the currencyCode we requested doesn&#39;t
+        ///     match.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;currencyCode&quot;&gt;the currency code to be matched for the culture&lt;/param&gt;
+        /// &gt;
+        /// &lt;returns&gt;CultureInfo object&lt;/returns&gt;
+        public static CultureInfo EffectiveCulture(string currencyCode)
+        {
+            var retVal = CultureInfo.CurrentCulture;
+
+            if (!CurrentCurrencyCode().Equals(currencyCode, StringComparison.OrdinalIgnoreCase))
+            {
+                // Find currency culture
+                var info =
+                    Cultures.FirstOrDefault(
+                        i =&gt;
+                            new RegionInfo(i.Name).ISOCurrencySymbol.Equals(
+                                currencyCode,
+                                StringComparison.OrdinalIgnoreCase));
+                retVal = info ?? retVal;
+            }
+
+            //.NET for swiss currency returns Fr where normally it should be CHF
+            if (retVal.Name.Equals(&quot;de-CH&quot;, StringComparison.InvariantCultureIgnoreCase))
+            {
+                retVal.NumberFormat.CurrencySymbol = &quot;CHF&quot;;
+            }
+
+            return retVal;
+        }
+
+        /// &lt;summary&gt;
+        ///     Attempt to format the currency based on the browser&#39;s locale, but if that currency
+        ///     is not in the database, then fallback to current thread&#39;s culture.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;amount&quot;&gt;the amount to be formated&lt;/param&gt;
+        /// &lt;param name=&quot;currencyCode&quot;&gt;
+        ///     currency code which will be used to find the
+        ///     effective culture
+        /// &lt;/param&gt;
+        /// &lt;returns&gt;Formatted currency in String&lt;/returns&gt;
+        public static string FormatCurrency(decimal amount, string currencyCode)
+        {
+            return String.Format(EffectiveCulture(currencyCode), &quot;{0:c}&quot;, amount);
+        }
+
+   
+        #endregion
+
+        #region Methods
+        private static CultureInfo[] CreateCultures()
+        {
+            return CultureInfo.GetCultures(CultureTypes.SpecificCultures);
+        }
+        #endregion
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,16,59,0],[23,13,23,14,0],[24,17,24,40,0],[25,13,25,14,0],[35,9,35,10,0],[36,13,36,95,0],[37,9,37,10,0],[40,9,40,10,0],[41,13,41,66,0],[42,9,42,10,0],[54,9,54,10,0],[55,13,55,53,0],[57,13,57,97,0],[58,13,58,14,0],[60,17,65,70,0],[63,29,65,68,0],[66,17,66,41,0],[67,13,67,14,0],[70,13,70,90,0],[71,13,71,14,0],[72,17,72,60,0],[73,13,73,14,0],[75,13,75,27,0],[76,9,76,10,0],[89,9,89,10,0],[90,13,90,83,0],[91,9,91,10,0],[98,9,98,10,0],[99,13,99,75,0],[100,9,100,10,0]]);
+    </script>
+  </body>
+</html>

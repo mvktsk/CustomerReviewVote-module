@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\contentblobproviders\blobconnectionstring.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Web;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    /// &lt;summary&gt;
+    /// Represent blob resources connection string which can contains complex part as Provider, basepath etc
+    /// &lt;/summary&gt;
+    public class BlobConnectionString
+    {
+        private BlobConnectionString()
+        {
+        }
+        public string Provider { get; private set; }
+        /// &lt;summary&gt;
+        /// root path. Base for blob resources
+        /// &lt;/summary&gt;
+        public string RootPath { get; private set; }
+        public string ConnectionString { get; private set; }
+
+        public static BlobConnectionString Parse(string inputString)
+        {
+            if (string.IsNullOrEmpty(inputString))
+                throw new ArgumentNullException(nameof(inputString));
+
+            var retVal = new BlobConnectionString();
+            var pairs = ToDictionary(inputString, &quot;;&quot;, &quot;=&quot;);
+            if(pairs.ContainsKey(&quot;provider&quot;))
+            {
+                retVal.Provider = pairs[&quot;provider&quot;];
+                pairs.Remove(&quot;provider&quot;);
+            }
+            if (pairs.ContainsKey(&quot;rootPath&quot;))
+            {
+                retVal.RootPath = pairs[&quot;rootPath&quot;];
+                pairs.Remove(&quot;rootPath&quot;);
+            }
+            retVal.ConnectionString = ToString(pairs, &quot;;&quot;, &quot;=&quot;);
+            return retVal;
+        }
+
+        private static Dictionary&lt;string, string&gt; ToDictionary(string sourceString, string pairSeparator, string valueSeparator)
+        {
+            return sourceString.Split(new[] { pairSeparator }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(x =&gt; x.Split(new[] { valueSeparator }, 2, StringSplitOptions.RemoveEmptyEntries))
+                .ToDictionary(x =&gt; x[0], x =&gt; x.Length == 2 ? x[1] : string.Empty, StringComparer.OrdinalIgnoreCase);
+        }
+
+        public static string ToString(IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt; pairs, string pairSeparator, string valueSeparator)
+        {
+            var builder = new StringBuilder();
+
+            foreach (var pair in pairs)
+            {
+                if (builder.Length &gt; 0)
+                {
+                    builder.Append(pairSeparator);
+                }
+                builder.Append(pair.Key);
+                builder.Append(valueSeparator);
+                builder.Append(pair.Value);
+            }
+
+            return builder.ToString();
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,14,39,0],[15,9,15,10,0],[16,9,16,10,0],[17,34,17,38,0],[17,39,17,51,0],[21,34,21,38,0],[21,39,21,51,0],[22,42,22,46,0],[22,47,22,59,0],[25,9,25,10,0],[26,13,26,51,0],[27,17,27,70,0],[29,13,29,53,0],[30,13,30,61,0],[31,13,31,46,0],[32,13,32,14,0],[33,17,33,53,0],[34,17,34,42,0],[35,13,35,14,0],[36,13,36,47,0],[37,13,37,14,0],[38,17,38,53,0],[39,17,39,42,0],[40,13,40,14,0],[41,13,41,65,0],[42,13,42,27,0],[43,9,43,10,0],[46,9,46,10,0],[47,13,49,118,0],[48,30,48,105,0],[49,36,49,40,0],[49,47,49,82,0],[50,9,50,10,0],[53,9,53,10,0],[54,13,54,47,0],[56,13,56,20,0],[56,22,56,30,0],[56,31,56,33,0],[56,34,56,39,0],[57,13,57,14,0],[58,17,58,40,0],[59,17,59,18,0],[60,21,60,51,0],[61,17,61,18,0],[62,17,62,42,0],[63,17,63,48,0],[64,17,64,44,0],[65,13,65,14,0],[67,13,67,39,0],[68,9,68,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\customerreviewvote-module\newmanagedmodule.data\migrations\configuration.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using CustomerReviewVotes.Core.Model;
+
+namespace CustomerReviewVotes.Data.Migrations
+{
+    using CustomerReviewVotes.Data.Model;
+    using System;
+    using System.Data.Entity.Migrations;
+
+    public sealed class Configuration : DbMigrationsConfiguration&lt;CustomerReviewVotes.Data.Repositories.CustomerReviewRepository&gt;
+    {
+        public Configuration()
+        {
+            AutomaticMigrationsEnabled = false;
+            MigrationsDirectory = @&quot;Migrations&quot;;
+        }
+
+        protected override void Seed(CustomerReviewVotes.Data.Repositories.CustomerReviewRepository context)
+        {
+            //  This method will be called after migrating to the latest version.
+
+            //  You can use the DbSet&lt;T&gt;.AddOrUpdate() helper extension method 
+            //  to avoid creating duplicate seed data.
+            var now = DateTime.UtcNow;
+            context.AddOrUpdate(new CustomerReviewEntity { Id = &quot;1&quot;, ProductId = &quot;8b7b07c165924a879392f4f51a6f7ce0&quot;, CreatedDate = now, CreatedBy = &quot;initial data seed&quot;, AuthorNickname = &quot;Andrew Peters&quot;, Content = &quot;Super!&quot; });
+            context.AddOrUpdate(new CustomerReviewEntity { Id = &quot;2&quot;, ProductId = &quot;8b7b07c165924a879392f4f51a6f7ce0&quot;, CreatedDate = now, CreatedBy = &quot;initial data seed&quot;, AuthorNickname = &quot;Mr. Pumpkin&quot;, Content = &quot;So so&quot; });
+            context.AddOrUpdate(new CustomerReviewEntity { Id = &quot;3&quot;, ProductId = &quot;8b7b07c165924a879392f4f51a6f7ce0&quot;, CreatedDate = now, CreatedBy = &quot;initial data seed&quot;, AuthorNickname = &quot;John Doe&quot;, Content = &quot;Liked that&quot; });
+            context.AddOrUpdate(new CustomerReviewVoteEntity { Id = &quot;1&quot;, AuthorId = &quot;1&quot;, CustomerReviewId = &quot;1&quot;, ReviewRate = VoteRate.Helpfull, CreatedDate = now, CreatedBy = &quot;initial data seed&quot; });
+            context.AddOrUpdate(new CustomerReviewVoteEntity { Id = &quot;2&quot;, AuthorId = &quot;2&quot;, CustomerReviewId = &quot;1&quot;, ReviewRate = VoteRate.Useless, CreatedDate = now, CreatedBy = &quot;initial data seed&quot; });
+            context.AddOrUpdate(new CustomerReviewVoteEntity { Id = &quot;3&quot;, AuthorId = &quot;3&quot;, CustomerReviewId = &quot;1&quot;, ReviewRate = VoteRate.Helpfull, CreatedDate = now, CreatedBy = &quot;initial data seed&quot; });
+            context.AddOrUpdate(new CustomerReviewVoteEntity { Id = &quot;4&quot;, AuthorId = &quot;1&quot;, CustomerReviewId = &quot;2&quot;, ReviewRate = VoteRate.Helpfull, CreatedDate = now, CreatedBy = &quot;initial data seed&quot; });
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,9,11,31,1],[12,9,12,10,1],[13,13,13,48,1],[14,13,14,49,1],[15,9,15,10,1],[18,9,18,10,0],[23,13,23,39,0],[24,13,24,226,0],[25,13,25,223,0],[26,13,26,225,0],[27,13,27,200,0],[28,13,28,199,0],[29,13,29,200,0],[30,13,30,200,0],[31,9,31,10,0]]);
+    </script>
+  </body>
+</html>

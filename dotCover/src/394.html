@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\order\customerorderservice.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using PagedList.Core;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using VirtoCommerce.Storefront.AutoRestClients.OrdersModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.QuoteModuleApi;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Order;
+using VirtoCommerce.Storefront.Model.Order.Services;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public class CustomerOrderService : ICustomerOrderService
+    {
+        private readonly IOrderModule _orderApi;
+        private readonly IWorkContextAccessor _workContextAccessor;
+        public CustomerOrderService(IOrderModule orderApi, IWorkContextAccessor workContextAccessor)
+        {
+            _orderApi = orderApi;
+            _workContextAccessor = workContextAccessor;
+        }
+
+        public IPagedList&lt;CustomerOrder&gt; SearchOrders(OrderSearchCriteria criteria)
+        {
+            var workContext = _workContextAccessor.WorkContext;
+            return InnerSearchOrdersAsync(criteria, workContext).GetAwaiter().GetResult();
+        }
+
+        public async Task&lt;IPagedList&lt;CustomerOrder&gt;&gt; SearchOrdersAsync(OrderSearchCriteria criteria)
+        {
+            var workContext = _workContextAccessor.WorkContext;
+            return await InnerSearchOrdersAsync(criteria, workContext);
+        }
+
+        public async Task&lt;CustomerOrder&gt; GetOrderByNumberAsync(string number)
+        {
+            var workContext = _workContextAccessor.WorkContext;
+            return (await _orderApi.GetByNumberAsync(number))?.ToCustomerOrder(workContext.AllCurrencies, workContext.CurrentLanguage);
+        }
+
+
+        protected virtual async Task&lt;IPagedList&lt;CustomerOrder&gt;&gt; InnerSearchOrdersAsync(OrderSearchCriteria criteria, WorkContext workContext)
+        {
+            if (criteria == null)
+            {
+                throw new ArgumentNullException(nameof(criteria));
+            }
+            var result = await _orderApi.SearchAsync(criteria.ToSearchCriteriaDto());
+            return new StaticPagedList&lt;CustomerOrder&gt;(result.CustomerOrders.Select(x =&gt; x.ToCustomerOrder(workContext.AllCurrencies, workContext.CurrentLanguage)),
+                                                     criteria.PageNumber, criteria.PageSize, result.TotalCount.Value);
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,9,18,101,0],[19,9,19,10,0],[20,13,20,34,0],[21,13,21,56,0],[22,9,22,10,0],[25,9,25,10,0],[26,13,26,64,0],[27,13,27,91,0],[28,9,28,10,0],[31,9,31,10,0],[32,13,32,64,0],[33,13,33,72,0],[34,9,34,10,0],[37,9,37,10,0],[38,13,38,64,0],[39,13,39,136,0],[40,9,40,10,0],[44,9,44,10,0],[45,13,45,34,0],[46,13,46,14,0],[47,17,47,67,0],[49,13,49,86,0],[50,13,51,119,0],[50,89,50,162,0],[52,9,52,10,0]]);
+    </script>
+  </body>
+</html>

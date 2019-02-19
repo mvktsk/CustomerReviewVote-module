@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\catalog\categorysearchcriteria.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model.Catalog
+{
+    public partial class CategorySearchCriteria : PagedSearchCriteria
+    {
+        private static int _defaultPageSize = 20;
+
+        public static int DefaultPageSize
+        {
+            get { return _defaultPageSize; }
+            set { _defaultPageSize = value; }
+        }
+
+        //For JSON deserialization 
+        public CategorySearchCriteria()
+            : this(null)
+        {
+        }
+
+        public CategorySearchCriteria(Language language)
+            : this(language, new NameValueCollection())
+        {
+        }
+
+        public CategorySearchCriteria(Language language, NameValueCollection queryString)
+            : base(queryString, DefaultPageSize)
+        {
+            Language = language;
+            Parse(queryString);
+        }
+
+        public CategoryResponseGroup ResponseGroup { get; set; }
+
+        public string Outline { get; set; }
+
+        public Language Language { get; set; }
+
+        public string Keyword { get; set; }
+
+        public string SortBy { get; set; }
+
+        public bool IsFuzzySearch { get; set; }
+
+        public CategorySearchCriteria Clone()
+        {
+            var retVal = new CategorySearchCriteria(Language)
+            {
+                Outline = Outline,
+                Keyword = Keyword,
+                SortBy = SortBy,
+                PageNumber = PageNumber,
+                PageSize = PageSize,
+                ResponseGroup = ResponseGroup,
+                IsFuzzySearch = IsFuzzySearch,
+            };
+            return retVal;
+        }
+      
+
+        private void Parse(NameValueCollection queryString)
+        {
+            Keyword = queryString.Get(&quot;q&quot;);
+            SortBy = queryString.Get(&quot;sort_by&quot;);
+            ResponseGroup = EnumUtility.SafeParse&lt;CategoryResponseGroup&gt;(queryString.Get(&quot;resp_group&quot;), CategoryResponseGroup.Small);
+        }      
+
+        public override string ToString()
+        {
+            var retVal = new List&lt;string&gt;();
+            retVal.Add(string.Format(&quot;page={0}&quot;, PageNumber));
+            retVal.Add(string.Format(&quot;page_size={0}&quot;, PageSize));
+            if (Keyword != null)
+            {
+                retVal.Add(string.Format(&quot;q={0}&quot;, Keyword));
+            }
+            return string.Join(&quot;&amp;&quot;, retVal);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,9,9,50,0],[13,17,13,18,0],[13,19,13,43,0],[13,44,13,45,0],[14,17,14,18,0],[14,19,14,44,0],[14,45,14,46,0],[19,15,19,25,0],[20,9,20,10,0],[21,9,21,10,0],[24,15,24,56,0],[25,9,25,10,0],[26,9,26,10,0],[29,15,29,49,0],[30,9,30,10,0],[31,13,31,33,0],[32,13,32,32,0],[33,9,33,10,0],[35,54,35,58,0],[35,59,35,63,0],[37,33,37,37,0],[37,38,37,42,0],[39,36,39,40,0],[39,41,39,45,0],[41,33,41,37,0],[41,38,41,42,0],[43,32,43,36,0],[43,37,43,41,0],[45,37,45,41,0],[45,42,45,46,0],[48,9,48,10,0],[49,13,58,15,0],[59,13,59,27,0],[60,9,60,10,0],[64,9,64,10,0],[65,13,65,44,0],[66,13,66,49,0],[67,13,67,134,0],[68,9,68,10,0],[71,9,71,10,0],[72,13,72,45,0],[73,13,73,63,0],[74,13,74,66,0],[75,13,75,33,0],[76,13,76,14,0],[77,17,77,61,0],[78,13,78,14,0],[79,13,79,45,0],[80,9,80,10,0]]);
+    </script>
+  </body>
+</html>

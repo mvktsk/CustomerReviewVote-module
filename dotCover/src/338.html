@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\infrastructure\requirecustomerusercontrollermodelconvention.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Linq;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using VirtoCommerce.Storefront.Controllers;
+using VirtoCommerce.Storefront.Domain.Security;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Infrastructure
+{
+    public class RequireCustomerUserControllerModelConvention : IControllerModelConvention
+    {
+        public void Apply(ControllerModel controller)
+        {
+            if (controller.ControllerType != typeof(AssetController) &amp;&amp; controller.ControllerType != typeof(ErrorController))
+            {
+                var authorizeAttribute = controller.Attributes.OfType&lt;AuthorizeAttribute&gt;().FirstOrDefault();
+                if (authorizeAttribute == null ||
+                    !authorizeAttribute.Policy.EqualsInvariant(OnlyDistributorAuthorizationRequirement.PolicyName) &amp;&amp;
+                    !authorizeAttribute.Policy.EqualsInvariant(OnlyDispatcherAuthorizationRequirement.PolicyName) &amp;&amp;
+                    !authorizeAttribute.Policy.EqualsInvariant(NonCustomerAuthorizationRequirement.PolicyName))
+                {
+                    var authorizationFilter = new AuthorizeFilter(OnlyCustomerAuthorizationRequirement.PolicyName);
+                    controller.Filters.Add(authorizationFilter);
+                }
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,14,10,0],[15,13,15,126,0],[16,13,16,14,0],[17,17,17,110,0],[18,17,21,112,0],[22,17,22,18,0],[23,21,23,116,0],[24,21,24,65,0],[25,17,25,18,0],[26,13,26,14,0],[27,9,27,10,0]]);
+    </script>
+  </body>
+</html>

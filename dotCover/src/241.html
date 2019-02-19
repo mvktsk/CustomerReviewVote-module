@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\eventthrottlingextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace VirtoCommerce.Storefront.Model.Common
+{
+    public static class EventThrottlingExtensions
+    {
+        public static FileSystemEventHandler Throttle(this FileSystemEventHandler handler, TimeSpan throttle)
+        {
+            var throttling = false;
+            return (s, e) =&gt;
+            {
+                if (throttling)
+                    return;
+                handler(s, e);
+                throttling = true;
+                Task.Delay(throttle).ContinueWith(x =&gt; throttling = false);
+            };
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,10,0],[14,13,14,36,0],[15,13,22,15,0],[16,13,16,14,0],[17,17,17,32,0],[18,21,18,28,0],[19,17,19,31,0],[20,17,20,35,0],[21,17,21,76,0],[21,56,21,74,0],[22,13,22,14,0],[23,9,23,10,0]]);
+    </script>
+  </body>
+</html>

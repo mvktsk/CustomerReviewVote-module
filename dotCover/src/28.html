@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\collections.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    public class Collections : ItemCollection&lt;Collection&gt;
+    {
+        public Collections(IEnumerable&lt;Collection&gt; collections)
+            : base(collections)
+        {
+        }
+
+        #region Public Methods and Operators
+        public override object BeforeMethod(string method)
+        {
+            return this.FirstOrDefault(x =&gt; x.Handle.Equals(method, StringComparison.OrdinalIgnoreCase));
+        }
+        #endregion
+        
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,15,12,32,0],[13,9,13,10,0],[14,9,14,10,0],[18,9,18,10,0],[19,13,19,106,0],[19,45,19,104,0],[20,9,20,10,0]]);
+    </script>
+  </body>
+</html>

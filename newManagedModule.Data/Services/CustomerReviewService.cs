@@ -92,7 +92,11 @@ namespace CustomerReviewVotes.Data.Services
 
             var pkMap = new PrimaryKeyResolvingMap();
             int i = 0;
+#pragma warning disable S3353 // Unchanged local variables should be "const"
+#pragma warning disable S1481 // Unused local variables should be removed
             int r = 0;
+#pragma warning restore S1481 // Unused local variables should be removed
+#pragma warning restore S3353 // Unchanged local variables should be "const"
             using (var repository = _repositoryFactory())
             {
                 using (var changeTracker = GetChangeTracker(repository))

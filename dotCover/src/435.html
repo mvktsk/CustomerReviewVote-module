@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\security\customsigninmanager.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using VirtoCommerce.Storefront.Model.Security;
+using VirtoCommerce.Storefront.Model.Security.Specifications;
+
+namespace VirtoCommerce.Storefront.Domain.Security
+{
+    public class CustomSignInManager : SignInManager&lt;User&gt;
+    {
+        public CustomSignInManager(UserManager&lt;User&gt; userManager, IHttpContextAccessor contextAccessor, IUserClaimsPrincipalFactory&lt;User&gt; claimsFactory, IOptions&lt;IdentityOptions&gt; optionsAccessor,
+            ILogger&lt;SignInManager&lt;User&gt;&gt; logger, IAuthenticationSchemeProvider schemes) : base(userManager, contextAccessor, claimsFactory, optionsAccessor, logger, schemes)
+        {
+        }
+        protected override async Task&lt;SignInResult&gt; PreSignInCheck(User user)
+        {
+            return await base.PreSignInCheck(user) ?? (new IsUserSuspendedSpecification().IsSatisfiedBy(user) ? CustomSignInResult.Rejected : null);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,91,15,174,0],[16,9,16,10,0],[17,9,17,10,0],[19,9,19,10,0],[20,13,20,149,0],[21,9,21,10,0]]);
+    </script>
+  </body>
+</html>

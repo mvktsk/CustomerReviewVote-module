@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\link.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using DotLiquid;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// Represents link list single object. Cannot be invoked on its own. It must be invoked inside a linklist.
+    /// &lt;/summary&gt;
+    /// &lt;remarks&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/objects/link
+    /// &lt;/remarks&gt;
+    public partial class Link : Drop
+    {
+        /// &lt;summary&gt;
+        /// Returns true if the link is active, or false if the link is inactive
+        /// &lt;/summary&gt;
+        public bool Active { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the variable associated to the link. The possible types are: product, collection, page, blog
+        /// &lt;/summary&gt;
+        public object Object { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the title of the link
+        /// &lt;/summary&gt;
+        public string Title { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the type of the link. The possible values are:
+        /// collection_link: if the link points to a collection
+        /// product_link: if the link points to a product page
+        /// page_link: if the link points to a page
+        /// blog_link: if the link points to a blog
+        /// relative_link: if the link points to the search page, the home page or /collections/all
+        /// http_link: if the link points to an external web page, or a type or vendor collection (ex: /collections/types?q=Pants)
+        /// &lt;/summary&gt;
+        public string Type { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the URL of the link
+        /// &lt;/summary&gt;
+        public string Url { get; set; }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,30,16,34,0],[16,35,16,39,0],[21,32,21,36,0],[21,37,21,41,0],[26,31,26,35,0],[26,36,26,40,0],[37,30,37,34,0],[37,35,37,39,0],[42,29,42,33,0],[42,34,42,38,0]]);
+    </script>
+  </body>
+</html>

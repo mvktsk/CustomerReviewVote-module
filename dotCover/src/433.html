@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\security\canreadcontentitemauthorizationhandler.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.StaticContent;
+
+namespace VirtoCommerce.Storefront.Domain.Security
+{
+    public class CanReadContentItemAuthorizeRequirement : IAuthorizationRequirement
+    {
+        public const string PolicyName = &quot;CanReadContentItem&quot;;
+    }
+
+    public class CanReadContentItemAuthorizationHandler : AuthorizationHandler&lt;CanReadContentItemAuthorizeRequirement, ContentItem&gt;
+    {
+        private readonly IWorkContextAccessor _workContextAccessor;
+        public CanReadContentItemAuthorizationHandler(IWorkContextAccessor workContextAccessor)
+        {
+            _workContextAccessor = workContextAccessor;
+        }
+
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, CanReadContentItemAuthorizeRequirement requirement, ContentItem resource)
+        {
+            var workContext = _workContextAccessor.WorkContext;
+            if (resource.Authorize)
+            {
+                if (workContext.CurrentUser.IsRegisteredUser)
+                {
+                    context.Succeed(requirement);
+                }
+            }
+            else
+            {
+                context.Succeed(requirement);
+            }
+
+            return Task.CompletedTask;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[19,9,19,96,0],[20,9,20,10,0],[21,13,21,56,0],[22,9,22,10,0],[25,9,25,10,0],[26,13,26,64,0],[27,13,27,36,0],[28,13,28,14,0],[29,17,29,62,0],[30,17,30,18,0],[31,21,31,50,0],[32,17,32,18,0],[33,13,33,14,0],[35,13,35,14,0],[36,17,36,46,0],[37,13,37,14,0],[39,13,39,39,0],[40,9,40,10,0]]);
+    </script>
+  </body>
+</html>

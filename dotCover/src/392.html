@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\marketing\marketingservice.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
+using VirtoCommerce.Storefront.AutoRestClients.MarketingModuleApi;
+using VirtoCommerce.Storefront.AutoRestClients.MarketingModuleApi.Models;
+using VirtoCommerce.Storefront.Extensions;
+using VirtoCommerce.Storefront.Infrastructure;
+using VirtoCommerce.Storefront.Model.Caching;
+using VirtoCommerce.Storefront.Model.Common.Caching;
+using VirtoCommerce.Storefront.Model.Marketing;
+using VirtoCommerce.Storefront.Model.Services;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public class MarketingService : IMarketingService
+    {
+        private readonly IMarketingModuleDynamicContent _dynamicContentApi;
+        private readonly IStorefrontMemoryCache _memoryCache;
+        private readonly IApiChangesWatcher _apiChangesWatcher;
+
+        public MarketingService(IMarketingModuleDynamicContent dynamicContentApi, IStorefrontMemoryCache memoryCache, IApiChangesWatcher changesWatcher)
+        {
+            _dynamicContentApi = dynamicContentApi;
+            _memoryCache = memoryCache;
+            _apiChangesWatcher = changesWatcher;
+        }
+
+        public virtual async Task&lt;string&gt; GetDynamicContentHtmlAsync(string storeId, string placeholderName)
+        {
+            string htmlContent = null;
+
+            //TODO: make full context
+            var evaluationContext = new DynamicContentEvaluationContext
+            {
+                StoreId = storeId,
+                PlaceName = placeholderName
+            };
+
+            var cacheKey = CacheKey.With(GetType(), &quot;GetDynamicContentHtmlAsync&quot;, storeId, placeholderName);
+            return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =&gt;
+            {
+                cacheEntry.AddExpirationToken(MarketingCacheRegion.CreateChangeToken());
+                cacheEntry.AddExpirationToken(_apiChangesWatcher.CreateChangeToken());
+                var dynamicContentItems = (await _dynamicContentApi.EvaluateDynamicContentAsync(evaluationContext)).Select(x =&gt; x.ToDynamicContentItem());
+
+                if (dynamicContentItems != null)
+                {
+                    var htmlContentSpec = new HtmlDynamicContentSpecification();
+                    var htmlDynamicContent = dynamicContentItems.FirstOrDefault(htmlContentSpec.IsSatisfiedBy);
+                    if (htmlDynamicContent != null)
+                    {
+                        var dynamicProperty = htmlDynamicContent.DynamicProperties.FirstOrDefault(htmlContentSpec.IsSatisfiedBy);
+                        if (dynamicProperty != null &amp;&amp; dynamicProperty.Values.Any(v =&gt; v.Value != null))
+                        {
+                            htmlContent = dynamicProperty.Values.First().Value.ToString();
+                        }
+                    }
+                }
+                return htmlContent;
+            });
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[21,9,21,153,0],[22,9,22,10,0],[23,13,23,52,0],[24,13,24,40,0],[25,13,25,49,0],[26,9,26,10,0],[29,9,29,10,0],[30,13,30,39,0],[33,13,37,15,0],[39,13,39,109,0],[40,13,60,16,0],[41,13,41,14,0],[42,17,42,89,0],[43,17,43,87,0],[44,17,44,155,0],[44,129,44,153,0],[46,17,46,49,0],[47,17,47,18,0],[48,21,48,81,0],[49,21,49,112,0],[50,21,50,52,0],[51,21,51,22,0],[52,25,52,130,0],[53,25,53,105,0],[53,88,53,103,0],[54,25,54,26,0],[55,29,55,91,0],[56,25,56,26,0],[57,21,57,22,0],[58,17,58,18,0],[59,17,59,36,0],[60,13,60,14,0],[61,9,61,10,0]]);
+    </script>
+  </body>
+</html>

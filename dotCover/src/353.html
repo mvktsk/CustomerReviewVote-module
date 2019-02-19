@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\extensions\claimsprincipalextensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+
+namespace VirtoCommerce.Storefront.Extensions
+{
+    public static class ClaimsPrincipalExtensions
+    {
+        public static string FindFirstValue(this ClaimsPrincipal principal, string[] claimTypes, string defaultValue )
+        {
+            foreach (var claimType in claimTypes)
+            {
+                var result = principal.FindFirstValue(claimType);
+                if (!string.IsNullOrEmpty(result))
+                    return result;
+            }
+
+            return defaultValue;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,9,12,10,0],[13,13,13,20,0],[13,22,13,35,0],[13,36,13,38,0],[13,39,13,49,0],[14,13,14,14,0],[15,17,15,66,0],[16,17,16,51,0],[17,21,17,35,0],[18,13,18,14,0],[20,13,20,33,0],[21,9,21,10,0]]);
+    </script>
+  </body>
+</html>

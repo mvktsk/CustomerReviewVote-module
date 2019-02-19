@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\customer\vendor.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Customer;
+
+namespace VirtoCommerce.Storefront.Model
+{
+    public partial class Vendor : Member
+    {
+        public string Description { get; set; }
+
+        public string SiteUrl { get; set; }
+
+        public string LogoUrl { get; set; }
+
+        public string GroupName { get; set; }
+
+        /// &lt;summary&gt;
+        /// Vendor seo info
+        /// &lt;/summary&gt;
+        public SeoInfo SeoInfo { get; set; }
+
+        public IMutablePagedList&lt;Product&gt; Products { get; set; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,37,10,41,0],[10,42,10,46,0],[12,33,12,37,0],[12,38,12,42,0],[14,33,14,37,0],[14,38,14,42,0],[16,35,16,39,0],[16,40,16,44,0],[21,34,21,38,0],[21,39,21,43,0],[23,54,23,58,0],[23,59,23,63,0]]);
+    </script>
+  </body>
+</html>

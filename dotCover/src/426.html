@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\workcontextaccessor.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Threading;
+using VirtoCommerce.Storefront.Model;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public class WorkContextAccessor : IWorkContextAccessor
+    {
+        private static AsyncLocal&lt;WorkContext&gt; _workContextCurrent = new AsyncLocal&lt;WorkContext&gt;();
+
+        public WorkContext WorkContext
+        {
+            get
+            {
+                return _workContextCurrent.Value;
+            }
+            set
+            {
+                _workContextCurrent.Value = value;
+            }
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,9,8,100,0],[13,13,13,14,0],[14,17,14,50,0],[15,13,15,14,0],[17,13,17,14,0],[18,17,18,51,0],[19,13,19,14,0]]);
+    </script>
+  </body>
+</html>

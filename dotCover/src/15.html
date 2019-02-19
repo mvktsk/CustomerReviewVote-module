@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\tags\layouttag.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using DotLiquid;
+using DotLiquid.Exceptions;
+
+namespace VirtoCommerce.LiquidThemeEngine.Tags
+{
+    public class LayoutTag : Block
+    {
+        private static readonly Regex Syntax = new Regex(string.Format(@&quot;^({0})&quot;, DotLiquid.Liquid.QuotedFragment));
+        private string _templateName;
+
+        #region Public Methods and Operators
+        public override void Initialize(string tagName, string markup, List&lt;string&gt; tokens)
+        {
+            var syntaxMatch = Syntax.Match(markup);
+
+            if (syntaxMatch.Success)
+            {
+                this._templateName = syntaxMatch.Groups[1].Value;
+            }
+            else
+            {
+                throw new SyntaxException(&quot;LayoutTagSyntaxException&quot;);
+            }
+
+            base.Initialize(tagName, markup, tokens);
+        }
+
+        public override void Render(Context context, TextWriter result)
+        {
+            var template = (context[this._templateName] ?? String.Empty).ToString();
+            if (String.IsNullOrEmpty(template))
+            {
+                var themeEngine = (ShopifyLiquidThemeEngine)Template.FileSystem;
+                if (themeEngine.ResolveTemplatePath(_templateName) != null)
+                {
+                    template = this._templateName;
+                }
+            }
+            if (!string.IsNullOrEmpty(template))
+            {
+                context.Registers[&quot;layout&quot;] = template;
+            }
+        }
+
+        protected override void AssertMissingDelimitation()
+        {
+        }
+
+        protected override void Parse(List&lt;string&gt; tokens)
+        {
+        }
+        #endregion
+    }
+}
+
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,117,0],[20,9,20,10,0],[21,13,21,52,0],[23,13,23,37,0],[24,13,24,14,0],[25,17,25,66,0],[26,13,26,14,0],[28,13,28,14,0],[29,17,29,71,0],[32,13,32,54,0],[33,9,33,10,0],[36,9,36,10,0],[37,13,37,85,0],[38,13,38,48,0],[39,13,39,14,0],[40,17,40,81,0],[41,17,41,76,0],[42,17,42,18,0],[43,21,43,51,0],[44,17,44,18,0],[45,13,45,14,0],[46,13,46,49,0],[47,13,47,14,0],[48,17,48,56,0],[49,13,49,14,0],[50,9,50,10,0],[53,9,53,10,0],[54,9,54,10,0],[57,9,57,10,0],[58,9,58,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\quote\quoteconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Storefront.Common;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Marketing;
+using VirtoCommerce.Storefront.Model.Quote;
+using coreDto = VirtoCommerce.Storefront.AutoRestClients.CoreModuleApi.Models;
+using quoteDto = VirtoCommerce.Storefront.AutoRestClients.QuoteModuleApi.Models;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public static class QuoteConverterExtension
+    {
+        public static QuoteConverter QuoteConverterInstance
+        {
+            get
+            {
+                return new QuoteConverter();
+            }
+        }
+        public static quoteDto.QuoteRequestSearchCriteria ToQuoteSearchCriteriaDto(this QuoteSearchCriteria criteria)
+        {
+            return QuoteConverterInstance.ToQuoteSearchCriteriaDto(criteria);
+        }
+
+        public static QuoteRequest ToQuoteRequest(this quoteDto.QuoteRequest quoteRequestDto, Currency currency, Language language)
+        {
+            return QuoteConverterInstance.ToQuoteRequest(quoteRequestDto, currency, language);
+        }
+
+        public static quoteDto.QuoteRequest ToQuoteRequestDto(this QuoteRequest quoteRequest)
+        {
+            return QuoteConverterInstance.ToQuoteRequestDto(quoteRequest);
+        }
+
+        public static TaxDetail ToTaxDetail(this quoteDto.TaxDetail taxDetailDto, Currency currency)
+        {
+            return QuoteConverterInstance.ToTaxDetail(taxDetailDto, currency);
+        }
+
+        public static quoteDto.TaxDetail ToQuoteTaxDetailDto(this TaxDetail taxDetail)
+        {
+            return QuoteConverterInstance.ToQuoteTaxDetailDto(taxDetail);
+        }
+
+        public static quoteDto.QuoteAttachment ToQuoteAttachmentDto(this Attachment attachment)
+        {
+            return QuoteConverterInstance.ToQuoteAttachmentDto(attachment);
+        }
+
+        public static TierPrice ToTierPrice(this quoteDto.TierPrice tierPriceDto, Currency currency)
+        {
+            return QuoteConverterInstance.ToTierPrice(tierPriceDto, currency);
+        }
+
+        public static quoteDto.TierPrice ToQuoteTierPriceDto(this TierPrice tierPrice)
+        {
+            return QuoteConverterInstance.ToQuoteTierPriceDto(tierPrice);
+        }
+
+        public static QuoteItem ToQuoteItem(this Product product, long quantity, Currency currency)
+        {
+            return QuoteConverterInstance.ToQuoteItem(product, quantity, currency);
+        }
+
+        public static QuoteItem ToQuoteItem(this quoteDto.QuoteItem quoteItemDto, Currency currency)
+        {
+            return QuoteConverterInstance.ToQuoteItem(quoteItemDto, currency);
+        }
+
+        public static quoteDto.QuoteItem ToQuoteItemDto(this QuoteItem quoteItem)
+        {
+            return QuoteConverterInstance.ToQuoteItemDto(quoteItem);
+        }
+
+        public static QuoteRequestTotals ToQuoteTotals(this quoteDto.QuoteRequestTotals totalsDto, Currency currency)
+        {
+            return QuoteConverterInstance.ToQuoteTotals(totalsDto, currency);
+        }
+
+        public static quoteDto.QuoteRequestTotals ToQuoteTotalsDto(this QuoteRequestTotals totals)
+        {
+            return QuoteConverterInstance.ToQuoteTotalsDto(totals);
+        }
+
+        public static ShippingMethod ToShippingMethod(this quoteDto.ShipmentMethod shippingMethodDto, Currency currency)
+        {
+            return QuoteConverterInstance.ToShippingMethod(shippingMethodDto, currency);
+        }
+
+        public static Address ToAddress(this quoteDto.Address addressDto)
+        {
+            return QuoteConverterInstance.ToAddress(addressDto);
+        }
+
+        public static quoteDto.Address ToQuoteAddressDto(this Address address)
+        {
+            return QuoteConverterInstance.ToQuoteAddressDto(address);
+        }
+
+        public static Attachment ToAttachment(this quoteDto.QuoteAttachment attachmentDto)
+        {
+            return QuoteConverterInstance.ToAttachment(attachmentDto);
+        }
+
+        public static DynamicProperty ToDynamicProperty(this quoteDto.DynamicObjectProperty propertyDto)
+        {
+            return QuoteConverterInstance.ToDynamicProperty(propertyDto);
+        }
+
+        public static quoteDto.DynamicObjectProperty ToQuoteDynamicPropertyDto(this DynamicProperty property)
+        {
+            return QuoteConverterInstance.ToQuoteDynamicPropertyDto(property);
+        }
+    }
+
+    public partial class QuoteConverter
+    {
+        public virtual quoteDto.QuoteRequestSearchCriteria ToQuoteSearchCriteriaDto(QuoteSearchCriteria criteria)
+        {
+            var result = new quoteDto.QuoteRequestSearchCriteria
+            {
+                CustomerId = criteria.CustomerId,
+                Skip = criteria.Start,
+                Take = criteria.PageSize,
+                Sort = criteria.Sort
+            };
+            return result;
+        }
+
+        public virtual DynamicProperty ToDynamicProperty(quoteDto.DynamicObjectProperty propertyDto)
+        {
+            return propertyDto.JsonConvert&lt;coreDto.DynamicObjectProperty&gt;().ToDynamicProperty();
+        }
+
+        public virtual quoteDto.DynamicObjectProperty ToQuoteDynamicPropertyDto(DynamicProperty property)
+        {
+            return property.ToDynamicPropertyDto().JsonConvert&lt;quoteDto.DynamicObjectProperty&gt;();
+        }
+
+        public virtual Attachment ToAttachment(quoteDto.QuoteAttachment attachmentDto)
+        {
+            var result = new Attachment
+            {
+                CreatedBy = attachmentDto.CreatedBy,
+                CreatedDate = attachmentDto.CreatedDate,
+                Id = attachmentDto.Id,
+                MimeType = attachmentDto.MimeType,
+                ModifiedBy = attachmentDto.ModifiedBy,
+                ModifiedDate = attachmentDto.ModifiedDate,
+                Name = attachmentDto.Name,
+                Size = attachmentDto.Size,
+                Url = attachmentDto.Url
+            };
+            return result;
+        }
+
+        public virtual Address ToAddress(quoteDto.Address addressDto)
+        {
+            return addressDto.JsonConvert&lt;coreDto.Address&gt;().ToAddress();
+        }
+
+        public virtual quoteDto.Address ToQuoteAddressDto(Address address)
+        {
+            return address.ToCoreAddressDto().JsonConvert&lt;quoteDto.Address&gt;();
+        }
+
+        public virtual QuoteRequest ToQuoteRequest(quoteDto.QuoteRequest quoteRequestDto, Currency currency, Language language)
+        {
+            var result = new QuoteRequest(currency, language)
+            {
+                CancelledDate = quoteRequestDto.CancelledDate,
+                CancelReason = quoteRequestDto.CancelReason,
+                ChannelId = quoteRequestDto.ChannelId,
+                Comment = quoteRequestDto.Comment,
+                CreatedBy = quoteRequestDto.CreatedBy,
+                CreatedDate = quoteRequestDto.CreatedDate,
+                CustomerId = quoteRequestDto.CustomerId,
+                CustomerName = quoteRequestDto.CustomerName,
+                EmployeeId = quoteRequestDto.EmployeeId,
+                EmployeeName = quoteRequestDto.EmployeeName,
+                EnableNotification = quoteRequestDto.EnableNotification ?? false,
+                ExpirationDate = quoteRequestDto.ExpirationDate,
+                Id = quoteRequestDto.Id,
+                IsAnonymous = quoteRequestDto.IsAnonymous ?? false,
+                IsCancelled = quoteRequestDto.IsCancelled ?? false,
+                IsLocked = quoteRequestDto.IsLocked ?? false,
+                ModifiedBy = quoteRequestDto.ModifiedBy,
+                ModifiedDate = quoteRequestDto.ModifiedDate,
+                Number = quoteRequestDto.Number,
+                OrganizationId = quoteRequestDto.OrganizationId,
+                OrganizationName = quoteRequestDto.OrganizationName,
+                ReminderDate = quoteRequestDto.ReminderDate,
+                Status = quoteRequestDto.Status,
+                StoreId = quoteRequestDto.StoreId,
+                Tag = quoteRequestDto.Tag,
+
+                Currency = currency,
+                Language = language,
+                ManualRelDiscountAmount = new Money(quoteRequestDto.ManualRelDiscountAmount ?? 0, currency),
+                ManualShippingTotal = new Money(quoteRequestDto.ManualShippingTotal ?? 0, currency),
+                ManualSubTotal = new Money(quoteRequestDto.ManualSubTotal ?? 0, currency)
+            };
+
+            if (quoteRequestDto.Addresses != null)
+            {
+                result.Addresses = quoteRequestDto.Addresses.Select(a =&gt; ToAddress(a)).ToList();
+            }
+
+            if (quoteRequestDto.Attachments != null)
+            {
+                result.Attachments = quoteRequestDto.Attachments.Select(a =&gt; ToAttachment(a)).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(quoteRequestDto.Coupon))
+            {
+                result.Coupon = new Coupon { AppliedSuccessfully = true, Code = quoteRequestDto.Coupon };
+            }
+
+            if (quoteRequestDto.DynamicProperties != null)
+            {
+                result.DynamicProperties = quoteRequestDto.DynamicProperties.Select(ToDynamicProperty).ToList();
+            }
+
+            if (quoteRequestDto.Items != null)
+            {
+                result.Items = quoteRequestDto.Items.Select(i =&gt; ToQuoteItem(i, currency)).ToList();
+            }
+
+            // TODO
+            if (quoteRequestDto.ShipmentMethod != null)
+            {
+            }
+
+            if (quoteRequestDto.TaxDetails != null)
+            {
+                result.TaxDetails = quoteRequestDto.TaxDetails.Select(td =&gt; ToTaxDetail(td, currency)).ToList();
+            }
+
+            if (quoteRequestDto.Totals != null)
+            {
+                result.Totals = ToQuoteTotals(quoteRequestDto.Totals, currency);
+            }
+
+            return result;
+        }
+
+        public virtual quoteDto.QuoteRequest ToQuoteRequestDto(QuoteRequest quoteRequest)
+        {
+            var result = new quoteDto.QuoteRequest
+            {
+                CancelledDate = quoteRequest.CancelledDate,
+                CancelReason = quoteRequest.CancelReason,
+                ChannelId = quoteRequest.ChannelId,
+                Comment = quoteRequest.Comment,
+                CreatedBy = quoteRequest.CreatedBy,
+                CreatedDate = quoteRequest.CreatedDate,
+                CustomerId = quoteRequest.CustomerId,
+                CustomerName = quoteRequest.CustomerName,
+                EmployeeId = quoteRequest.EmployeeId,
+                EmployeeName = quoteRequest.EmployeeName,
+                EnableNotification = quoteRequest.EnableNotification,
+                ExpirationDate = quoteRequest.ExpirationDate,
+                Id = quoteRequest.Id,
+                IsAnonymous = quoteRequest.IsAnonymous,
+                IsCancelled = quoteRequest.IsCancelled,
+                IsLocked = quoteRequest.IsLocked,
+                ModifiedBy = quoteRequest.ModifiedBy,
+                ModifiedDate = quoteRequest.ModifiedDate,
+                Number = quoteRequest.Number,
+                OrganizationId = quoteRequest.OrganizationId,
+                OrganizationName = quoteRequest.OrganizationName,
+                ReminderDate = quoteRequest.ReminderDate,
+                Status = quoteRequest.Status,
+                StoreId = quoteRequest.StoreId,
+                Tag = quoteRequest.Tag,
+
+                Currency = quoteRequest.Currency.Code,
+                Addresses = quoteRequest.Addresses.Select(ToQuoteAddressDto).ToList(),
+                Attachments = quoteRequest.Attachments.Select(ToQuoteAttachmentDto).ToList(),
+                DynamicProperties = quoteRequest.DynamicProperties.Select(ToQuoteDynamicPropertyDto).ToList(),
+                Items = quoteRequest.Items.Select(ToQuoteItemDto).ToList(),
+                LanguageCode = quoteRequest.Language.CultureName,
+                ManualRelDiscountAmount = quoteRequest.ManualRelDiscountAmount != null ? (double?)quoteRequest.ManualRelDiscountAmount.Amount : null,
+                ManualShippingTotal = quoteRequest.ManualShippingTotal != null ? (double?)quoteRequest.ManualShippingTotal.Amount : null,
+                ManualSubTotal = quoteRequest.ManualSubTotal != null ? (double?)quoteRequest.ManualSubTotal.Amount : null,
+                TaxDetails = quoteRequest.TaxDetails.Select(ToQuoteTaxDetailDto).ToList()
+            };
+
+            if (quoteRequest.Coupon != null &amp;&amp; quoteRequest.Coupon.AppliedSuccessfully)
+            {
+                result.Coupon = quoteRequest.Coupon.Code;
+            }
+
+            if (quoteRequest.Totals != null)
+            {
+                result.Totals = ToQuoteTotalsDto(quoteRequest.Totals);
+            }
+
+            return result;
+        }
+
+        public virtual QuoteItem ToQuoteItem(quoteDto.QuoteItem quoteItemDto, Currency currency)
+        {
+            var result = new QuoteItem
+            {
+                CatalogId = quoteItemDto.CatalogId,
+                CategoryId = quoteItemDto.CategoryId,
+                Comment = quoteItemDto.Comment,
+                CreatedBy = quoteItemDto.CreatedBy,
+                CreatedDate = quoteItemDto.CreatedDate,
+                Id = quoteItemDto.Id,
+                ImageUrl = quoteItemDto.ImageUrl,
+                ModifiedBy = quoteItemDto.ModifiedBy,
+                ModifiedDate = quoteItemDto.ModifiedDate,
+                Name = quoteItemDto.Name,
+                ProductId = quoteItemDto.ProductId,
+                Sku = quoteItemDto.Sku,
+                TaxType = quoteItemDto.TaxType,
+
+                Currency = currency,
+                ListPrice = new Money(quoteItemDto.ListPrice ?? 0, currency),
+                SalePrice = new Money(quoteItemDto.SalePrice ?? 0, currency)
+            };
+
+            if (quoteItemDto.ProposalPrices != null)
+            {
+                result.ProposalPrices = quoteItemDto.ProposalPrices.Select(pp =&gt; ToTierPrice(pp, currency)).ToList();
+            }
+
+            if (quoteItemDto.SelectedTierPrice != null)
+            {
+                result.SelectedTierPrice = ToTierPrice(quoteItemDto.SelectedTierPrice, currency);
+            }
+
+            return result;
+        }
+
+        public virtual quoteDto.QuoteItem ToQuoteItemDto(QuoteItem quoteItem)
+        {
+            var result = new quoteDto.QuoteItem
+            {
+                CatalogId = quoteItem.CatalogId,
+                CategoryId = quoteItem.CategoryId,
+                Comment = quoteItem.Comment,
+                CreatedBy = quoteItem.CreatedBy,
+                CreatedDate = quoteItem.CreatedDate,
+                Id = quoteItem.Id,
+                ImageUrl = quoteItem.ImageUrl,
+                ModifiedBy = quoteItem.ModifiedBy,
+                ModifiedDate = quoteItem.ModifiedDate,
+                Name = quoteItem.Name,
+                ProductId = quoteItem.ProductId,
+                Sku = quoteItem.Sku,
+                TaxType = quoteItem.TaxType,
+
+                Currency = quoteItem.Currency.Code,
+                ListPrice = (double)quoteItem.ListPrice.Amount,
+                ProposalPrices = quoteItem.ProposalPrices.Select(ToQuoteTierPriceDto).ToList(),
+                SalePrice = (double)quoteItem.SalePrice.Amount
+            };
+
+            if (quoteItem.SelectedTierPrice != null)
+            {
+                result.SelectedTierPrice = ToQuoteTierPriceDto(quoteItem.SelectedTierPrice);
+            }
+
+            return result;
+        }
+
+        public virtual QuoteItem ToQuoteItem(Product product, long quantity, Currency currency)
+        {
+            var retVal = new QuoteItem
+            {
+                CatalogId = product.CatalogId,
+                CategoryId = product.CategoryId,
+                Name = product.Name,
+                Sku = product.Sku,
+                TaxType = product.TaxType,
+                Currency = currency,
+
+                ImageUrl = product.PrimaryImage != null ? product.PrimaryImage.Url : null,
+                ListPrice = product.Price.ListPrice,
+                ProductId = product.Id,
+                SalePrice = product.Price.SalePrice
+            };
+            retVal.ProposalPrices.Add(new TierPrice(product.Price.SalePrice, quantity));
+            retVal.SelectedTierPrice = retVal.ProposalPrices.First();
+
+            return retVal;
+        }
+
+        public virtual QuoteRequestTotals ToQuoteTotals(quoteDto.QuoteRequestTotals totalsDto, Currency currency)
+        {
+            var result = new QuoteRequestTotals(currency)
+            {
+                AdjustmentQuoteExlTax = new Money(totalsDto.AdjustmentQuoteExlTax ?? 0, currency),
+                DiscountTotal = new Money(totalsDto.DiscountTotal ?? 0, currency),
+                GrandTotalExlTax = new Money(totalsDto.GrandTotalExlTax ?? 0, currency),
+                GrandTotalInclTax = new Money(totalsDto.GrandTotalInclTax ?? 0, currency),
+                OriginalSubTotalExlTax = new Money(totalsDto.OriginalSubTotalExlTax ?? 0, currency),
+                ShippingTotal = new Money(totalsDto.ShippingTotal ?? 0, currency),
+                SubTotalExlTax = new Money(totalsDto.SubTotalExlTax ?? 0, currency),
+                TaxTotal = new Money(totalsDto.TaxTotal ?? 0, currency)
+            };
+            return result;
+        }
+
+        public virtual quoteDto.QuoteRequestTotals ToQuoteTotalsDto(QuoteRequestTotals totals)
+        {
+            var result = new quoteDto.QuoteRequestTotals
+            {
+                AdjustmentQuoteExlTax = (double)totals.AdjustmentQuoteExlTax.Amount,
+                DiscountTotal = (double)totals.DiscountTotal.Amount,
+                GrandTotalExlTax = (double)totals.GrandTotalExlTax.Amount,
+                GrandTotalInclTax = (double)totals.GrandTotalInclTax.Amount,
+                OriginalSubTotalExlTax = (double)totals.OriginalSubTotalExlTax.Amount,
+                ShippingTotal = (double)totals.ShippingTotal.Amount,
+                SubTotalExlTax = (double)totals.SubTotalExlTax.Amount,
+                TaxTotal = (double)totals.TaxTotal.Amount
+            };
+
+            return result;
+        }
+
+        public virtual ShippingMethod ToShippingMethod(quoteDto.ShipmentMethod shippingMethodDto, Currency currency)
+        {
+            var result = new ShippingMethod(currency)
+            {
+                LogoUrl = shippingMethodDto.LogoUrl,
+                Name = shippingMethodDto.Name,
+                OptionName = shippingMethodDto.OptionName
+            };
+            result.LogoUrl = shippingMethodDto.LogoUrl;
+            result.Price = new Money(shippingMethodDto.Price ?? 0, currency);
+            return result;
+        }
+
+        public virtual TaxDetail ToTaxDetail(quoteDto.TaxDetail taxDetail, Currency currency)
+        {
+            var result = new TaxDetail(currency)
+            {
+                Amount = new Money(taxDetail.Amount ?? 0, currency),
+                Rate = new Money(taxDetail.Rate ?? 0, currency),
+                Name = taxDetail.Name
+            };
+            return result;
+        }
+
+        public virtual quoteDto.TaxDetail ToQuoteTaxDetailDto(TaxDetail taxDetail)
+        {
+            var result = new quoteDto.TaxDetail
+            {
+                Amount = (double)taxDetail.Amount.Amount,
+                Name = taxDetail.Name,
+                Rate = (double)taxDetail.Rate.Amount
+            };
+            return result;
+        }
+
+        public virtual quoteDto.QuoteAttachment ToQuoteAttachmentDto(Attachment attachment)
+        {
+            var result = new quoteDto.QuoteAttachment
+            {
+                CreatedBy = attachment.CreatedBy,
+                CreatedDate = attachment.CreatedDate,
+                Id = attachment.Id,
+                MimeType = attachment.MimeType,
+                ModifiedBy = attachment.ModifiedBy,
+                ModifiedDate = attachment.ModifiedDate,
+                Name = attachment.Name,
+                Size = attachment.Size,
+                Url = attachment.Url
+            };
+            return result;
+        }
+
+        public virtual TierPrice ToTierPrice(quoteDto.TierPrice tierPriceDto, Currency currency)
+        {
+            var result = new TierPrice(currency)
+            {
+                Quantity = tierPriceDto.Quantity ?? 1,
+                Price = new Money(tierPriceDto.Price ?? 0, currency)
+            };
+            return result;
+        }
+
+        public virtual quoteDto.TierPrice ToQuoteTierPriceDto(TierPrice webModel)
+        {
+            var result = new quoteDto.TierPrice
+            {
+                Quantity = webModel.Quantity,
+                Price = (double)webModel.Price.Amount
+            };
+            return result;
+        }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[19,13,19,14,0],[20,17,20,45,0],[21,13,21,14,0],[24,9,24,10,0],[25,13,25,78,0],[26,9,26,10,0],[29,9,29,10,0],[30,13,30,95,0],[31,9,31,10,0],[34,9,34,10,0],[35,13,35,75,0],[36,9,36,10,0],[39,9,39,10,0],[40,13,40,79,0],[41,9,41,10,0],[44,9,44,10,0],[45,13,45,74,0],[46,9,46,10,0],[49,9,49,10,0],[50,13,50,76,0],[51,9,51,10,0],[54,9,54,10,0],[55,13,55,79,0],[56,9,56,10,0],[59,9,59,10,0],[60,13,60,74,0],[61,9,61,10,0],[64,9,64,10,0],[65,13,65,84,0],[66,9,66,10,0],[69,9,69,10,0],[70,13,70,79,0],[71,9,71,10,0],[74,9,74,10,0],[75,13,75,69,0],[76,9,76,10,0],[79,9,79,10,0],[80,13,80,78,0],[81,9,81,10,0],[84,9,84,10,0],[85,13,85,68,0],[86,9,86,10,0],[89,9,89,10,0],[90,13,90,89,0],[91,9,91,10,0],[94,9,94,10,0],[95,13,95,65,0],[96,9,96,10,0],[99,9,99,10,0],[100,13,100,70,0],[101,9,101,10,0],[104,9,104,10,0],[105,13,105,71,0],[106,9,106,10,0],[109,9,109,10,0],[110,13,110,74,0],[111,9,111,10,0],[114,9,114,10,0],[115,13,115,79,0],[116,9,116,10,0],[122,9,122,10,0],[123,13,129,15,0],[130,13,130,27,0],[131,9,131,10,0],[134,9,134,10,0],[135,13,135,97,0],[136,9,136,10,0],[139,9,139,10,0],[140,13,140,98,0],[141,9,141,10,0],[144,9,144,10,0],[145,13,156,15,0],[157,13,157,27,0],[158,9,158,10,0],[161,9,161,10,0],[162,13,162,74,0],[163,9,163,10,0],[166,9,166,10,0],[167,13,167,79,0],[168,9,168,10,0],[171,9,171,10,0],[172,13,205,15,0],[207,13,207,51,0],[208,13,208,14,0],[209,17,209,97,0],[209,74,209,86,0],[210,13,210,14,0],[212,13,212,53,0],[213,13,213,14,0],[214,17,214,104,0],[214,78,214,93,0],[215,13,215,14,0],[217,13,217,63,0],[218,13,218,14,0],[219,17,219,106,0],[220,13,220,14,0],[222,13,222,59,0],[223,13,223,14,0],[224,17,224,113,0],[225,13,225,14,0],[227,13,227,47,0],[228,13,228,14,0],[229,17,229,101,0],[229,66,229,90,0],[230,13,230,14,0],[233,13,233,56,0],[234,13,234,14,0],[235,13,235,14,0],[237,13,237,52,0],[238,13,238,14,0],[239,17,239,113,0],[239,77,239,102,0],[240,13,240,14,0],[242,13,242,48,0],[243,13,243,14,0],[244,17,244,81,0],[245,13,245,14,0],[247,13,247,27,0],[248,9,248,10,0],[251,9,251,10,0],[252,13,290,15,0],[292,13,292,88,0],[293,13,293,14,0],[294,17,294,58,0],[295,13,295,14,0],[297,13,297,45,0],[298,13,298,14,0],[299,17,299,71,0],[300,13,300,14,0],[302,13,302,27,0],[303,9,303,10,0],[306,9,306,10,0],[307,13,326,15,0],[328,13,328,53,0],[329,13,329,14,0],[330,17,330,118,0],[330,82,330,107,0],[331,13,331,14,0],[333,13,333,56,0],[334,13,334,14,0],[335,17,335,98,0],[336,13,336,14,0],[338,13,338,27,0],[339,9,339,10,0],[342,9,342,10,0],[343,13,363,15,0],[365,13,365,53,0],[366,13,366,14,0],[367,17,367,93,0],[368,13,368,14,0],[370,13,370,27,0],[371,9,371,10,0],[374,9,374,10,0],[375,13,388,15,0],[389,13,389,89,0],[390,13,390,70,0],[392,13,392,27,0],[393,9,393,10,0],[396,9,396,10,0],[397,13,407,15,0],[408,13,408,27,0],[409,9,409,10,0],[412,9,412,10,0],[413,13,423,15,0],[425,13,425,27,0],[426,9,426,10,0],[429,9,429,10,0],[430,13,435,15,0],[436,13,436,56,0],[437,13,437,78,0],[438,13,438,27,0],[439,9,439,10,0],[442,9,442,10,0],[443,13,448,15,0],[449,13,449,27,0],[450,9,450,10,0],[453,9,453,10,0],[454,13,459,15,0],[460,13,460,27,0],[461,9,461,10,0],[464,9,464,10,0],[465,13,476,15,0],[477,13,477,27,0],[478,9,478,10,0],[481,9,481,10,0],[482,13,486,15,0],[487,13,487,27,0],[488,9,488,10,0],[491,9,491,10,0],[492,13,496,15,0],[497,13,497,27,0],[498,9,498,10,0]]);
+    </script>
+  </body>
+</html>

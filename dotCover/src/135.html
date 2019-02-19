@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\linklist\menulinklist.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model
+{
+    /// &lt;summary&gt;
+    /// Represents site navigation menu link list object
+    /// &lt;/summary&gt;
+    public class MenuLinkList : Entity, IHasLanguage
+    {
+        public MenuLinkList()
+        {
+            MenuLinks = new List&lt;MenuLink&gt;();
+        }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the name of site navigation menu link list
+        /// &lt;/summary&gt;
+        public string Name { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the site navigation menu link list store ID
+        /// &lt;/summary&gt;
+        public string StoreId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the collection of site navigation menu link for link list
+        /// &lt;/summary&gt;
+        public IList&lt;MenuLink&gt; MenuLinks { get; set; }
+
+        #region IHasLanguage Members
+        /// &lt;summary&gt;
+        /// Gets or sets the locale of site navigation menu link list
+        /// &lt;/summary&gt;
+        public Language Language { get; set; }
+        #endregion
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,9,11,30,0],[12,9,12,10,0],[13,13,13,46,0],[14,9,14,10,0],[19,30,19,34,0],[19,35,19,39,0],[24,33,24,37,0],[24,38,24,42,0],[29,44,29,48,0],[29,49,29,53,0],[35,36,35,40,0],[35,41,35,45,0]]);
+    </script>
+  </body>
+</html>

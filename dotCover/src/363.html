@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\cart\cartconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using VirtoCommerce.Storefront.Common;
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Cart;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Marketing;
+using VirtoCommerce.Storefront.Model.Security;
+using VirtoCommerce.Storefront.Model.Stores;
+using VirtoCommerce.Storefront.Model.Tax;
+using cartDto = VirtoCommerce.Storefront.AutoRestClients.CartModuleApi.Models;
+using coreDto = VirtoCommerce.Storefront.AutoRestClients.CoreModuleApi.Models;
+using marketingDto = VirtoCommerce.Storefront.AutoRestClients.MarketingModuleApi.Models;
+using platformDto = VirtoCommerce.Storefront.AutoRestClients.PlatformModuleApi.Models;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public static partial class CartConverter
+    {
+        public static cartDto.ShoppingCartSearchCriteria ToSearchCriteriaDto(this CartSearchCriteria criteria)
+        {
+            var result = new cartDto.ShoppingCartSearchCriteria
+            {
+                Name = criteria.Name,
+                Type = criteria.Type,
+                StoreId = criteria.StoreId,
+                CustomerId = criteria.Customer?.Id,
+                Currency = criteria.Currency?.Code,
+                LanguageCode = criteria.Language?.CultureName,
+                OutletIds = new[] { criteria.OutletId },
+                Skip = criteria.Start,
+                Take = criteria.PageSize,
+                Sort = criteria.Sort,
+            };
+
+            return result;
+        }
+
+        public static DynamicProperty ToDynamicProperty(this cartDto.DynamicObjectProperty propertyDto)
+        {
+            return propertyDto.JsonConvert&lt;coreDto.DynamicObjectProperty&gt;().ToDynamicProperty();
+        }
+
+        public static cartDto.DynamicObjectProperty ToCartDynamicPropertyDto(this DynamicProperty property)
+        {
+            return property.ToDynamicPropertyDto().JsonConvert&lt;cartDto.DynamicObjectProperty&gt;();
+        }
+
+        public static Discount ToDiscount(this cartDto.Discount discountDto, IEnumerable&lt;Currency&gt; availCurrencies, Language language)
+        {
+            var currency = availCurrencies.FirstOrDefault(x =&gt; x.Equals(discountDto.Currency)) ?? new Currency(language, discountDto.Currency);
+
+            var result = new Discount(currency)
+            {
+                Coupon = discountDto.Coupon,
+                Description = discountDto.Description,
+                PromotionId = discountDto.PromotionId,
+                Amount = new Money(discountDto.DiscountAmount ?? 0, currency)
+            };
+
+            return result;
+        }
+
+        public static cartDto.Discount ToCartDiscountDto(this Discount discount)
+        {
+            var result = new cartDto.Discount
+            {
+                PromotionId = discount.PromotionId,
+                Coupon = discount.Coupon,
+                Description = discount.Description,
+                Currency = discount.Amount.Currency.Code,
+                DiscountAmount = (double)discount.Amount.Amount
+            };
+
+            return result;
+        }
+
+        public static ShippingMethod ToShippingMethod(this cartDto.ShippingRate shippingRate, Currency currency, IEnumerable&lt;Currency&gt; availCurrencies)
+        {
+            var rateCurrency = availCurrencies.FirstOrDefault(x =&gt; x.Equals(shippingRate.Currency)) ?? new Currency(new Language(currency.CultureName), shippingRate.Currency);
+            var ratePrice = new Money(shippingRate.Rate ?? 0, rateCurrency);
+            var rateDiscount = new Money(shippingRate.DiscountAmount ?? 0, rateCurrency);
+
+            if (rateCurrency != currency)
+            {
+                ratePrice = ratePrice.ConvertTo(currency);
+                rateDiscount = rateDiscount.ConvertTo(currency);
+            }
+
+            var result = new ShippingMethod(currency);
+            result.OptionDescription = shippingRate.OptionDescription;
+            result.OptionName = shippingRate.OptionName;
+
+            result.Price = ratePrice;
+            result.DiscountAmount = rateDiscount;
+
+            if (shippingRate.ShippingMethod != null)
+            {
+                result.LogoUrl = shippingRate.ShippingMethod.LogoUrl;
+                result.Name = shippingRate.ShippingMethod.Name;
+                result.Priority = shippingRate.ShippingMethod.Priority ?? 0;
+                result.TaxType = shippingRate.ShippingMethod.TaxType;
+
+                result.ShipmentMethodCode = shippingRate.ShippingMethod.Code;
+                if (shippingRate.ShippingMethod.Settings != null)
+                {
+                    result.Settings = shippingRate.ShippingMethod.Settings.Where(x =&gt; !x.ValueType.EqualsInvariant(&quot;SecureString&quot;))
+                                                                          .Select(x =&gt; x.JsonConvert&lt;platformDto.Setting&gt;().ToSettingEntry()).ToList();
+                }
+            }
+
+            return result;
+        }
+
+        public static Shipment ToCartShipment(this ShippingMethod shippingMethod, Currency currency)
+        {
+            var result = new Shipment(currency)
+            {
+                ShipmentMethodCode = shippingMethod.ShipmentMethodCode,
+                Price = shippingMethod.Price,
+                DiscountAmount = shippingMethod.DiscountAmount,
+                TaxType = shippingMethod.TaxType
+            };
+
+            return result;
+        }
+
+        public static TaxLine[] ToTaxLines(this ShippingMethod shipmentMethod)
+        {
+            var retVal = new List&lt;TaxLine&gt;
+            {
+                new TaxLine(shipmentMethod.Currency)
+                {
+                    Id = shipmentMethod.BuildTaxLineId(),
+                    Code = shipmentMethod.ShipmentMethodCode,
+                    TaxType = shipmentMethod.TaxType,
+                    //Special case when shipment method have 100% discount and need to calculate tax for old value
+                    Amount = shipmentMethod.Total.Amount &gt; 0 ? shipmentMethod.Total : shipmentMethod.Price
+                }
+            };
+
+            return retVal.ToArray();
+        }
+
+        public static TaxLine[] ToTaxLines(this PaymentMethod paymentMethod)
+        {
+            var retVal = new List&lt;TaxLine&gt;
+            {
+                new TaxLine(paymentMethod.Currency)
+                {
+                    Id = paymentMethod.Code,
+                    Code = paymentMethod.Code,
+                    TaxType = paymentMethod.TaxType,
+                     //Special case when payment method have 100% discount and need to calculate tax for old value
+                    Amount = paymentMethod.Total.Amount &gt; 0 ? paymentMethod.Total : paymentMethod.Price
+                }
+            };
+
+            return retVal.ToArray();
+        }
+
+        public static CartShipmentItem ToShipmentItem(this cartDto.ShipmentItem shipmentItemDto, ShoppingCart cart)
+        {
+            var result = new CartShipmentItem
+            {
+                Quantity = shipmentItemDto.Quantity ?? 0,
+
+                LineItem = cart.Items.FirstOrDefault(x =&gt; x.Id == shipmentItemDto.LineItemId)
+            };
+
+            return result;
+        }
+
+        public static cartDto.ShipmentItem ToShipmentItemDto(this CartShipmentItem shipmentItem)
+        {
+            var result = new cartDto.ShipmentItem
+            {
+                Quantity = shipmentItem.Quantity,
+                LineItem = shipmentItem.LineItem.ToLineItemDto()
+            };
+
+            return result;
+        }
+
+        public static Shipment ToShipment(this cartDto.Shipment shipmentDto, ShoppingCart cart)
+        {
+            var retVal = new Shipment(cart.Currency)
+            {
+                Id = shipmentDto.Id,
+                MeasureUnit = shipmentDto.MeasureUnit,
+                ShipmentMethodCode = shipmentDto.ShipmentMethodCode,
+                ShipmentMethodOption = shipmentDto.ShipmentMethodOption,
+                WeightUnit = shipmentDto.WeightUnit,
+                Height = shipmentDto.Height,
+                Weight = shipmentDto.Weight,
+                Width = shipmentDto.Width,
+                Length = shipmentDto.Length,
+                Currency = cart.Currency,
+                Price = new Money(shipmentDto.Price ?? 0, cart.Currency),
+                PriceWithTax = new Money(shipmentDto.PriceWithTax ?? 0, cart.Currency),
+                DiscountAmount = new Money(shipmentDto.DiscountAmount ?? 0, cart.Currency),
+                Total = new Money(shipmentDto.Total ?? 0, cart.Currency),
+                TotalWithTax = new Money(shipmentDto.TotalWithTax ?? 0, cart.Currency),
+                DiscountAmountWithTax = new Money(shipmentDto.DiscountAmountWithTax ?? 0, cart.Currency),
+                TaxTotal = new Money(shipmentDto.TaxTotal ?? 0, cart.Currency),
+                TaxPercentRate = (decimal?)shipmentDto.TaxPercentRate ?? 0m
+            };
+
+            if (shipmentDto.DeliveryAddress != null)
+            {
+                retVal.DeliveryAddress = ToAddress(shipmentDto.DeliveryAddress);
+            }
+
+            if (shipmentDto.Items != null)
+            {
+                retVal.Items = shipmentDto.Items.Select(i =&gt; ToShipmentItem(i, cart)).ToList();
+            }
+
+            if (shipmentDto.TaxDetails != null)
+            {
+                retVal.TaxDetails = shipmentDto.TaxDetails.Select(td =&gt; ToTaxDetail(td, cart.Currency)).ToList();
+            }
+
+            if (!shipmentDto.Discounts.IsNullOrEmpty())
+            {
+                retVal.Discounts.AddRange(shipmentDto.Discounts.Select(x =&gt; ToDiscount(x, new[] { cart.Currency }, cart.Language)));
+            }
+
+            return retVal;
+        }
+
+        public static cartDto.Shipment ToShipmentDto(this Shipment shipment)
+        {
+            var retVal = new cartDto.Shipment
+            {
+                Id = shipment.Id,
+                MeasureUnit = shipment.MeasureUnit,
+                ShipmentMethodCode = shipment.ShipmentMethodCode,
+                ShipmentMethodOption = shipment.ShipmentMethodOption,
+                WeightUnit = shipment.WeightUnit,
+                Height = shipment.Height,
+                Weight = shipment.Weight,
+                Width = shipment.Width,
+                Length = shipment.Length,
+
+                Currency = shipment.Currency != null ? shipment.Currency.Code : null,
+                DiscountAmount = shipment.DiscountAmount != null ? (double?)shipment.DiscountAmount.InternalAmount : null,
+                Price = shipment.Price != null ? (double?)shipment.Price.InternalAmount : null,
+                TaxPercentRate = (double)shipment.TaxPercentRate
+            };
+
+            if (shipment.DeliveryAddress != null)
+            {
+                retVal.DeliveryAddress = ToCartAddressDto(shipment.DeliveryAddress);
+            }
+
+            if (shipment.Discounts != null)
+            {
+                retVal.Discounts = shipment.Discounts.Select(ToCartDiscountDto).ToList();
+            }
+
+            if (shipment.Items != null)
+            {
+                retVal.Items = shipment.Items.Select(ToShipmentItemDto).ToList();
+            }
+
+            if (shipment.TaxDetails != null)
+            {
+                retVal.TaxDetails = shipment.TaxDetails.Select(ToCartTaxDetailDto).ToList();
+            }
+
+            return retVal;
+        }
+
+        public static PaymentMethod ToPaymentMethod(this cartDto.PaymentMethod paymentMethodDto, ShoppingCart cart)
+        {
+            var retVal = new PaymentMethod(cart.Currency)
+            {
+                Code = paymentMethodDto.Code,
+                Description = paymentMethodDto.Description,
+                LogoUrl = paymentMethodDto.LogoUrl,
+                Name = paymentMethodDto.Name,
+                PaymentMethodGroupType = paymentMethodDto.PaymentMethodGroupType,
+                PaymentMethodType = paymentMethodDto.PaymentMethodType,
+                TaxType = paymentMethodDto.TaxType,
+
+                Priority = paymentMethodDto.Priority ?? 0
+            };
+
+            if (paymentMethodDto.Settings != null)
+            {
+                retVal.Settings = paymentMethodDto.Settings.Where(x =&gt; !x.ValueType.EqualsInvariant(&quot;SecureString&quot;)).Select(x =&gt; x.JsonConvert&lt;platformDto.Setting&gt;().ToSettingEntry()).ToList();
+            }
+
+            retVal.Currency = cart.Currency;
+            retVal.Price = new Money(paymentMethodDto.Price ?? 0, cart.Currency);
+            retVal.DiscountAmount = new Money(paymentMethodDto.DiscountAmount ?? 0, cart.Currency);
+            retVal.TaxPercentRate = (decimal?)paymentMethodDto.TaxPercentRate ?? 0m;
+
+            if (paymentMethodDto.TaxDetails != null)
+            {
+                retVal.TaxDetails = paymentMethodDto.TaxDetails.Select(td =&gt; ToTaxDetail(td, cart.Currency)).ToList();
+            }
+
+            return retVal;
+        }
+
+        public static Payment ToCartPayment(this PaymentMethod paymentMethod, Money amount, ShoppingCart cart)
+        {
+            var result = new Payment(cart.Currency)
+            {
+                Amount = amount,
+                PaymentGatewayCode = paymentMethod.Code,
+                Price = paymentMethod.Price,
+                DiscountAmount = paymentMethod.DiscountAmount,
+                TaxPercentRate = paymentMethod.TaxPercentRate,
+                TaxDetails = paymentMethod.TaxDetails
+            };
+
+            return result;
+        }
+
+        public static Payment ToPayment(this cartDto.Payment paymentDto, ShoppingCart cart)
+        {
+            var result = new Payment(cart.Currency)
+            {
+                Id = paymentDto.Id,
+                OuterId = paymentDto.OuterId,
+                PaymentGatewayCode = paymentDto.PaymentGatewayCode,
+                TaxType = paymentDto.TaxType,
+
+                Amount = new Money(paymentDto.Amount ?? 0, cart.Currency)
+            };
+
+            if (paymentDto.BillingAddress != null)
+            {
+                result.BillingAddress = ToAddress(paymentDto.BillingAddress);
+            }
+
+            result.Price = new Money(paymentDto.Price ?? 0, cart.Currency);
+            result.DiscountAmount = new Money(paymentDto.DiscountAmount ?? 0, cart.Currency);
+            result.PriceWithTax = new Money(paymentDto.PriceWithTax ?? 0, cart.Currency);
+            result.DiscountAmountWithTax = new Money(paymentDto.DiscountAmountWithTax ?? 0, cart.Currency);
+            result.Total = new Money(paymentDto.Total ?? 0, cart.Currency);
+            result.TotalWithTax = new Money(paymentDto.TotalWithTax ?? 0, cart.Currency);
+            result.TaxTotal = new Money(paymentDto.TaxTotal ?? 0, cart.Currency);
+            result.TaxPercentRate = (decimal?)paymentDto.TaxPercentRate ?? 0m;
+
+            if (paymentDto.TaxDetails != null)
+            {
+                result.TaxDetails = paymentDto.TaxDetails.Select(td =&gt; ToTaxDetail(td, cart.Currency)).ToList();
+            }
+
+            if (!paymentDto.Discounts.IsNullOrEmpty())
+            {
+                result.Discounts.AddRange(paymentDto.Discounts.Select(x =&gt; ToDiscount(x, new[] { cart.Currency }, cart.Language)));
+            }
+
+            return result;
+        }
+
+        public static cartDto.Payment ToPaymentDto(this Payment payment)
+        {
+            var result = new cartDto.Payment
+            {
+                Id = payment.Id,
+                OuterId = payment.OuterId,
+                PaymentGatewayCode = payment.PaymentGatewayCode,
+                TaxType = payment.TaxType,
+
+                Amount = (double)payment.Amount.InternalAmount,
+
+                Currency = payment.Currency.Code,
+                Price = (double)payment.Price.InternalAmount,
+                DiscountAmount = (double)payment.DiscountAmount.InternalAmount,
+                TaxPercentRate = (double)payment.TaxPercentRate
+            };
+
+            if (payment.BillingAddress != null)
+            {
+                result.BillingAddress = ToCartAddressDto(payment.BillingAddress);
+            }
+            if (payment.Discounts != null)
+            {
+                result.Discounts = payment.Discounts.Select(ToCartDiscountDto).ToList();
+            }
+            if (payment.TaxDetails != null)
+            {
+                result.TaxDetails = payment.TaxDetails.Select(ToCartTaxDetailDto).ToList();
+            }
+
+            return result;
+        }
+
+        public static cartDto.Address ToCartAddressDto(this Address address)
+        {
+            return address.ToCoreAddressDto().JsonConvert&lt;cartDto.Address&gt;();
+        }
+
+        public static Address ToAddress(this cartDto.Address addressDto)
+        {
+            return addressDto.JsonConvert&lt;coreDto.Address&gt;().ToAddress();
+        }
+
+        public static PromotionEvaluationContext ToPromotionEvaluationContext(this ShoppingCart cart)
+        {
+            var result = new PromotionEvaluationContext(cart.Language, cart.Currency)
+            {
+                Cart = cart,
+                User = cart.Customer,
+                Currency = cart.Currency,
+                Language = cart.Language,
+                StoreId = cart.StoreId
+            };
+
+            return result;
+        }
+
+        public static ShoppingCart ToShoppingCart(this cartDto.ShoppingCart cartDto, Currency currency, Language language, User user)
+        {
+            var result = new ShoppingCart(currency, language)
+            {
+                ChannelId = cartDto.ChannelId,
+                Comment = cartDto.Comment,
+                CustomerId = cartDto.CustomerId,
+                CustomerName = cartDto.CustomerName,
+                Id = cartDto.Id,
+                Name = cartDto.Name,
+                ObjectType = cartDto.ObjectType,
+                OrganizationId = cartDto.OrganizationId,
+                Status = cartDto.Status,
+                StoreId = cartDto.StoreId,
+                Type = cartDto.Type,
+                Customer = user,
+                CreatedDate = cartDto.CreatedDate,
+                ModifiedDate = cartDto.ModifiedDate,
+                OutletDisId = cartDto.OutletDisId,
+                OutletId = cartDto.OutletId,
+                OutletName = cartDto.OutletName
+            };
+
+            if (cartDto.Coupon != null)
+            {
+                result.Coupon = new Coupon
+                {
+                    Code = cartDto.Coupon,
+                    AppliedSuccessfully = !string.IsNullOrEmpty(cartDto.Coupon)
+                };
+            }
+
+            if (cartDto.Items != null)
+            {
+                result.Items = cartDto.Items.Select(i =&gt; ToLineItem(i, currency, language)).ToList();
+                result.HasPhysicalProducts = result.Items.Any(i =&gt;
+                    string.IsNullOrEmpty(i.ProductType) ||
+                    !string.IsNullOrEmpty(i.ProductType) &amp;&amp; i.ProductType.Equals(&quot;Physical&quot;, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (cartDto.Addresses != null)
+            {
+                result.Addresses = cartDto.Addresses.Select(ToAddress).ToList();
+            }
+
+            if (cartDto.Payments != null)
+            {
+                result.Payments = cartDto.Payments.Select(p =&gt; ToPayment(p, result)).ToList();
+            }
+
+            if (cartDto.Shipments != null)
+            {
+                result.Shipments = cartDto.Shipments.Select(s =&gt; ToShipment(s, result)).ToList();
+            }
+
+            if (cartDto.DynamicProperties != null)
+            {
+                result.DynamicProperties = cartDto.DynamicProperties.Select(ToDynamicProperty).ToList();
+            }
+
+            if (cartDto.TaxDetails != null)
+            {
+                result.TaxDetails = cartDto.TaxDetails.Select(td =&gt; ToTaxDetail(td, currency)).ToList();
+            }
+
+            result.DiscountAmount = new Money(cartDto.DiscountAmount ?? 0, currency);
+            result.HandlingTotal = new Money(cartDto.HandlingTotal ?? 0, currency);
+            result.HandlingTotalWithTax = new Money(cartDto.HandlingTotalWithTax ?? 0, currency);
+
+            result.Total = new Money(cartDto.Total ?? 0, currency);
+            result.SubTotal = new Money(cartDto.SubTotal ?? 0, currency);
+            result.SubTotalWithTax = new Money(cartDto.SubTotalWithTax ?? 0, currency);
+            result.ShippingPrice = new Money(cartDto.ShippingSubTotal ?? 0, currency);
+            result.ShippingPriceWithTax = new Money(cartDto.ShippingSubTotalWithTax ?? 0, currency);
+            result.ShippingTotal = new Money(cartDto.ShippingTotal ?? 0, currency);
+            result.ShippingTotalWithTax = new Money(cartDto.ShippingTotalWithTax ?? 0, currency);
+            result.PaymentPrice = new Money(cartDto.PaymentSubTotal ?? 0, currency);
+            result.PaymentPriceWithTax = new Money(cartDto.PaymentSubTotalWithTax ?? 0, currency);
+            result.PaymentTotal = new Money(cartDto.PaymentTotal ?? 0, currency);
+            result.PaymentTotalWithTax = new Money(cartDto.PaymentTotalWithTax ?? 0, currency);
+
+            result.DiscountTotal = new Money(cartDto.DiscountTotal ?? 0, currency);
+            result.DiscountTotalWithTax = new Money(cartDto.DiscountTotalWithTax ?? 0, currency);
+            result.TaxTotal = new Money(cartDto.TaxTotal ?? 0, currency);
+
+
+            result.IsAnonymous = cartDto.IsAnonymous == true;
+            result.IsRecuring = cartDto.IsRecuring == true;
+            result.VolumetricWeight = (decimal)(cartDto.VolumetricWeight ?? 0);
+            result.Weight = (decimal)(cartDto.Weight ?? 0);
+
+            return result;
+        }
+
+        public static cartDto.ShoppingCart ToShoppingCartDto(this ShoppingCart cart)
+        {
+            var result = new cartDto.ShoppingCart
+            {
+                ChannelId = cart.ChannelId,
+                Comment = cart.Comment,
+                CustomerId = cart.CustomerId,
+                CustomerName = cart.CustomerName,
+                Id = cart.Id,
+                Name = cart.Name,
+                ObjectType = cart.ObjectType,
+                OrganizationId = cart.OrganizationId,
+                Status = cart.Status,
+                StoreId = cart.StoreId,
+                OutletDisId = cart.OutletDisId,
+                OutletId = cart.OutletId,
+                OutletName = cart.OutletName,
+                Type = cart.Type ?? ShoppingCartType.ShoppingCart
+            };
+
+            if (cart.Language != null)
+            {
+                result.LanguageCode = cart.Language.CultureName;
+            }
+            result.Addresses = cart.Addresses.Select(ToCartAddressDto).ToList();
+            result.Coupon = cart.Coupon != null ? cart.Coupon.Code : null;
+            result.Currency = cart.Currency.Code;
+            result.Discounts = cart.Discounts.Select(ToCartDiscountDto).ToList();
+            result.HandlingTotal = (double)cart.HandlingTotal.InternalAmount;
+            result.HandlingTotalWithTax = (double)cart.HandlingTotal.InternalAmount;
+            result.DiscountAmount = (double)cart.DiscountAmount.InternalAmount;
+            result.Items = cart.Items.Select(ToLineItemDto).ToList();
+            result.Payments = cart.Payments.Select(ToPaymentDto).ToList();
+            result.Shipments = cart.Shipments.Select(ToShipmentDto).ToList();
+            result.TaxDetails = cart.TaxDetails.Select(ToCartTaxDetailDto).ToList();
+            result.DynamicProperties = cart.DynamicProperties.Select(ToCartDynamicPropertyDto).ToList();
+            result.VolumetricWeight = (double)cart.VolumetricWeight;
+            result.Weight = (double)cart.Weight;
+
+            return result;
+        }
+
+        public static TaxEvaluationContext ToTaxEvalContext(this ShoppingCart cart, Store store)
+        {
+            var result = new TaxEvaluationContext(cart.StoreId)
+            {
+                Id = cart.Id,
+                Code = cart.Name,
+                Currency = cart.Currency,
+                Type = &quot;Cart&quot;,
+                Customer = cart.Customer,
+                StoreTaxCalculationEnabled = store.TaxCalculationEnabled
+            };
+
+            foreach (var lineItem in cart.Items)
+            {
+                result.Lines.Add(new TaxLine(lineItem.Currency)
+                {
+                    Id = lineItem.Id,
+                    Code = lineItem.Sku,
+                    Name = lineItem.Name,
+                    TaxType = lineItem.TaxType,
+                    //Special case when product have 100% discount and need to calculate tax for old value
+                    Amount = lineItem.ExtendedPrice.Amount &gt; 0 ? lineItem.ExtendedPrice : lineItem.SalePrice
+                });
+            }
+
+            foreach (var shipment in cart.Shipments)
+            {
+                var totalTaxLine = new TaxLine(shipment.Currency)
+                {
+                    Id = shipment.Id,
+                    Code = shipment.ShipmentMethodCode,
+                    Name = shipment.ShipmentMethodOption,
+                    TaxType = shipment.TaxType,
+                    //Special case when shipment have 100% discount and need to calculate tax for old value
+                    Amount = shipment.Total.Amount &gt; 0 ? shipment.Total : shipment.Price
+                };
+                result.Lines.Add(totalTaxLine);
+
+                if (shipment.DeliveryAddress != null)
+                {
+                    result.Address = shipment.DeliveryAddress;
+                }
+            }
+
+            foreach (var payment in cart.Payments)
+            {
+                var totalTaxLine = new TaxLine(payment.Currency)
+                {
+                    Id = payment.Id,
+                    Code = payment.PaymentGatewayCode,
+                    Name = payment.PaymentGatewayCode,
+                    TaxType = payment.TaxType,
+                    //Special case when shipment have 100% discount and need to calculate tax for old value
+                    Amount = payment.Total.Amount &gt; 0 ? payment.Total : payment.Price
+                };
+                result.Lines.Add(totalTaxLine);
+            }
+
+            return result;
+        }
+
+        public static TaxDetail ToTaxDetail(this cartDto.TaxDetail taxDeatilDto, Currency currency)
+        {
+            var result = new TaxDetail(currency)
+            {
+                Name = taxDeatilDto.Name,
+                Rate = new Money(taxDeatilDto.Rate ?? 0, currency)
+            };
+
+            return result;
+        }
+
+        public static cartDto.TaxDetail ToCartTaxDetailDto(this TaxDetail taxDetail)
+        {
+            var result = new cartDto.TaxDetail
+            {
+                Name = taxDetail.Name,
+                Rate = (double)taxDetail.Rate.Amount
+            };
+
+            return result;
+        }
+
+        public static LineItem ToLineItem(this Product product, Language language, int quantity)
+        {
+            var result = new LineItem(product.Price.Currency, language)
+            {
+                CatalogId = product.CatalogId,
+                CategoryId = product.CategoryId,
+                Name = product.Name,
+                Sku = product.Sku,
+                ProductType = product.ProductType,
+                TaxType = product.TaxType,
+                WeightUnit = product.WeightUnit,
+                MeasureUnit = product.MeasureUnit,
+                Weight = product.Weight,
+                Width = product.Width,
+                Length = product.Length,
+                Height = product.Height,
+
+                ImageUrl = product.PrimaryImage?.Url,
+                ThumbnailImageUrl = product.PrimaryImage?.Url,
+                ListPrice = product.Price.ListPrice,
+                SalePrice = product.Price.GetTierPrice(quantity).Price,
+                TaxPercentRate = product.Price.TaxPercentRate,
+                DiscountAmount = product.Price.DiscountAmount,
+                DiscountAmountWithTax = product.Price.DiscountAmount * product.Price.TaxPercentRate,
+                DiscountTotal = product.Price.DiscountAmount * quantity,
+                DiscountTotalWithTax = product.Price.DiscountAmount * quantity * product.Price.TaxPercentRate,
+                ProductId = product.Id,
+                Quantity = quantity,
+                EmptiesDeposit = product.EmptiesDeposit
+            };
+
+            result.IsReccuring = result.PaymentPlan != null;
+
+            CopyShortTextValue(product, result, &quot;Brand group&quot;);
+            CopyShortTextValue(product, result, &quot;Unit&quot;);
+            CopyShortTextValue(product, result, &quot;Packaging&quot;);
+            CopyShortTextValue(product, result, &quot;Package&quot;);
+
+            CopyDecimalValue(product, result, &quot;Product volume&quot;);
+            CopyDecimalValue(product, result, &quot;Empties Deposit&quot;);
+
+            return result;
+        }
+
+        public static LineItem ToLineItem(this cartDto.LineItem lineItemDto, Currency currency, Language language)
+        {
+            var result = new LineItem(currency, language)
+            {
+                Id = lineItemDto.Id,
+                CatalogId = lineItemDto.CatalogId,
+                CategoryId = lineItemDto.CategoryId,
+                ImageUrl = lineItemDto.ImageUrl,
+                Name = lineItemDto.Name,
+                ObjectType = lineItemDto.ObjectType,
+                ProductId = lineItemDto.ProductId,
+                ProductType = lineItemDto.ProductType,
+                Quantity = lineItemDto.Quantity ?? 1,
+                ShipmentMethodCode = lineItemDto.ShipmentMethodCode,
+                Sku = lineItemDto.Sku,
+                TaxType = lineItemDto.TaxType,
+                ThumbnailImageUrl = lineItemDto.ThumbnailImageUrl,
+                WeightUnit = lineItemDto.WeightUnit,
+                MeasureUnit = lineItemDto.MeasureUnit,
+                Weight = (decimal?)lineItemDto.Weight,
+                Width = (decimal?)lineItemDto.Width,
+                Length = (decimal?)lineItemDto.Length,
+                Height = (decimal?)lineItemDto.Height,
+                CreatedDate = lineItemDto.CreatedDate.GetValueOrDefault()
+            };
+
+            result.ImageUrl = lineItemDto.ImageUrl.RemoveLeadingUriScheme();
+
+            if (lineItemDto.TaxDetails != null)
+            {
+                result.TaxDetails = lineItemDto.TaxDetails.Select(td =&gt; ToTaxDetail(td, currency)).ToList();
+            }
+
+            if (lineItemDto.DynamicProperties != null)
+            {
+                result.DynamicProperties = lineItemDto.DynamicProperties.Select(ToDynamicProperty).ToList();
+            }
+
+            if (!lineItemDto.Discounts.IsNullOrEmpty())
+            {
+                result.Discounts.AddRange(lineItemDto.Discounts.Select(x =&gt; ToDiscount(x, new[] { currency }, language)));
+            }
+            result.Comment = lineItemDto.Note;
+            result.IsGift = lineItemDto.IsGift == true;
+            result.IsReccuring = lineItemDto.IsReccuring == true;
+            result.ListPrice = new Money(lineItemDto.ListPrice ?? 0, currency);
+            result.RequiredShipping = lineItemDto.RequiredShipping == true;
+            result.SalePrice = new Money(lineItemDto.SalePrice ?? 0, currency);
+            result.TaxPercentRate = (decimal?)lineItemDto.TaxPercentRate ?? 0m;
+            result.DiscountAmount = new Money(lineItemDto.DiscountAmount ?? 0, currency);
+            result.TaxIncluded = lineItemDto.TaxIncluded == true;
+            result.Weight = (decimal?)lineItemDto.Weight;
+            result.Width = (decimal?)lineItemDto.Width;
+            result.Height = (decimal?)lineItemDto.Height;
+            result.Length = (decimal?)lineItemDto.Length;
+
+
+            result.DiscountAmountWithTax = new Money(lineItemDto.DiscountAmountWithTax ?? 0, currency);
+            result.DiscountTotal = new Money(lineItemDto.DiscountTotal ?? 0, currency);
+            result.DiscountTotalWithTax = new Money(lineItemDto.DiscountTotalWithTax ?? 0, currency);
+            result.ListPriceWithTax = new Money(lineItemDto.ListPriceWithTax ?? 0, currency);
+            result.SalePriceWithTax = new Money(lineItemDto.SalePriceWithTax ?? 0, currency);
+            result.PlacedPrice = new Money(lineItemDto.PlacedPrice ?? 0, currency);
+            result.PlacedPriceWithTax = new Money(lineItemDto.PlacedPriceWithTax ?? 0, currency);
+            result.ExtendedPrice = new Money(lineItemDto.ExtendedPrice ?? 0, currency);
+            result.ExtendedPriceWithTax = new Money(lineItemDto.ExtendedPriceWithTax ?? 0, currency);
+            result.TaxTotal = new Money(lineItemDto.TaxTotal ?? 0, currency);
+
+            var emptiesDeposit = result.DynamicProperties.GetDecimalValue(&quot;Empties Deposit&quot;);
+            result.EmptiesDeposit = new Money(emptiesDeposit ?? 0, currency);
+
+            var taxIncludedRate = result.DynamicProperties.GetDecimalValue(&quot;Tax Included Rate&quot;);
+            result.TaxIncludedRate = taxIncludedRate ?? 0;
+
+            return result;
+        }
+
+        public static cartDto.LineItem ToLineItemDto(this LineItem lineItem)
+        {
+            var retVal = new cartDto.LineItem
+            {
+                Id = lineItem.Id,
+                CatalogId = lineItem.CatalogId,
+                CategoryId = lineItem.CategoryId,
+                ImageUrl = lineItem.ImageUrl,
+                Name = lineItem.Name,
+                ObjectType = lineItem.ObjectType,
+                ProductId = lineItem.ProductId,
+                ProductType = lineItem.ProductType,
+                Quantity = lineItem.Quantity,
+                ShipmentMethodCode = lineItem.ShipmentMethodCode,
+                Sku = lineItem.Sku,
+                TaxType = lineItem.TaxType,
+                ThumbnailImageUrl = lineItem.ThumbnailImageUrl,
+                WeightUnit = lineItem.WeightUnit,
+                MeasureUnit = lineItem.MeasureUnit,
+                Weight = (double?)lineItem.Weight,
+                Width = (double?)lineItem.Width,
+                Length = (double?)lineItem.Length,
+                Height = (double?)lineItem.Height,
+
+                Currency = lineItem.Currency.Code,
+                Discounts = lineItem.Discounts.Select(ToCartDiscountDto).ToList(),
+
+                ListPrice = (double)lineItem.ListPrice.InternalAmount,
+                SalePrice = (double)lineItem.SalePrice.InternalAmount,
+                TaxPercentRate = (double)lineItem.TaxPercentRate,
+                DiscountAmount = (double)lineItem.DiscountAmount.InternalAmount,
+                TaxDetails = lineItem.TaxDetails.Select(ToCartTaxDetailDto).ToList(),
+                DynamicProperties = lineItem.DynamicProperties.Select(ToCartDynamicPropertyDto).ToList(),
+                VolumetricWeight = (double)(lineItem.VolumetricWeight ?? 0)
+            };
+            retVal.Weight = (double?)lineItem.Weight;
+            retVal.Width = (double?)lineItem.Width;
+            retVal.Height = (double?)lineItem.Height;
+            retVal.Length = (double?)lineItem.Length;
+            retVal.IsGift = lineItem.IsGift;
+            retVal.Note = lineItem.Comment;
+
+            return retVal;
+        }
+
+        public static CartShipmentItem ToShipmentItem(this LineItem lineItem)
+        {
+            var shipmentItem = new CartShipmentItem
+            {
+                LineItem = lineItem,
+                Quantity = lineItem.Quantity
+            };
+
+            return shipmentItem;
+        }
+
+        public static marketingDto.ProductPromoEntry ToProductPromoEntryDto(this LineItem lineItem)
+        {
+            var result = new marketingDto.ProductPromoEntry
+            {
+                CatalogId = lineItem.CatalogId,
+                CategoryId = lineItem.CategoryId,
+                Code = lineItem.Sku,
+                ProductId = lineItem.ProductId,
+                Discount = (double)lineItem.DiscountTotal.Amount,
+                //Use only base price for discount evaluation
+                Price = (double)lineItem.SalePrice.Amount,
+                Quantity = lineItem.Quantity,
+                InStockQuantity = lineItem.InStockQuantity,
+                Variations = null // TODO
+            };
+
+            return result;
+        }
+
+        private static void CopyShortTextValue(Product source, LineItem target, string propertyName)
+        {
+            var value = source.Properties.GetValue(propertyName);
+            target.DynamicProperties.SetShortTextValue(propertyName, value);
+        }
+
+        private static void CopyDecimalValue(Product source, LineItem target, string propertyName)
+        {
+            var stringValue = source.Properties.GetValue(propertyName)?.Replace(&#39;,&#39;, &#39;.&#39;); // Workaround for current catalog data
+            if (decimal.TryParse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var decimalValue))
+            {
+                target.DynamicProperties.SetDecimalValue(propertyName, decimalValue);
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[24,9,24,10,0],[25,13,37,15,0],[39,13,39,27,0],[40,9,40,10,0],[43,9,43,10,0],[44,13,44,97,0],[45,9,45,10,0],[48,9,48,10,0],[49,13,49,97,0],[50,9,50,10,0],[53,9,53,10,0],[54,13,54,144,0],[54,64,54,94,0],[56,13,62,15,0],[64,13,64,27,0],[65,9,65,10,0],[68,9,68,10,0],[69,13,76,15,0],[78,13,78,27,0],[79,9,79,10,0],[82,9,82,10,0],[83,13,83,176,0],[83,68,83,99,0],[84,13,84,77,0],[85,13,85,90,0],[87,13,87,42,0],[88,13,88,14,0],[89,17,89,59,0],[90,17,90,65,0],[91,13,91,14,0],[93,13,93,55,0],[94,13,94,71,0],[95,13,95,57,0],[97,13,97,38,0],[98,13,98,50,0],[100,13,100,53,0],[101,13,101,14,0],[102,17,102,70,0],[103,17,103,64,0],[104,17,104,77,0],[105,17,105,70,0],[107,17,107,78,0],[108,17,108,66,0],[109,17,109,18,0],[110,21,111,152,0],[110,87,110,131,0],[111,88,111,141,0],[112,17,112,18,0],[113,13,113,14,0],[115,13,115,27,0],[116,9,116,10,0],[119,9,119,10,0],[120,13,126,15,0],[128,13,128,27,0],[129,9,129,10,0],[132,9,132,10,0],[133,13,143,15,0],[145,13,145,37,0],[146,9,146,10,0],[149,9,149,10,0],[150,13,160,15,0],[162,13,162,37,0],[163,9,163,10,0],[166,9,166,10,0],[167,13,172,15,0],[171,59,171,93,0],[174,13,174,27,0],[175,9,175,10,0],[178,9,178,10,0],[179,13,183,15,0],[185,13,185,27,0],[186,9,186,10,0],[189,9,189,10,0],[190,13,210,15,0],[212,13,212,53,0],[213,13,213,14,0],[214,17,214,81,0],[215,13,215,14,0],[217,13,217,43,0],[218,13,218,14,0],[219,17,219,96,0],[219,62,219,85,0],[220,13,220,14,0],[222,13,222,48,0],[223,13,223,14,0],[224,17,224,114,0],[224,73,224,103,0],[225,13,225,14,0],[227,13,227,56,0],[228,13,228,14,0],[229,17,229,133,0],[229,77,229,130,0],[230,13,230,14,0],[232,13,232,27,0],[233,9,233,10,0],[236,9,236,10,0],[237,13,253,15,0],[255,13,255,50,0],[256,13,256,14,0],[257,17,257,85,0],[258,13,258,14,0],[260,13,260,44,0],[261,13,261,14,0],[262,17,262,90,0],[263,13,263,14,0],[265,13,265,40,0],[266,13,266,14,0],[267,17,267,82,0],[268,13,268,14,0],[270,13,270,45,0],[271,13,271,14,0],[272,17,272,93,0],[273,13,273,14,0],[275,13,275,27,0],[276,9,276,10,0],[279,9,279,10,0],[280,13,291,15,0],[293,13,293,51,0],[294,13,294,14,0],[295,17,295,194,0],[295,72,295,116,0],[295,130,295,183,0],[296,13,296,14,0],[298,13,298,45,0],[299,13,299,82,0],[300,13,300,100,0],[301,13,301,85,0],[303,13,303,53,0],[304,13,304,14,0],[305,17,305,119,0],[305,78,305,108,0],[306,13,306,14,0],[308,13,308,27,0],[309,9,309,10,0],[312,9,312,10,0],[313,13,321,15,0],[323,13,323,27,0],[324,9,324,10,0],[327,9,327,10,0],[328,13,336,15,0],[338,13,338,51,0],[339,13,339,14,0],[340,17,340,78,0],[341,13,341,14,0],[343,13,343,76,0],[344,13,344,94,0],[345,13,345,90,0],[346,13,346,108,0],[347,13,347,76,0],[348,13,348,90,0],[349,13,349,82,0],[350,13,350,79,0],[352,13,352,47,0],[353,13,353,14,0],[354,17,354,113,0],[354,72,354,102,0],[355,13,355,14,0],[357,13,357,55,0],[358,13,358,14,0],[359,17,359,132,0],[359,76,359,129,0],[360,13,360,14,0],[362,13,362,27,0],[363,9,363,10,0],[366,9,366,10,0],[367,13,380,15,0],[382,13,382,48,0],[383,13,383,14,0],[384,17,384,82,0],[385,13,385,14,0],[386,13,386,43,0],[387,13,387,14,0],[388,17,388,89,0],[389,13,389,14,0],[390,13,390,44,0],[391,13,391,14,0],[392,17,392,92,0],[393,13,393,14,0],[395,13,395,27,0],[396,9,396,10,0],[399,9,399,10,0],[400,13,400,78,0],[401,9,401,10,0],[404,9,404,10,0],[405,13,405,74,0],[406,9,406,10,0],[409,9,409,10,0],[410,13,417,15,0],[419,13,419,27,0],[420,9,420,10,0],[423,9,423,10,0],[424,13,443,15,0],[445,13,445,40,0],[446,13,446,14,0],[447,17,451,19,0],[452,13,452,14,0],[454,13,454,39,0],[455,13,455,14,0],[456,17,456,102,0],[456,58,456,91,0],[457,17,459,131,0],[458,21,459,129,0],[460,13,460,14,0],[462,13,462,43,0],[463,13,463,14,0],[464,17,464,81,0],[465,13,465,14,0],[467,13,467,42,0],[468,13,468,14,0],[469,17,469,95,0],[469,64,469,84,0],[470,13,470,14,0],[472,13,472,43,0],[473,13,473,14,0],[474,17,474,98,0],[474,66,474,87,0],[475,13,475,14,0],[477,13,477,51,0],[478,13,478,14,0],[479,17,479,105,0],[480,13,480,14,0],[482,13,482,44,0],[483,13,483,14,0],[484,17,484,105,0],[484,69,484,94,0],[485,13,485,14,0],[487,13,487,86,0],[488,13,488,84,0],[489,13,489,98,0],[491,13,491,68,0],[492,13,492,74,0],[493,13,493,88,0],[494,13,494,87,0],[495,13,495,101,0],[496,13,496,84,0],[497,13,497,98,0],[498,13,498,85,0],[499,13,499,99,0],[500,13,500,82,0],[501,13,501,96,0],[503,13,503,84,0],[504,13,504,98,0],[505,13,505,74,0],[508,13,508,62,0],[509,13,509,60,0],[510,13,510,80,0],[511,13,511,60,0],[513,13,513,27,0],[514,9,514,10,0],[517,9,517,10,0],[518,13,534,15,0],[536,13,536,39,0],[537,13,537,14,0],[538,17,538,65,0],[539,13,539,14,0],[540,13,540,81,0],[541,13,541,75,0],[542,13,542,50,0],[543,13,543,82,0],[544,13,544,78,0],[545,13,545,85,0],[546,13,546,80,0],[547,13,547,70,0],[548,13,548,75,0],[549,13,549,78,0],[550,13,550,85,0],[551,13,551,105,0],[552,13,552,69,0],[553,13,553,49,0],[555,13,555,27,0],[556,9,556,10,0],[559,9,559,10,0],[560,13,568,15,0],[570,13,570,20,0],[570,22,570,34,0],[570,35,570,37,0],[570,38,570,48,0],[571,13,571,14,0],[572,17,580,20,0],[581,13,581,14,0],[583,13,583,20,0],[583,22,583,34,0],[583,35,583,37,0],[583,38,583,52,0],[584,13,584,14,0],[585,17,593,19,0],[594,17,594,48,0],[596,17,596,54,0],[597,17,597,18,0],[598,21,598,63,0],[599,17,599,18,0],[600,13,600,14,0],[602,13,602,20,0],[602,22,602,33,0],[602,34,602,36,0],[602,37,602,50,0],[603,13,603,14,0],[604,17,612,19,0],[613,17,613,48,0],[614,13,614,14,0],[616,13,616,27,0],[617,9,617,10,0],[620,9,620,10,0],[621,13,625,15,0],[627,13,627,27,0],[628,9,628,10,0],[631,9,631,10,0],[632,13,636,15,0],[638,13,638,27,0],[639,9,639,10,0],[642,9,642,10,0],[643,13,670,15,0],[672,13,672,61,0],[674,13,674,64,0],[675,13,675,57,0],[676,13,676,62,0],[677,13,677,60,0],[679,13,679,65,0],[680,13,680,66,0],[682,13,682,27,0],[683,9,683,10,0],[686,9,686,10,0],[687,13,709,15,0],[711,13,711,77,0],[713,13,713,48,0],[714,13,714,14,0],[715,17,715,109,0],[715,73,715,98,0],[716,13,716,14,0],[718,13,718,55,0],[719,13,719,14,0],[720,17,720,109,0],[721,13,721,14,0],[723,13,723,56,0],[724,13,724,14,0],[725,17,725,123,0],[725,77,725,120,0],[726,13,726,14,0],[727,13,727,47,0],[728,13,728,56,0],[729,13,729,66,0],[730,13,730,80,0],[731,13,731,76,0],[732,13,732,80,0],[733,13,733,80,0],[734,13,734,90,0],[735,13,735,66,0],[736,13,736,58,0],[737,13,737,56,0],[738,13,738,58,0],[739,13,739,58,0],[742,13,742,104,0],[743,13,743,88,0],[744,13,744,102,0],[745,13,745,94,0],[746,13,746,94,0],[747,13,747,84,0],[748,13,748,98,0],[749,13,749,88,0],[750,13,750,102,0],[751,13,751,78,0],[753,13,753,94,0],[754,13,754,78,0],[756,13,756,97,0],[757,13,757,59,0],[759,13,759,27,0],[760,9,760,10,0],[763,9,763,10,0],[764,13,796,15,0],[797,13,797,54,0],[798,13,798,52,0],[799,13,799,54,0],[800,13,800,54,0],[801,13,801,45,0],[802,13,802,44,0],[804,13,804,27,0],[805,9,805,10,0],[808,9,808,10,0],[809,13,813,15,0],[815,13,815,33,0],[816,9,816,10,0],[819,9,819,10,0],[820,13,832,15,0],[834,13,834,27,0],[835,9,835,10,0],[838,9,838,10,0],[839,13,839,66,0],[840,13,840,77,0],[841,9,841,10,0],[844,9,844,10,0],[845,13,845,91,0],[846,13,846,119,0],[847,13,847,14,0],[848,17,848,86,0],[849,13,849,14,0],[850,9,850,10,0]]);
+    </script>
+  </body>
+</html>

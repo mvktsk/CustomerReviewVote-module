@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\cart\validationerrors\priceerror.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model.Cart.ValidationErrors
+{
+    public class PriceError : ValidationError
+    {
+        public PriceError(Money oldPrice, Money oldPriceWithTax, Money newPrice, Money newPriceWithTax)
+        {
+            OldPrice = oldPrice;
+            OldPriceWithTax = oldPriceWithTax;
+            NewPrice = newPrice;
+            NewPriceWithTax = newPriceWithTax;
+        }
+
+        public Money OldPrice { get; private set; }
+        public Money OldPriceWithTax { get; private set; }
+        public Money NewPrice { get; private set; }
+        public Money NewPriceWithTax { get; private set; }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[7,9,7,104,0],[8,9,8,10,0],[9,13,9,33,0],[10,13,10,47,0],[11,13,11,33,0],[12,13,12,47,0],[13,9,13,10,0],[15,33,15,37,0],[15,38,15,50,0],[16,40,16,44,0],[16,45,16,57,0],[17,33,17,37,0],[17,38,17,50,0],[18,40,18,44,0],[18,45,18,57,0]]);
+    </script>
+  </body>
+</html>

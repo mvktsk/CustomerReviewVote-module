@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\recommendations\recommendationevalcontext.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model.Recommendations
+{
+    /// &lt;summary&gt;
+    /// Context used for evaluation recommendation for given  parameters 
+    /// &lt;/summary&gt;
+    public partial class RecommendationEvalContext : ValueObject
+    {
+        public RecommendationEvalContext()
+        {
+            ProductIds = new List&lt;string&gt;();
+            Take = 20;
+        }
+
+        /// &lt;summary&gt;
+        /// Recommendation data provider (Cognitive, Association etc)
+        /// &lt;/summary&gt;
+        public string Provider { get; set;}
+        /// &lt;summary&gt;
+        /// Type of requested recommendations may be unique for each kind of provider
+        /// Coginitive - User2Item, Item2Item, FBT
+        /// Association - Recommendations, UpSale, CrossSale etc
+        /// &lt;/summary&gt;
+        public string Type { get; set; }
+
+        public string StoreId { get; set; }
+
+        public string UserId { get; set; }
+
+        public IList&lt;string&gt; ProductIds { get; set; } = new List&lt;string&gt;();
+
+        public int Take { get; set; }
+       
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,9,11,43,0],[12,9,12,10,0],[13,13,13,45,0],[14,13,14,23,0],[15,9,15,10,0],[20,34,20,38,0],[20,39,20,43,0],[26,30,26,34,0],[26,35,26,39,0],[28,33,28,37,0],[28,38,28,42,0],[30,32,30,36,0],[30,37,30,41,0],[32,43,32,47,0],[32,48,32,52,0],[32,57,32,75,0],[34,27,34,31,0],[34,32,34,36,0]]);
+    </script>
+  </body>
+</html>

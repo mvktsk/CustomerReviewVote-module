@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\quote\quoterequestformmodel.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model.Quote
+{
+    public partial class QuoteRequestFormModel : Entity
+    {
+        public QuoteRequestFormModel()
+        {
+            Items = new List&lt;QuoteItemFormModel&gt;();
+        }
+
+        public string Tag { get; set; }
+
+        public string Status { get; set; }
+
+        public string Comment { get; set; }
+
+        public Address BillingAddress { get; set; }
+
+        public Address ShippingAddress { get; set; }
+
+        public IList&lt;QuoteItemFormModel&gt; Items { get; set; }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,9,8,39,0],[9,9,9,10,0],[10,13,10,52,0],[11,9,11,10,0],[13,29,13,33,0],[13,34,13,38,0],[15,32,15,36,0],[15,37,15,41,0],[17,33,17,37,0],[17,38,17,42,0],[19,41,19,45,0],[19,46,19,50,0],[21,42,21,46,0],[21,47,21,51,0],[23,50,23,54,0],[23,55,23,59,0]]);
+    </script>
+  </body>
+</html>

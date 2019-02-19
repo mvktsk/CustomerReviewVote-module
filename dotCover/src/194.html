@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\order\lineitem.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Marketing;
+
+namespace VirtoCommerce.Storefront.Model.Order
+{
+    /// &lt;summary&gt;
+    /// Represents order line item
+    /// &lt;/summary&gt;
+    public partial class LineItem : IProductIsInStock
+    {
+        public LineItem(Currency currency)
+        {
+            Currency = currency;
+            TaxDetails = new List&lt;TaxDetail&gt;();
+            DynamicProperties = new List&lt;DynamicProperty&gt;();
+
+            ListPrice = new Money(currency);
+            ListPriceWithTax = new Money(currency);
+            PlacedPrice = new Money(currency);
+            PlacedPriceWithTax = new Money(currency);
+            ExtendedPrice = new Money(currency);
+            ExtendedPriceWithTax = new Money(currency);
+            DiscountAmount = new Money(currency);
+            DiscountAmountWithTax = new Money(currency);
+            DiscountTotal = new Money(currency);
+            DiscountTotalWithTax = new Money(currency);
+            TaxTotal = new Money(currency);
+            Discounts = new List&lt;Discount&gt;();
+        }
+
+
+        /// &lt;summary&gt;
+        /// Gets or Sets Currency
+        /// &lt;/summary&gt;
+        public Currency Currency { get; set; }
+
+        /// &lt;summary&gt;
+        /// Reserve quantity
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Reserve quantity&lt;/value&gt;
+        public int? ReserveQuantity { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets Quantity
+        /// &lt;/summary&gt;
+        public int? Quantity { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets ProductId
+        /// &lt;/summary&gt;
+        public string ProductId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets SKU
+        /// &lt;/summary&gt;
+        public string Sku { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets CatalogId
+        /// &lt;/summary&gt;
+        public string CatalogId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets CategoryId
+        /// &lt;/summary&gt;
+        public string CategoryId { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets Name
+        /// &lt;/summary&gt;
+        public string Name { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets ImageUrl
+        /// &lt;/summary&gt;
+        public string ImageUrl { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets DisplayName
+        /// &lt;/summary&gt;
+        public string DisplayName { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets IsGift
+        /// &lt;/summary&gt;
+        public bool? IsGift { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets ShippingMethodCode
+        /// &lt;/summary&gt;
+        public string ShippingMethodCode { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets FulfillmentLocationCode
+        /// &lt;/summary&gt;
+        public string FulfillmentLocationCode { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets WeightUnit
+        /// &lt;/summary&gt;
+        public string WeightUnit { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets Weight
+        /// &lt;/summary&gt;
+        public double? Weight { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets MeasureUnit
+        /// &lt;/summary&gt;
+        public string MeasureUnit { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets Height
+        /// &lt;/summary&gt;
+        public double? Height { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets Length
+        /// &lt;/summary&gt;
+        public double? Length { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets Width
+        /// &lt;/summary&gt;
+        public double? Width { get; set; }
+
+
+        /// &lt;summary&gt;
+        /// Flag represent that line item was canceled
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Flag represent that line item was canceled&lt;/value&gt;
+        public bool? IsCancelled { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets CancelledDate
+        /// &lt;/summary&gt;
+        public DateTime? CancelledDate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Text representation of cancel reason
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Text representation of cancel reason&lt;/value&gt;
+        public string CancelReason { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets TaxDetails
+        /// &lt;/summary&gt;
+        public IList&lt;TaxDetail&gt; TaxDetails { get; set; }
+
+        /// &lt;summary&gt;
+        /// Used for dynamic properties management, contains object type string
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Used for dynamic properties management, contains object type string&lt;/value&gt;
+        public string ObjectType { get; set; }
+
+        /// &lt;summary&gt;
+        /// Dynamic properties collections
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;Dynamic properties collections&lt;/value&gt;
+        public IList&lt;DynamicProperty&gt; DynamicProperties { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets CreatedDate
+        /// &lt;/summary&gt;
+        public DateTime? CreatedDate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets ModifiedDate
+        /// &lt;/summary&gt;
+        public DateTime? ModifiedDate { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets CreatedBy
+        /// &lt;/summary&gt;
+        public string CreatedBy { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets ModifiedBy
+        /// &lt;/summary&gt;
+        public string ModifiedBy { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or Sets Id
+        /// &lt;/summary&gt;
+        public string Id { get; set; }
+
+
+        public Money ListPrice { get; set; }
+        public Money ListPriceWithTax { get; set; }
+
+        public Money PlacedPrice { get; set; }
+        public Money PlacedPriceWithTax { get; set; }
+
+        public Money ExtendedPrice { get; set; }
+        public Money ExtendedPriceWithTax { get; set; }
+
+        public Money DiscountAmount { get; set; }
+        public Money DiscountAmountWithTax { get; set; }
+
+        public Money DiscountTotal { get; set; }
+        public Money DiscountTotalWithTax { get; set; }
+
+        public string TaxType { get; set; }
+        public Money TaxTotal { get; set; }
+        public decimal TaxPercentRate { get; set; }
+
+
+        public IList&lt;Discount&gt; Discounts { get; set; }
+
+        public bool ProductIsInStock { get; set; }
+
+        public string ProductType { get; set; }
+        public string Comment { get; set; }
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,43,0],[14,9,14,10,0],[15,13,15,33,0],[16,13,16,48,0],[17,13,17,61,0],[19,13,19,45,0],[20,13,20,52,0],[21,13,21,47,0],[22,13,22,54,0],[23,13,23,49,0],[24,13,24,56,0],[25,13,25,50,0],[26,13,26,57,0],[27,13,27,49,0],[28,13,28,56,0],[29,13,29,44,0],[30,13,30,46,0],[31,9,31,10,0],[37,36,37,40,0],[37,41,37,45,0],[43,39,43,43,0],[43,44,43,48,0],[48,32,48,36,0],[48,37,48,41,0],[53,35,53,39,0],[53,40,53,44,0],[58,29,58,33,0],[58,34,58,38,0],[63,35,63,39,0],[63,40,63,44,0],[68,36,68,40,0],[68,41,68,45,0],[73,30,73,34,0],[73,35,73,39,0],[78,34,78,38,0],[78,39,78,43,0],[83,37,83,41,0],[83,42,83,46,0],[88,31,88,35,0],[88,36,88,40,0],[93,44,93,48,0],[93,49,93,53,0],[98,49,98,53,0],[98,54,98,58,0],[103,36,103,40,0],[103,41,103,45,0],[108,33,108,37,0],[108,38,108,42,0],[113,37,113,41,0],[113,42,113,46,0],[118,33,118,37,0],[118,38,118,42,0],[123,33,123,37,0],[123,38,123,42,0],[128,32,128,36,0],[128,37,128,41,0],[135,36,135,40,0],[135,41,135,45,0],[140,42,140,46,0],[140,47,140,51,0],[146,38,146,42,0],[146,43,146,47,0],[151,46,151,50,0],[151,51,151,55,0],[157,36,157,40,0],[157,41,157,45,0],[163,59,163,63,0],[163,64,163,68,0],[168,40,168,44,0],[168,45,168,49,0],[173,41,173,45,0],[173,46,173,50,0],[178,35,178,39,0],[178,40,178,44,0],[183,36,183,40,0],[183,41,183,45,0],[188,28,188,32,0],[188,33,188,37,0],[191,34,191,38,0],[191,39,191,43,0],[192,41,192,45,0],[192,46,192,50,0],[194,36,194,40,0],[194,41,194,45,0],[195,43,195,47,0],[195,48,195,52,0],[197,38,197,42,0],[197,43,197,47,0],[198,45,198,49,0],[198,50,198,54,0],[200,39,200,43,0],[200,44,200,48,0],[201,46,201,50,0],[201,51,201,55,0],[203,38,203,42,0],[203,43,203,47,0],[204,45,204,49,0],[204,50,204,54,0],[206,33,206,37,0],[206,38,206,42,0],[207,33,207,37,0],[207,38,207,42,0],[208,41,208,45,0],[208,46,208,50,0],[211,44,211,48,0],[211,49,211,53,0],[213,40,213,44,0],[213,45,213,49,0],[215,37,215,41,0],[215,42,215,46,0],[216,33,216,37,0],[216,38,216,42,0]]);
+    </script>
+  </body>
+</html>

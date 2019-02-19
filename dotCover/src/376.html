@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\contentblobproviders\azureblobcontentprovider.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
+using VirtoCommerce.Storefront.Extensions;
+using VirtoCommerce.Storefront.Infrastructure;
+using VirtoCommerce.Storefront.Model.Caching;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Common.Caching;
+using VirtoCommerce.Storefront.Model.Common.Exceptions;
+using VirtoCommerce.Storefront.Model.StaticContent;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public class AzureBlobContentProvider : IContentBlobProvider
+    {
+        private readonly CloudBlobClient _cloudBlobClient;
+        private readonly CloudStorageAccount _cloudStorageAccount;
+        private readonly CloudBlobContainer _container;
+        private readonly IStorefrontMemoryCache _memoryCache;
+        private readonly AzureBlobContentOptions _options;
+        private readonly IBlobChangesWatcher _watcher;
+
+        public AzureBlobContentProvider(IOptions&lt;AzureBlobContentOptions&gt; options, IStorefrontMemoryCache memoryCache, IBlobChangesWatcher watcher)
+        {
+            _options = options.Value;
+            _memoryCache = memoryCache;
+
+            if (!CloudStorageAccount.TryParse(_options.ConnectionString, out _cloudStorageAccount))
+            {
+                throw new StorefrontException(&quot;Failed to get valid connection string&quot;);
+            }
+            _cloudBlobClient = _cloudStorageAccount.CreateCloudBlobClient();
+            _container = _cloudBlobClient.GetContainerReference(_options.Container);
+            _watcher = watcher;
+        }
+
+        #region IContentBlobProvider Members
+        /// &lt;summary&gt;
+        /// Open blob for read 
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;path&quot;&gt;blob relative path /folder/blob.md&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public virtual Stream OpenRead(string path)
+        {
+            return OpenReadAsync(path).GetAwaiter().GetResult();
+        }
+
+        public virtual async Task&lt;Stream&gt; OpenReadAsync(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+            path = NormalizePath(path);
+
+            return await _container.GetBlobReference(path).OpenReadAsync();
+        }
+
+        /// &lt;summary&gt;
+        /// Open blob for write by path
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;path&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;blob stream&lt;/returns&gt;
+        public virtual Stream OpenWrite(string path)
+        {
+            return OpenWriteAsync(path).GetAwaiter().GetResult();
+        }
+
+        public virtual async Task&lt;Stream&gt; OpenWriteAsync(string path)
+        {
+            //Container name
+            path = NormalizePath(path);
+            var blob = _container.GetBlockBlobReference(path);
+            blob.Properties.ContentType = MimeTypes.GetMimeType(Path.GetFileName(path));
+            return await blob.OpenWriteAsync();
+        }
+
+        /// &lt;summary&gt;
+        /// Check that blob or folder with passed path exist
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;path&quot;&gt;path /folder/blob.md&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public virtual bool PathExists(string path)
+        {
+            return PathExistsAsync(path).GetAwaiter().GetResult();
+        }
+
+        public virtual async Task&lt;bool&gt; PathExistsAsync(string path)
+        {
+            path = NormalizePath(path);
+            var cacheKey = CacheKey.With(GetType(), &quot;PathExistsAsync&quot;, path);
+            return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =&gt;
+           {
+               cacheEntry.AddExpirationToken(ContentBlobCacheRegion.CreateChangeToken());
+
+               // If requested path is a directory we should always return true because Azure blob storage does not support checking if directories exist
+               var result = string.IsNullOrEmpty(Path.GetExtension(path));
+               if (!result)
+               {
+                   var url = GetAbsoluteUrl(path);
+                   try
+                   {
+                       result = await (await _cloudBlobClient.GetBlobReferenceFromServerAsync(new Uri(url))).ExistsAsync();
+                   }
+                   catch (Exception)
+                   {
+                       //Azure blob storage client does not provide method to check blob url exist without throwing exception
+                   }
+               }
+               return result;
+           });
+        }
+
+
+        /// &lt;summary&gt;
+        /// Search blob content in specified folder
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;path&quot;&gt;folder path in which the search will be processed&lt;/param&gt;
+        /// &lt;param name=&quot;searchPattern&quot;&gt;search blob name pattern can be used mask (*, ? symbols)&lt;/param&gt;
+        /// &lt;param name=&quot;recursive&quot;&gt; recursive search&lt;/param&gt;
+        /// &lt;returns&gt;Returns relative path for all found blobs  example: /folder/blob.md &lt;/returns&gt;
+        public virtual IEnumerable&lt;string&gt; Search(string path, string searchPattern, bool recursive)
+        {
+            return SearchAsync(path, searchPattern, recursive).GetAwaiter().GetResult();
+        }
+
+        public virtual async Task&lt;IEnumerable&lt;string&gt;&gt; SearchAsync(string path, string searchPattern, bool recursive)
+        {
+            var retVal = new List&lt;string&gt;();
+            path = NormalizePath(path);
+            //Search pattern may contains part of path /path/*.jpg then nedd add this part to base path
+            searchPattern = searchPattern.Replace(&#39;\\&#39;, &#39;/&#39;).TrimStart(&#39;/&#39;);
+            var subDir = NormalizePath(Path.GetDirectoryName(searchPattern));
+            if (!string.IsNullOrEmpty(subDir))
+            {
+                path = path.TrimEnd(&#39;/&#39;) + &quot;/&quot; + subDir;
+                searchPattern = Path.GetFileName(searchPattern);
+            }
+            var context = new OperationContext();
+            var blobItems = new List&lt;IListBlobItem&gt;();
+            BlobContinuationToken token = null;
+            var operationContext = new OperationContext();
+            var directory = GetCloudBlobDirectory(path);
+            do
+            {
+                var resultSegment = await directory.ListBlobsSegmentedAsync(recursive, BlobListingDetails.Metadata, null, token, _options.BlobRequestOptions, operationContext);
+                token = resultSegment.ContinuationToken;
+                blobItems.AddRange(resultSegment.Results);
+            } while (token != null);
+
+            // Loop over items within the container and output the length and URI.
+            foreach (var item in blobItems)
+            {
+                var block = item as CloudBlockBlob;
+                if (block != null)
+                {
+                    var blobRelativePath = GetRelativeUrl(block.Uri.ToString());
+                    var fileName = Path.GetFileName(Uri.UnescapeDataString(block.Uri.ToString()));
+                    if (fileName.FitsMask(searchPattern))
+                    {
+                        retVal.Add(blobRelativePath);
+                    }
+                }
+            }
+            return retVal;
+        }
+
+        public virtual IChangeToken Watch(string path)
+        {
+            return _watcher.CreateBlobChangeToken(NormalizePath(path));
+        }
+        #endregion
+
+        protected virtual CloudBlobDirectory GetCloudBlobDirectory(string path)
+        {
+            var isPathToFile = !string.IsNullOrEmpty(Path.GetExtension(path));
+            if (isPathToFile)
+            {
+                path = NormalizePath(Path.GetDirectoryName(path));
+            }
+            return _container.GetDirectoryReference(path);
+        }
+
+        protected virtual string NormalizePath(string path)
+        {
+            return path.Replace(&#39;\\&#39;, &#39;/&#39;).TrimStart(&#39;/&#39;);
+        }
+
+        protected virtual string GetRelativeUrl(string url)
+        {
+            var absoluteUrl = GetAbsoluteUrl(&quot;&quot;);
+            return url.Replace(absoluteUrl, string.Empty);
+        }
+
+        protected virtual string GetAbsoluteUrl(string path)
+        {
+            var builder = new UriBuilder(_cloudBlobClient.BaseUri);
+            builder.Path += string.Join(&quot;/&quot;, _options.Container, path).Replace(&quot;//&quot;, &quot;/&quot;);
+            return builder.Uri.ToString();
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[29,9,29,148,0],[30,9,30,10,0],[31,13,31,38,0],[32,13,32,40,0],[34,13,34,100,0],[35,13,35,14,0],[36,17,36,88,0],[38,13,38,77,0],[39,13,39,85,0],[40,13,40,32,0],[41,9,41,10,0],[50,9,50,10,0],[51,13,51,65,0],[52,9,52,10,0],[55,9,55,10,0],[56,13,56,44,0],[57,13,57,14,0],[58,17,58,63,0],[60,13,60,40,0],[62,13,62,76,0],[63,9,63,10,0],[71,9,71,10,0],[72,13,72,66,0],[73,9,73,10,0],[76,9,76,10,0],[78,13,78,40,0],[79,13,79,63,0],[80,13,80,89,0],[81,13,81,48,0],[82,9,82,10,0],[90,9,90,10,0],[91,13,91,67,0],[92,9,92,10,0],[95,9,95,10,0],[96,13,96,40,0],[97,13,97,78,0],[98,13,117,15,0],[99,12,99,13,0],[100,16,100,90,0],[103,16,103,75,0],[104,16,104,28,0],[105,16,105,17,0],[106,20,106,51,0],[108,20,108,21,0],[109,24,109,124,0],[110,20,110,21,0],[111,20,111,37,0],[112,20,112,21,0],[114,20,114,21,0],[115,16,115,17,0],[116,16,116,30,0],[117,12,117,13,0],[118,9,118,10,0],[129,9,129,10,0],[130,13,130,89,0],[131,9,131,10,0],[134,9,134,10,0],[135,13,135,45,0],[136,13,136,40,0],[138,13,138,77,0],[139,13,139,78,0],[140,13,140,47,0],[141,13,141,14,0],[142,17,142,57,0],[143,17,143,65,0],[144,13,144,14,0],[145,13,145,50,0],[146,13,146,55,0],[147,13,147,48,0],[148,13,148,59,0],[149,13,149,57,0],[151,13,151,14,0],[152,17,152,177,0],[153,17,153,57,0],[154,17,154,59,0],[155,13,155,14,0],[155,15,155,37,0],[158,13,158,20,0],[158,22,158,30,0],[158,31,158,33,0],[158,34,158,43,0],[159,13,159,14,0],[160,17,160,52,0],[161,17,161,35,0],[162,17,162,18,0],[163,21,163,81,0],[164,21,164,99,0],[165,21,165,58,0],[166,21,166,22,0],[167,25,167,54,0],[168,21,168,22,0],[169,17,169,18,0],[170,13,170,14,0],[171,13,171,27,0],[172,9,172,10,0],[175,9,175,10,0],[176,13,176,72,0],[177,9,177,10,0],[181,9,181,10,0],[182,13,182,79,0],[183,13,183,30,0],[184,13,184,14,0],[185,17,185,67,0],[186,13,186,14,0],[187,13,187,59,0],[188,9,188,10,0],[191,9,191,10,0],[192,13,192,59,0],[193,9,193,10,0],[196,9,196,10,0],[197,13,197,50,0],[198,13,198,59,0],[199,9,199,10,0],[202,9,202,10,0],[203,13,203,68,0],[204,13,204,91,0],[205,13,205,43,0],[206,9,206,10,0]]);
+    </script>
+  </body>
+</html>

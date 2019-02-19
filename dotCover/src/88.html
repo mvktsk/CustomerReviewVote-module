@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\converters\attachmentconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using VirtoCommerce.LiquidThemeEngine.Objects;
+
+namespace VirtoCommerce.LiquidThemeEngine.Converters
+{
+    public static class AttachmentConverter
+    {
+        public static Attachment ToShopifyModel(this VirtoCommerce.Storefront.Model.Attachment attachment)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidAttachment(attachment);
+        }
+
+    }
+
+    public partial class ShopifyModelConverter
+    {
+        public virtual Attachment ToLiquidAttachment(VirtoCommerce.Storefront.Model.Attachment attachment)
+        {
+            var retVal = new Attachment();
+
+            retVal.CreatedBy = attachment.CreatedBy;
+            retVal.CreatedDate = attachment.CreatedDate;
+            retVal.MimeType = attachment.MimeType;
+            retVal.ModifiedBy = attachment.ModifiedBy;
+            retVal.ModifiedDate = attachment.ModifiedDate;
+            retVal.Name = attachment.Name;
+            retVal.Size = attachment.Size;
+            retVal.Url = attachment.Url;         
+
+            return retVal;
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,9,8,10,0],[9,13,9,57,0],[10,13,10,61,0],[11,9,11,10,0],[18,9,18,10,0],[19,13,19,43,0],[21,13,21,53,0],[22,13,22,57,0],[23,13,23,51,0],[24,13,24,55,0],[25,13,25,59,0],[26,13,26,43,0],[27,13,27,43,0],[28,13,28,41,0],[30,13,30,27,0],[31,9,31,10,0]]);
+    </script>
+  </body>
+</html>

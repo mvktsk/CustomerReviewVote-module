@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\catalog\category.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Collections.Generic;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model.Catalog
+{
+    public partial class Category : Entity, IHasProperties
+    {
+        public Category()
+        {
+            Images = new List&lt;Image&gt;();
+            Properties = new List&lt;CatalogProperty&gt;();
+        }
+
+        public string CatalogId { get; set; }
+
+        //All parents categories
+        public IMutablePagedList&lt;Category&gt; Parents { get; set; }
+        public string ParentId { get; set; }      
+
+        public string Code { get; set; }
+
+        public string TaxType { get; set; }
+
+        public string Name { get; set; }
+
+        /// &lt;summary&gt;
+        /// All parent categories ids concatenated with &quot;/&quot;. E.g. (1/21/344)
+        /// &lt;/summary&gt;
+        public string Outline { get; set; }
+        /// &lt;summary&gt;
+        /// Slug  path e.g /camcorders
+        /// &lt;/summary&gt;
+        public string SeoPath { get; set; }
+        /// &lt;summary&gt;
+        /// Application relative url e.g ~/camcorders
+        /// &lt;/summary&gt;
+        public string Url { get; set; }
+
+        public SeoInfo SeoInfo { get; set; }
+
+        /// &lt;summary&gt;
+        /// Category main image
+        /// &lt;/summary&gt;
+        public Image PrimaryImage { get; set; }
+
+        public IList&lt;Image&gt; Images { get; set; }
+
+        public IMutablePagedList&lt;Product&gt; Products { get; set; }
+
+        /// &lt;summary&gt;
+        /// Child categories
+        /// &lt;/summary&gt;
+        public IMutablePagedList&lt;Category&gt; Categories { get; set; }
+
+        #region IHasProperties Members
+        public IList&lt;CatalogProperty&gt; Properties { get; set; }
+        #endregion
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,9,8,26,0],[9,9,9,10,0],[10,13,10,40,0],[11,13,11,54,0],[12,9,12,10,0],[14,35,14,39,0],[14,40,14,44,0],[17,54,17,58,0],[17,59,17,63,0],[18,34,18,38,0],[18,39,18,43,0],[20,30,20,34,0],[20,35,20,39,0],[22,33,22,37,0],[22,38,22,42,0],[24,30,24,34,0],[24,35,24,39,0],[29,33,29,37,0],[29,38,29,42,0],[33,33,33,37,0],[33,38,33,42,0],[37,29,37,33,0],[37,34,37,38,0],[39,34,39,38,0],[39,39,39,43,0],[44,37,44,41,0],[44,42,44,46,0],[46,38,46,42,0],[46,43,46,47,0],[48,54,48,58,0],[48,59,48,63,0],[53,57,53,61,0],[53,62,53,66,0],[56,52,56,56,0],[56,57,56,61,0]]);
+    </script>
+  </body>
+</html>

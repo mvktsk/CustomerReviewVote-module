@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\linklist.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using DotLiquid;
+using System.Collections.Generic;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    /// &lt;summary&gt;
+    /// Represents link list in site navigation part
+    /// &lt;/summary&gt;
+    /// &lt;remarks&gt;
+    /// https://docs.shopify.com/themes/liquid-documentation/objects/linklist
+    /// &lt;/remarks&gt;
+    public partial class Linklist : Drop
+    {
+        /// &lt;summary&gt;
+        /// Returns the handle of the linklist
+        /// &lt;/summary&gt;
+        public string Handle { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the id of the linklist
+        /// &lt;/summary&gt;
+        public string Id { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns a collection of links in the linklist
+        /// &lt;/summary&gt;
+        public IList&lt;Link&gt; Links { get; set; }
+
+        /// &lt;summary&gt;
+        /// Returns the title of the linklist
+        /// &lt;/summary&gt;
+        public string Title { get; set; }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,32,17,36,0],[17,37,17,41,0],[22,28,22,32,0],[22,33,22,37,0],[27,36,27,40,0],[27,41,27,45,0],[32,31,32,35,0],[32,36,32,40,0]]);
+    </script>
+  </body>
+</html>

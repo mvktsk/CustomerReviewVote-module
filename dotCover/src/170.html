@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\security\userregistration.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
+
+namespace VirtoCommerce.Storefront.Model.Security
+{
+    public partial class UserRegistration 
+    {
+        [FromForm(Name = &quot;customer[photoUrl]&quot;)]
+        public string PhotoUrl { get; set; }
+
+        [FromForm(Name = &quot;customer[first_name]&quot;)]
+        public string FirstName { get; set; }
+
+        [FromForm(Name = &quot;customer[last_name]&quot;)]
+        public string LastName { get; set; }
+
+        [FromForm(Name = &quot;customer[email]&quot;)]
+        [EmailAddress]
+        public string Email { get; set; }
+
+        [FromForm(Name = &quot;customer[user_name]&quot;)]
+        [Required]
+        public string UserName { get; set; }
+
+        [FromForm(Name = &quot;customer[password]&quot;)]
+        [Required]
+        public string Password { get; set; }
+
+        [FromForm(Name = &quot;customer[store_id]&quot;)]
+        public string StoreId { get; set; }
+
+        [FromForm(Name = &quot;customer[name]&quot;)]
+        public string Name { get; set; }
+
+        [FromForm(Name = &quot;customer[address]&quot;)]
+        public Address Address { get; set; }
+        [FromForm(Name = &quot;customer[salutation]&quot;)]
+        public string Salutation { get; set; }
+        [FromForm(Name = &quot;customer[fullName]&quot;)]
+        public string FullName { get; set; }
+        [FromForm(Name = &quot;customer[middleName]&quot;)]
+        public string MiddleName { get; set; }
+        [FromForm(Name = &quot;customer[birthDate]&quot;)]
+        public DateTime? BirthDate { get; set; }
+        [FromForm(Name = &quot;customer[timeZone]&quot;)]
+        public string TimeZone { get; set; }     
+      
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,34,10,38,0],[10,39,10,43,0],[13,35,13,39,0],[13,40,13,44,0],[16,34,16,38,0],[16,39,16,43,0],[20,31,20,35,0],[20,36,20,40,0],[24,34,24,38,0],[24,39,24,43,0],[28,34,28,38,0],[28,39,28,43,0],[31,33,31,37,0],[31,38,31,42,0],[34,30,34,34,0],[34,35,34,39,0],[37,34,37,38,0],[37,39,37,43,0],[39,36,39,40,0],[39,41,39,45,0],[41,34,41,38,0],[41,39,41,43,0],[43,36,43,40,0],[43,41,43,45,0],[45,38,45,42,0],[45,43,45,47,0],[47,34,47,38,0],[47,39,47,43,0]]);
+    </script>
+  </body>
+</html>

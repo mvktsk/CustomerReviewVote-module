@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\objects\tag.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Globalization;
+using DotLiquid;
+
+namespace VirtoCommerce.LiquidThemeEngine.Objects
+{
+    public partial class Tag : Drop
+    {
+        public Tag(string groupName, string value)
+        {
+            GroupName = groupName;
+            Value = value;
+            Id = string.Concat(GroupName, &quot;_&quot;, Value).ToLowerInvariant();
+        }
+
+        public string GroupType { get; set; }
+        public string GroupName { get; set; }
+        public string GroupLabel { get; set; }
+        public string Label { get; set; }
+        public int Count { get; set; }
+        public string Value { get; set; }
+        public string Id { get; set; }
+        public string Lower { get; set; }
+        public string Upper { get; set; }
+
+        public override string ToString()
+        {
+            var filters = (Context[&quot;collection_sidebar_filters&quot;] ?? string.Empty).ToString();
+
+            if (filters == &quot;groups&quot;)
+            {
+                // eliminate count for now, since it problematic to make it work in some templates, especially when determine active tag
+                return Id;
+            }
+
+            if (filters == &quot;facets&quot;)
+            {
+                return string.Format(CultureInfo.InvariantCulture, &quot;{0}_{1} ({2})&quot;, GroupName, Label, Count);
+            }
+
+            return Id;
+        }
+
+        public override bool Equals(object obj)
+        {
+            var tag = obj as Tag;
+            return tag != null &amp;&amp; Id.Equals(tag.Id);
+        }
+
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode();
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,9,8,51,0],[9,9,9,10,0],[10,13,10,35,0],[11,13,11,27,0],[12,13,12,74,0],[13,9,13,10,0],[15,35,15,39,0],[15,40,15,44,0],[16,35,16,39,0],[16,40,16,44,0],[17,36,17,40,0],[17,41,17,45,0],[18,31,18,35,0],[18,36,18,40,0],[19,28,19,32,0],[19,33,19,37,0],[20,31,20,35,0],[20,36,20,40,0],[21,28,21,32,0],[21,33,21,37,0],[22,31,22,35,0],[22,36,22,40,0],[23,31,23,35,0],[23,36,23,40,0],[26,9,26,10,0],[27,13,27,94,0],[29,13,29,37,0],[30,13,30,14,0],[32,17,32,27,0],[35,13,35,37,0],[36,13,36,14,0],[37,17,37,110,0],[40,13,40,23,0],[41,9,41,10,0],[44,9,44,10,0],[45,13,45,34,0],[46,13,46,53,0],[47,9,47,10,0],[50,9,50,10,0],[51,13,51,37,0],[52,9,52,10,0]]);
+    </script>
+  </body>
+</html>

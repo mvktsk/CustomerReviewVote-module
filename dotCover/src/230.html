@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\anonymouscomparer.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+/*--------------------------------------------------------------------------
+* AnonymousComparer - lambda compare selector for Linq
+* ver 1.3.0.0 (Oct. 18th, 2010)
+*
+* created and maintained by neuecc &lt;ils@neue.cc&gt;
+* licensed under Microsoft Public License(Ms-PL)
+* http://neue.cc/
+* http://linqcomparer.codeplex.com/
+*--------------------------------------------------------------------------*/
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace VirtoCommerce.Storefront.Model.Common
+{
+    public static class AnonymousComparer
+    {
+        #region IComparer&lt;T&gt;
+
+        /// &lt;summary&gt;Example:AnonymousComparer.Create&amp;lt;int&amp;gt;((x, y) =&gt; y - x)&lt;/summary&gt;
+        public static IComparer&lt;T&gt; Create&lt;T&gt;(Func&lt;T, T, int&gt; compare)
+        {
+            if (compare == null)
+                throw new ArgumentNullException(&quot;compare&quot;);
+
+            return new Comparer&lt;T&gt;(compare);
+        }
+
+        private class Comparer&lt;T&gt; : IComparer&lt;T&gt;
+        {
+            private readonly Func&lt;T, T, int&gt; compare;
+
+            public Comparer(Func&lt;T, T, int&gt; compare)
+            {
+                this.compare = compare;
+            }
+
+            public int Compare(T x, T y)
+            {
+                return compare(x, y);
+            }
+        }
+
+        #endregion
+
+        #region IEqualityComparer&lt;T&gt;
+
+        /// &lt;summary&gt;Example:AnonymousComparer.Create((MyClass mc) =&gt; mc.MyProperty)&lt;/summary&gt;
+        public static IEqualityComparer&lt;T&gt; Create&lt;T, TKey&gt;(Func&lt;T, TKey&gt; compareKeySelector)
+        {
+            if (compareKeySelector == null)
+                throw new ArgumentNullException(&quot;compareKeySelector&quot;);
+
+            return new EqualityComparer&lt;T&gt;(
+                (x, y) =&gt;
+                {
+                    if (object.ReferenceEquals(x, y))
+                        return true;
+                    if (x == null || y == null)
+                        return false;
+                    return compareKeySelector(x).Equals(compareKeySelector(y));
+                },
+                obj =&gt;
+                {
+                    if (obj == null)
+                        return 0;
+                    var retVal = compareKeySelector(obj);
+                    if (retVal == null)
+                    {
+                        return 0;
+                    }
+                    return retVal.GetHashCode();
+                });
+        }
+
+        public static IEqualityComparer&lt;T&gt; Create&lt;T&gt;(Func&lt;T, T, bool&gt; equals, Func&lt;T, int&gt; getHashCode)
+        {
+            if (equals == null)
+                throw new ArgumentNullException(&quot;equals&quot;);
+            if (getHashCode == null)
+                throw new ArgumentNullException(&quot;getHashCode&quot;);
+
+            return new EqualityComparer&lt;T&gt;(equals, getHashCode);
+        }
+
+        private class EqualityComparer&lt;T&gt; : IEqualityComparer&lt;T&gt;
+        {
+            private readonly Func&lt;T, T, bool&gt; equals;
+            private readonly Func&lt;T, int&gt; getHashCode;
+
+            public EqualityComparer(Func&lt;T, T, bool&gt; equals, Func&lt;T, int&gt; getHashCode)
+            {
+                this.equals = equals;
+                this.getHashCode = getHashCode;
+            }
+
+            public bool Equals(T x, T y)
+            {
+                return equals(x, y);
+            }
+
+            public int GetHashCode(T obj)
+            {
+                return getHashCode(obj);
+            }
+        }
+
+        #endregion
+
+
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[23,9,23,10,0],[24,13,24,33,0],[25,17,25,60,0],[27,13,27,45,0],[28,9,28,10,0],[34,13,34,53,0],[35,13,35,14,0],[36,17,36,40,0],[37,13,37,14,0],[40,13,40,14,0],[41,17,41,38,0],[42,13,42,14,0],[51,9,51,10,0],[52,13,52,44,0],[53,17,53,71,0],[55,13,74,20,0],[57,17,57,18,0],[58,21,58,54,0],[59,25,59,37,0],[60,21,60,48,0],[61,25,61,38,0],[62,21,62,80,0],[63,17,63,18,0],[65,17,65,18,0],[66,21,66,37,0],[67,25,67,34,0],[68,21,68,58,0],[69,21,69,40,0],[70,21,70,22,0],[71,25,71,34,0],[73,21,73,49,0],[74,17,74,18,0],[75,9,75,10,0],[78,9,78,10,0],[79,13,79,32,0],[80,17,80,59,0],[81,13,81,37,0],[82,17,82,64,0],[84,13,84,65,0],[85,9,85,10,0],[92,13,92,87,0],[93,13,93,14,0],[94,17,94,38,0],[95,17,95,48,0],[96,13,96,14,0],[99,13,99,14,0],[100,17,100,37,0],[101,13,101,14,0],[104,13,104,14,0],[105,17,105,41,0],[106,13,106,14,0]]);
+    </script>
+  </body>
+</html>

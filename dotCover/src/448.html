@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\security\securityconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Linq;
+using Microsoft.AspNetCore.Identity;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Security;
+using dto = VirtoCommerce.Storefront.AutoRestClients.PlatformModuleApi.Models;
+
+namespace VirtoCommerce.Storefront.Domain.Security
+{
+
+    public static class SecurityConverter
+    {
+        public static IdentityResult ToIdentityResult(this dto.SecurityResult resultDto)
+        {
+            if (resultDto.Succeeded == true)
+            {
+                return IdentityResult.Success;
+            }
+            return IdentityResult.Failed(resultDto.Errors.Select(x =&gt; new IdentityError { Description = x }).ToArray());
+        }
+
+        public static dto.Role ToRoleDto(this Role role)
+        {
+            return new dto.Role
+            {
+                Id = role.Id,
+                Name = role.Name,
+                Permissions = role?.Permissions.Select(x =&gt; new dto.Permission { Id = x, Name = x }).ToList()
+            };
+        }
+        public static Role ToRole(this dto.Role roleDto)
+        {
+            return new Role
+            {
+                Id = roleDto.Id,
+                Name = roleDto.Name,
+                Permissions = roleDto?.Permissions.Select(x =&gt; x.Id).ToList()
+            };
+        }
+
+        public static User ToUser(this OrganizationUserRegistration registerForm)
+        {
+            var result = ((UserRegistration)registerForm).ToUser();
+            if (!string.IsNullOrEmpty(registerForm.Role))
+            {
+                result.Roles = new[] { new Role { Id = registerForm.Role } };
+            }
+            return result;
+        }
+
+        public static User ToUser(this UserRegistration registerForm)
+        {
+            var result = new User
+            {
+                Email = registerForm.Email,
+                UserName = registerForm.UserName,
+                Password = registerForm.Password
+            };
+            return result;
+        }
+
+        public static dto.ApplicationUserExtended ToUserDto(this User user)
+        {
+            var result = new dto.ApplicationUserExtended
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Password = user.Password,
+                UserName = user.UserName,
+                StoreId = user.StoreId,
+                MemberId = user.Contact?.Id ?? user.ContactId,
+                AccessFailedCount = user.AccessFailedCount,
+                EmailConfirmed = user.EmailConfirmed,
+                LockoutEnabled = user.LockoutEnabled,
+                LockoutEndDateUtc = user.LockoutEndDateUtc,
+                TwoFactorEnabled = user.TwoFactorEnabled,
+                SecurityStamp = user.SecurityStamp,
+                PasswordHash = user.PasswordHash,
+                UserState = user.UserState.ToString(),
+                UserType = user.UserType,
+                IsAdministrator = user.IsAdministrator
+            };
+
+            if (!user.Roles.IsNullOrEmpty())
+            {
+                //Need to convert role names to the registered in the platform roles entities 
+                result.Roles = user.Roles.Select(ToRoleDto).ToList();
+            }
+            if (!user.ExternalLogins.IsNullOrEmpty())
+            {
+                result.Logins = user.ExternalLogins.Select(x =&gt; new dto.ApplicationUserLogin
+                {
+                    LoginProvider = x.LoginProvider,
+                    ProviderKey = x.ProviderKey
+                }).ToList();
+            }
+            return result;
+        }
+
+        public static User ToUser(this dto.ApplicationUserExtended userDto)
+        {
+            var result = new User()
+            {
+                Email = userDto.Email,
+                Id = userDto.Id,
+                ContactId = userDto.MemberId,
+                PhoneNumber = userDto.PhoneNumber,
+                UserName = userDto.UserName,
+                StoreId = userDto.StoreId,
+                IsRegisteredUser = true,
+                IsAdministrator = userDto.IsAdministrator ?? false,
+                Permissions = userDto.Permissions,
+                AccessFailedCount = userDto.AccessFailedCount ?? 0,
+                LockoutEnabled = userDto.LockoutEnabled ?? false,
+                EmailConfirmed = userDto.EmailConfirmed ?? false,
+                LockoutEndDateUtc = userDto.LockoutEndDateUtc,
+                PasswordHash = userDto.PasswordHash,
+                SecurityStamp = userDto.SecurityStamp,
+                UserState = EnumUtility.SafeParse(userDto.UserState, AccountState.Approved),
+                UserType = userDto.UserType
+            };
+
+            if (!userDto.Roles.IsNullOrEmpty())
+            {
+                result.Roles = userDto.Roles.Select(x =&gt; new Role
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                });
+            }
+
+            if (!userDto.Logins.IsNullOrEmpty())
+            {
+                result.ExternalLogins = userDto.Logins.Select(x =&gt; new ExternalUserLoginInfo
+                {
+                    LoginProvider = x.LoginProvider,
+                    ProviderKey = x.ProviderKey
+                }).ToList();
+            }
+
+            return result;
+        }
+    }
+
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,10,0],[14,13,14,45,0],[15,13,15,14,0],[16,17,16,47,0],[18,13,18,121,0],[18,71,18,108,0],[19,9,19,10,0],[22,9,22,10,0],[23,13,28,15,0],[27,61,27,100,0],[29,9,29,10,0],[31,9,31,10,0],[32,13,37,15,0],[36,64,36,68,0],[38,9,38,10,0],[41,9,41,10,0],[42,13,42,68,0],[43,13,43,58,0],[44,13,44,14,0],[45,17,45,78,0],[46,13,46,14,0],[47,13,47,27,0],[48,9,48,10,0],[51,9,51,10,0],[52,13,57,15,0],[58,13,58,27,0],[59,9,59,10,0],[62,9,62,10,0],[63,13,81,15,0],[83,13,83,45,0],[84,13,84,14,0],[86,17,86,70,0],[87,13,87,14,0],[88,13,88,54,0],[89,13,89,14,0],[90,17,94,29,0],[90,65,94,18,0],[95,13,95,14,0],[96,13,96,27,0],[97,9,97,10,0],[100,9,100,10,0],[101,13,120,15,0],[122,13,122,48,0],[123,13,123,14,0],[124,17,128,20,0],[124,58,128,18,0],[129,13,129,14,0],[131,13,131,49,0],[132,13,132,14,0],[133,17,137,29,0],[133,68,137,18,0],[138,13,138,14,0],[140,13,140,27,0],[141,9,141,10,0]]);
+    </script>
+  </body>
+</html>

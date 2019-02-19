@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\enumerableextension.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace VirtoCommerce.Storefront.Model.Common
+{
+    public static class EnumerableExtensions
+    {
+        /// &lt;summary&gt;Indicates whether the specified enumerable is null or has a length of zero.&lt;/summary&gt;
+        /// &lt;param name=&quot;data&quot;&gt;The data to test.&lt;/param&gt;
+        /// &lt;returns&gt;true if the array parameter is null or has a length of zero; otherwise, false.&lt;/returns&gt;
+        public static bool IsNullOrEmpty&lt;T&gt;(this IEnumerable&lt;T&gt; data)
+        {
+            return data == null || !data.Any();
+        }
+
+        public static int GetOrderIndependentHashCode&lt;T&gt;(this IEnumerable&lt;T&gt; source)
+        {
+            int hash = 0;
+            //Need to force order to get  order independent hash code
+            foreach (T element in source.OrderBy(x =&gt; x, Comparer&lt;T&gt;.Default))
+            {
+                hash = hash ^ EqualityComparer&lt;T&gt;.Default.GetHashCode(element);
+            }
+            return hash;
+        }
+
+        public static IEnumerable&lt;TSource&gt; DistinctBy&lt;TSource, TKey&gt;(this IEnumerable&lt;TSource&gt; source, Func&lt;TSource, TKey&gt; keySelector)
+        {
+            var seenKeys = new HashSet&lt;TKey&gt;();
+            foreach (var element in source)
+            {
+                if (seenKeys.Add(keySelector(element)))
+                {
+                    yield return element;
+                }
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,10,0],[16,13,16,48,0],[17,9,17,10,0],[20,9,20,10,0],[21,13,21,26,0],[23,13,23,20,0],[23,22,23,31,0],[23,32,23,34,0],[23,35,23,78,0],[23,55,23,56,0],[24,13,24,14,0],[25,17,25,80,0],[26,13,26,14,0],[27,13,27,25,0],[28,9,28,10,0],[31,9,31,10,0],[32,13,32,48,0],[33,13,33,20,0],[33,22,33,33,0],[33,34,33,36,0],[33,37,33,43,0],[34,13,34,14,0],[35,17,35,56,0],[36,17,36,18,0],[37,21,37,42,0],[38,17,38,18,0],[39,13,39,14,0],[40,9,40,10,0]]);
+    </script>
+  </body>
+</html>

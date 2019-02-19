@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\customerreviewvote-module\newmanagedmodule.data\repositories\customerreviewrepository.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using CustomerReviewVotes.Data.Model;
+using System.Data.Entity;
+using System.Linq;
+using VirtoCommerce.Platform.Data.Infrastructure;
+using VirtoCommerce.Platform.Data.Infrastructure.Interceptors;
+
+namespace CustomerReviewVotes.Data.Repositories
+{
+    public class CustomerReviewRepository : EFRepositoryBase, ICustomerReviewRepository
+    {
+        public CustomerReviewRepository()
+        {
+        }
+
+        public CustomerReviewRepository(string nameOrConnectionString, params IInterceptor[] interceptors)
+            : base(nameOrConnectionString, null, interceptors)
+        {
+            Configuration.LazyLoadingEnabled = false;
+        }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity&lt;CustomerReviewEntity&gt;().ToTable(&quot;CustomerReview&quot;).HasKey(x =&gt; x.Id).Property(x =&gt; x.Id);
+
+
+            modelBuilder.Entity&lt;CustomerReviewEntity&gt;().Property(x =&gt; x.HelpfullVotesCount).HasColumnAnnotation(&quot;DefaultValue&quot;, 0);
+            modelBuilder.Entity&lt;CustomerReviewEntity&gt;().Property(x =&gt; x.UselessVotesCount).HasColumnAnnotation(&quot;DefaultValue&quot;, 0);
+            modelBuilder.Entity&lt;CustomerReviewEntity&gt;().Property(x =&gt; x.TotalVotesCount).HasColumnAnnotation(&quot;DefaultValue&quot;, 0);
+
+            modelBuilder.Entity&lt;CustomerReviewVoteEntity&gt;().ToTable(&quot;CustomerReviewVote&quot;).HasKey(x =&gt; x.Id).Property(x =&gt; x.Id);
+
+            modelBuilder.Entity&lt;CustomerReviewVoteEntity&gt;()
+                .HasRequired&lt;CustomerReviewEntity&gt;(x =&gt; x.CustomerReview)
+                .WithMany(y =&gt; y.CustomerReviewVotes)
+                .HasForeignKey&lt;string&gt;(z =&gt; z.CustomerReviewId);
+
+            modelBuilder.Entity&lt;CustomerReviewVoteEntity&gt;()
+                .HasIndex(x =&gt; new { x.AuthorId, x.CustomerReviewId })
+                .IsUnique()
+                .HasName(&quot;IX_AuthorIdCustomerReviewId&quot;);
+
+            base.OnModelCreating(modelBuilder);
+        }
+
+        #region CustomerReview Members
+        public IQueryable&lt;CustomerReviewEntity&gt; CustomerReviews =&gt; GetAsQueryable&lt;CustomerReviewEntity&gt;();
+
+        public CustomerReviewEntity[] GetReviewByIds(string[] ids)
+        {
+            return CustomerReviews.Include(x =&gt; x.CustomerReviewVotes).Where(x =&gt; ids.Contains(x.Id)).ToArray();
+        }
+
+
+        public void DeleteCustomerReviews(string[] ids)
+        {
+            var items = GetReviewByIds(ids);
+            foreach (var item in items)
+            {
+                Remove(item);
+            }
+        }
+        #endregion
+
+        #region CustomerReviewVote Members
+        public IQueryable&lt;CustomerReviewVoteEntity&gt; CustomerReviewVotes =&gt; GetAsQueryable&lt;CustomerReviewVoteEntity&gt;();
+
+        public CustomerReviewVoteEntity[] GetVoteByIds(string[] ids)
+        {
+            return CustomerReviewVotes.Include(x =&gt; x.CustomerReview).Where(x =&gt; ids.Contains(x.Id)).ToArray();
+        }
+
+        public void DeleteCustomerReviewVotes(string[] ids)
+        {
+            var items = GetVoteByIds(ids);
+            foreach (var item in items)
+            {
+                Remove(item);
+            }
+        }
+        #endregion
+
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,9,11,42,1],[12,9,12,10,1],[13,9,13,10,1],[16,15,16,63,1],[17,9,17,10,1],[18,13,18,54,1],[19,9,19,10,1],[22,9,22,10,1],[23,13,23,121,1],[26,13,26,132,1],[27,13,27,131,1],[28,13,28,129,1],[30,13,30,129,1],[32,13,35,65,1],[37,13,40,57,1],[42,13,42,48,1],[43,9,43,10,1],[46,68,46,106,1],[49,9,49,10,1],[50,13,50,113,1],[51,9,51,10,1],[55,9,55,10,1],[56,13,56,45,1],[57,13,57,20,1],[57,22,57,30,1],[57,31,57,33,1],[57,34,57,39,1],[58,13,58,14,1],[59,17,59,30,1],[60,13,60,14,1],[61,9,61,10,1],[65,76,65,118,1],[68,9,68,10,1],[69,13,69,112,1],[70,9,70,10,1],[73,9,73,10,1],[74,13,74,43,1],[75,13,75,20,1],[75,22,75,30,1],[75,31,75,33,1],[75,34,75,39,1],[76,13,76,14,1],[77,17,77,30,1],[78,13,78,14,1],[79,9,79,10,1]]);
+    </script>
+  </body>
+</html>

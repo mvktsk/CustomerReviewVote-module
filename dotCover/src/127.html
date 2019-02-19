@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\dynamicproperty.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VirtoCommerce.Storefront.Model.Common;
+
+namespace VirtoCommerce.Storefront.Model
+{
+    public partial class DynamicProperty : Entity
+    {
+        public string Name { get; set; }
+
+        public LocalizedString DisplayName { get; set; }
+        public IList&lt;LocalizedString&gt; DisplayNames { get; set; } = new List&lt;LocalizedString&gt;();
+        /// &lt;summary&gt;
+        /// Defines whether a property supports multiple values.
+        /// &lt;/summary&gt;
+        public bool IsArray { get; set; }
+        /// &lt;summary&gt;
+        /// Dictionary has a predefined set of values. User can select one or more of them and cannot enter arbitrary values.
+        /// &lt;/summary&gt;
+        public bool IsDictionary { get; set; }
+
+        public bool IsRequired { get; set; }
+
+        public string ValueType { get; set; }
+
+        //Selected scalar values
+        public IList&lt;LocalizedString&gt; Values { get; set; } = new List&lt;LocalizedString&gt;();
+        //Selected dictionary values
+        public IList&lt;DynamicPropertyDictionaryItem&gt; DictionaryValues { get; set; } = new List&lt;DynamicPropertyDictionaryItem&gt;();
+        //All possible dictionary values
+        public IList&lt;DynamicPropertyDictionaryItem&gt; DictionaryItems { get; set; } = new List&lt;DynamicPropertyDictionaryItem&gt;();
+    }
+
+  
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,30,11,34,0],[11,35,11,39,0],[13,46,13,50,0],[13,51,13,55,0],[14,54,14,58,0],[14,59,14,63,0],[14,68,14,95,0],[18,31,18,35,0],[18,36,18,40,0],[22,36,22,40,0],[22,41,22,45,0],[24,34,24,38,0],[24,39,24,43,0],[26,35,26,39,0],[26,40,26,44,0],[29,48,29,52,0],[29,53,29,57,0],[29,62,29,89,0],[31,72,31,76,0],[31,77,31,81,0],[31,86,31,127,0],[33,71,33,75,0],[33,76,33,80,0],[33,85,33,126,0]]);
+    </script>
+  </body>
+</html>

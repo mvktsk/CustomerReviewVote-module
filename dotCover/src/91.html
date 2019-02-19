@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.liquidthemeengine\converters\cartconverter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Linq;
+using VirtoCommerce.LiquidThemeEngine.Objects;
+using VirtoCommerce.Storefront.Model.Common;
+using StorefrontModel = VirtoCommerce.Storefront.Model;
+
+namespace VirtoCommerce.LiquidThemeEngine.Converters
+{
+    public static class CartConverter
+    {
+        public static Cart ToShopifyModel(this StorefrontModel.Cart.ShoppingCart cart, StorefrontModel.Language language, IStorefrontUrlBuilder urlBuilder)
+        {
+            var converter = new ShopifyModelConverter();
+            return converter.ToLiquidCart(cart, language, urlBuilder);
+        }
+    }
+
+    public partial class ShopifyModelConverter
+    {
+        public virtual Cart ToLiquidCart(StorefrontModel.Cart.ShoppingCart cart, StorefrontModel.Language language, IStorefrontUrlBuilder urlBuilder)
+        {
+            var result = new Cart();
+
+            result.Items = cart.Items.Select(x =&gt; ToLiquidLineItem(x, language, urlBuilder)).ToList();
+            result.ItemCount = cart.Items.Count();
+            result.Note = cart.Comment;
+            result.TotalPrice = cart.SubTotal.Amount * 100;
+            result.TotalWeight = cart.Weight;
+
+            return result;
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,9,11,10,0],[12,13,12,57,0],[13,13,13,71,0],[14,9,14,10,0],[20,9,20,10,0],[21,13,21,37,0],[23,13,23,103,0],[23,51,23,92,0],[24,13,24,51,0],[25,13,25,40,0],[26,13,26,60,0],[27,13,27,46,0],[29,13,29,27,0],[30,9,30,10,0]]);
+    </script>
+  </body>
+</html>

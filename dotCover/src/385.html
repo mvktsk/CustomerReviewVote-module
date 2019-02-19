@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront\domain\customer\cutomercacheregion.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Concurrent;
+using System.Threading;
+using Microsoft.Extensions.Primitives;
+using VirtoCommerce.Storefront.Model.Common.Caching;
+
+namespace VirtoCommerce.Storefront.Domain
+{
+    public class CustomerCacheRegion : CancellableCacheRegion&lt;CustomerCacheRegion&gt;
+    {
+        private static readonly ConcurrentDictionary&lt;string, CancellationTokenSource&gt; _memberRegionTokenLookup =
+          new ConcurrentDictionary&lt;string, CancellationTokenSource&gt;();
+
+        public static IChangeToken CreateChangeToken(string memberId)
+        {
+            if (memberId == null)
+            {
+                throw new ArgumentNullException(nameof(memberId));
+            }
+            var cancellationTokenSource = _memberRegionTokenLookup.GetOrAdd(memberId, new CancellationTokenSource());
+            return new CompositeChangeToken(new[] { CreateChangeToken(), new CancellationChangeToken(cancellationTokenSource.Token) });
+        }
+
+        public static void ExpireMember(string memberId)
+        {
+            if (!string.IsNullOrEmpty(memberId) &amp;&amp; _memberRegionTokenLookup.TryRemove(memberId, out var token))
+            {
+                token.Cancel();
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,9,12,71,0],[15,9,15,10,0],[16,13,16,34,0],[17,13,17,14,0],[18,17,18,67,0],[20,13,20,118,0],[21,13,21,136,0],[22,9,22,10,0],[25,9,25,10,0],[26,13,26,112,0],[27,13,27,14,0],[28,17,28,32,0],[29,13,29,14,0],[30,9,30,10,0]]);
+    </script>
+  </body>
+</html>

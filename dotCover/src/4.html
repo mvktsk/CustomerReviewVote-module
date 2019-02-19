@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.tests\marketingtests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using VirtoCommerce.Storefront.Model;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Marketing;
+using Xunit;
+
+namespace VirtoCommerce.Storefront.Tests
+{
+    [Trait(&quot;Category&quot;, &quot;Unit&quot;)]
+    public class MarketingTests
+    {
+        [Theory]
+        [InlineData(10, 8, 8, AmountType.Relative)]
+        [InlineData(10, 8, 10, AmountType.Absolute)]
+        public void Can_limit_only_relative_rewards(int amount, int maxLimit, decimal expected, AmountType type)
+        {
+            var currency = new Currency(new Language(&quot;en-US&quot;), &quot;USD (840)&quot;);
+            var money = new Money(100m, currency);
+            //Arrange
+            var reward = new PromotionReward()
+            {
+                Amount = amount,
+                AmountType = type,
+                MaxLimit = maxLimit,
+                Promotion = new Promotion()
+                {
+                    Id = &quot;id&quot;,
+                    Description = &quot;&quot;
+                }
+            };
+
+            //Act
+            var discount = new Discount();
+            discount = reward.ToDiscountModel(money);
+
+            //Assert
+            var expectedAmount = new Money(expected, currency);
+            Assert.Equal(discount.Amount, expectedAmount);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,10,1],[16,13,16,77,1],[17,13,17,51,1],[19,13,29,15,1],[32,13,32,43,1],[33,13,33,54,1],[36,13,36,64,1],[37,13,37,59,1],[38,9,38,10,1]]);
+    </script>
+  </body>
+</html>

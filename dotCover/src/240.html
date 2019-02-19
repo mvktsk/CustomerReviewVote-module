@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\common\enumutility.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace VirtoCommerce.Storefront.Model.Common
+{
+    public static class EnumUtility
+    {
+        public static T SafeParse&lt;T&gt;(string value, T defaultValue)
+            where T : struct
+        {
+            T result;
+
+            if (!Enum.TryParse(value, out result))
+                result = defaultValue;
+
+            return result;
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,9,13,10,0],[16,13,16,51,0],[17,17,17,39,0],[19,13,19,27,0],[20,9,20,10,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>d:\data\sources\heineken-asia-pacific\hru-storefront-core\virtocommerce.storefront.model\workcontext.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using VirtoCommerce.Storefront.Model.Cart;
+using VirtoCommerce.Storefront.Model.Catalog;
+using VirtoCommerce.Storefront.Model.Common;
+using VirtoCommerce.Storefront.Model.Inventory;
+using VirtoCommerce.Storefront.Model.Order;
+using VirtoCommerce.Storefront.Model.Pricing;
+using VirtoCommerce.Storefront.Model.Quote;
+using VirtoCommerce.Storefront.Model.Security;
+using VirtoCommerce.Storefront.Model.StaticContent;
+using VirtoCommerce.Storefront.Model.Stores;
+
+namespace VirtoCommerce.Storefront.Model
+{
+    /// &lt;summary&gt;
+    /// Main working context contains all data which could be used in presentation logic
+    /// &lt;/summary&gt;
+    public partial class WorkContext : IDisposable
+    {
+        public WorkContext()
+        {
+            ExternalLoginProviders = new List&lt;LoginProvider&gt;();
+            ApplicationSettings = new Dictionary&lt;string, object&gt;();
+        }
+        /// &lt;summary&gt;
+        /// Layout which will be used for rendering current view
+        /// &lt;/summary&gt;
+        public string Layout { get; set; }
+        /// &lt;summary&gt;
+        /// Current request url example: http:/host/app/store/en-us/search?page=2
+        /// &lt;/summary&gt;
+        public Uri RequestUrl { get; set; }
+
+        public NameValueCollection QueryString { get; set; }
+
+
+        /// &lt;summary&gt;
+        /// Current user
+        /// &lt;/summary&gt;
+        public User CurrentUser { get; set; }
+
+        /// &lt;summary&gt;
+        /// Current language and culture
+        /// &lt;/summary&gt;
+        public Language CurrentLanguage { get; set; }
+
+        /// &lt;summary&gt;
+        /// Current currency
+        /// &lt;/summary&gt;
+        public Currency CurrentCurrency { get; set; }
+
+        public SeoInfo CurrentPageSeo { get; set; }
+
+        /// &lt;summary&gt;
+        /// Represent current account orders search criteria taken from request url
+        /// &lt;/summary&gt;
+        public OrderSearchCriteria CurrentOrderSearchCriteria { get; set; }
+
+        /// &lt;summary&gt;
+        /// Current store
+        /// &lt;/summary&gt;
+        public Store CurrentStore { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the current shopping cart
+        /// &lt;/summary&gt;
+        public Lazy&lt;ShoppingCart&gt; CurrentCart { get; set; }
+
+        /// &lt;summary&gt;
+        /// Represent current quotes search criteria taken from request url
+        /// &lt;/summary&gt;
+        public QuoteSearchCriteria CurrentQuoteSearchCriteria { get; set; }
+
+        public Lazy&lt;QuoteRequest&gt; CurrentQuoteRequest { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the HTML code for payment method prepared form
+        /// &lt;/summary&gt;
+        public string PaymentFormHtml { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the collection of site navigation menu link lists
+        /// &lt;/summary&gt;
+        public IMutablePagedList&lt;MenuLinkList&gt; CurrentLinkLists { get; set; }
+
+        /// &lt;summary&gt;
+        /// List of all supported stores
+        /// &lt;/summary&gt;
+        public IList&lt;Store&gt; AllStores { get; set; }
+
+        /// &lt;summary&gt;
+        /// List of all active system currencies
+        /// &lt;/summary&gt;
+        public IList&lt;Currency&gt; AllCurrencies { get; set; }
+
+        /// &lt;summary&gt;
+        /// List of all available roles
+        /// &lt;/summary&gt;
+        public IEnumerable&lt;Role&gt; AvailableRoles { get; set; }
+
+        public string ErrorMessage { get; set; }
+        /// &lt;summary&gt;
+        /// List of active pricelists
+        /// &lt;/summary&gt;
+        public IMutablePagedList&lt;Pricelist&gt; CurrentPricelists { get; set; }
+
+        #region Catalog Properties
+
+        /// &lt;summary&gt;
+        /// Represent current product
+        /// &lt;/summary&gt;
+        public Product CurrentProduct { get; set; }
+        /// &lt;summary&gt;
+        /// Represent current category
+        /// &lt;/summary&gt;
+        public Category CurrentCategory { get; set; }
+        /// &lt;summary&gt;
+        /// Represent all store catalog categories filtered by current search criteria CurrentCatalogSearchCriteria (loaded on first access by lazy loading)
+        /// &lt;/summary&gt;
+        public IMutablePagedList&lt;Category&gt; Categories { get; set; }
+        /// &lt;summary&gt;
+        /// Represent products filtered by current search criteria CurrentCatalogSearchCriteria (loaded on first access by lazy loading)
+        /// &lt;/summary&gt;
+        public IMutablePagedList&lt;Product&gt; Products { get; set; }
+
+        /// &lt;summary&gt;
+        /// Represent bucket, aggregated data based on a search query resulted by current search criteria CurrentCatalogSearchCriteria (example  color 33, gr
+        /// &lt;/summary&gt;
+        public IMutablePagedList&lt;Aggregation&gt; Aggregations { get; set; }
+
+        /// &lt;summary&gt;
+        /// Current search product search criterias
+        /// &lt;/summary&gt;
+        public ProductSearchCriteria CurrentProductSearchCriteria { get; set; }
+
+        /// &lt;summary&gt;
+        /// Current product response group
+        /// &lt;/summary&gt;
+        public ItemResponseGroup CurrentProductResponseGroup { get; set; }
+
+        public IMutablePagedList&lt;Vendor&gt; Vendors { get; set; }
+
+        public Vendor CurrentVendor { get; set; }
+
+        #endregion
+
+        #region Static Content Properties
+        public ContentPage CurrentPage { get; set; }
+
+        public StaticContentSearchCriteria CurrentStaticSearchCriteria { get; set; }
+
+        public IMutablePagedList&lt;ContentItem&gt; StaticContentSearchResult { get; set; }
+
+        public BlogSearchCriteria CurrentBlogSearchCritera { get; set; }
+
+        public Blog CurrentBlog { get; set; }
+
+        public BlogArticle CurrentBlogArticle { get; set; }
+        #endregion
+
+        private DateTime? _utcNow;
+        /// &lt;summary&gt;
+        /// Represent current storefront datetime in UTC (may be changes to test in future or past events)
+        /// &lt;/summary&gt;
+        public DateTime StorefrontUtcNow
+        {
+            get
+            {
+                return _utcNow ?? DateTime.UtcNow;
+            }
+            set
+            {
+                _utcNow = value;
+            }
+        }
+
+        public IList&lt;Country&gt; AllCountries { get; set; }
+
+        public CustomerOrder CurrentOrder { get; set; }
+
+
+        public StorefrontNotification StorefrontNotification { get; set; }
+
+        /// &lt;summary&gt;
+        /// All static content items (Pages, blog articles etc) for current store and theme
+        /// &lt;/summary&gt;
+        public IMutablePagedList&lt;ContentItem&gt; Pages { get; set; }
+
+        /// &lt;summary&gt;
+        ///  All blogs with articles for current store and theme
+        /// &lt;/summary&gt;
+        public IMutablePagedList&lt;Blog&gt; Blogs { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the collection of external login providers
+        /// &lt;/summary&gt;
+        public IList&lt;LoginProvider&gt; ExternalLoginProviders { get; set; }
+
+        /// &lt;summary&gt;
+        /// Current fulfillment center
+        /// &lt;/summary&gt;
+        public FulfillmentCenter CurrentFulfillmentCenter { get; set; }
+
+        /// &lt;summary&gt;
+        ///  All available fulfillment centers 
+        /// &lt;/summary&gt;
+        public IMutablePagedList&lt;FulfillmentCenter&gt; FulfillmentCenters { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets the dictionary of application settings
+        /// &lt;/summary&gt;
+        public IDictionary&lt;string, object&gt; ApplicationSettings { get; set; }
+
+        public IMutablePagedList&lt;string&gt; Brands { get; set; }
+
+        public IMutablePagedList&lt;Aggregation&gt; Types { get; set; }
+
+        //Represent the form data sent and processed on the server side and used for render result view and display errors
+        public object Form { get; set; }
+        /// &lt;summary&gt;
+        /// Current page number
+        /// &lt;/summary&gt;
+        public int? PageNumber { get; set; }
+        /// &lt;summary&gt;
+        /// Current page size
+        /// &lt;/summary&gt;
+        public int? PageSize { get; set; }
+
+        #region IDisposable Implementation
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+            }
+        }
+
+        #endregion
+
+        public bool IsForbidden { get; set; }
+        public string RedirectUrl { get; set; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[22,9,22,29,0],[23,9,23,10,0],[24,13,24,64,0],[25,13,25,68,0],[26,9,26,10,0],[30,32,30,36,0],[30,37,30,41,0],[34,33,34,37,0],[34,38,34,42,0],[36,50,36,54,0],[36,55,36,59,0],[42,35,42,39,0],[42,40,42,44,0],[47,43,47,47,0],[47,48,47,52,0],[52,43,52,47,0],[52,48,52,52,0],[54,41,54,45,0],[54,46,54,50,0],[59,65,59,69,0],[59,70,59,74,0],[64,37,64,41,0],[64,42,64,46,0],[69,49,69,53,0],[69,54,69,58,0],[74,65,74,69,0],[74,70,74,74,0],[76,57,76,61,0],[76,62,76,66,0],[81,41,81,45,0],[81,46,81,50,0],[86,67,86,71,0],[86,72,86,76,0],[91,41,91,45,0],[91,46,91,50,0],[96,48,96,52,0],[96,53,96,57,0],[101,51,101,55,0],[101,56,101,60,0],[103,38,103,42,0],[103,43,103,47,0],[107,65,107,69,0],[107,70,107,74,0],[114,41,114,45,0],[114,46,114,50,0],[118,43,118,47,0],[118,48,118,52,0],[122,57,122,61,0],[122,62,122,66,0],[126,54,126,58,0],[126,59,126,63,0],[131,62,131,66,0],[131,67,131,71,0],[136,69,136,73,0],[136,74,136,78,0],[141,64,141,68,0],[141,69,141,73,0],[143,52,143,56,0],[143,57,143,61,0],[145,39,145,43,0],[145,44,145,48,0],[150,42,150,46,0],[150,47,150,51,0],[152,74,152,78,0],[152,79,152,83,0],[154,75,154,79,0],[154,80,154,84,0],[156,62,156,66,0],[156,67,156,71,0],[158,35,158,39,0],[158,40,158,44,0],[160,49,160,53,0],[160,54,160,58,0],[170,13,170,14,0],[171,17,171,51,0],[172,13,172,14,0],[174,13,174,14,0],[175,17,175,33,0],[176,13,176,14,0],[179,46,179,50,0],[179,51,179,55,0],[181,45,181,49,0],[181,50,181,54,0],[184,64,184,68,0],[184,69,184,73,0],[189,55,189,59,0],[189,60,189,64,0],[194,48,194,52,0],[194,53,194,57,0],[199,62,199,66,0],[199,67,199,71,0],[204,61,204,65,0],[204,66,204,70,0],[209,74,209,78,0],[209,79,209,83,0],[214,66,214,70,0],[214,71,214,75,0],[216,51,216,55,0],[216,56,216,60,0],[218,55,218,59,0],[218,60,218,64,0],[221,30,221,34,0],[221,35,221,39,0],[225,34,225,38,0],[225,39,225,43,0],[229,32,229,36,0],[229,37,229,41,0],[234,9,234,10,0],[235,13,235,27,0],[236,9,236,10,0],[239,9,239,10,0],[240,13,240,27,0],[241,13,241,14,0],[242,13,242,14,0],[243,9,243,10,0],[247,35,247,39,0],[247,40,247,44,0],[248,37,248,41,0],[248,42,248,46,0]]);
+    </script>
+  </body>
+</html>
