@@ -1,3 +1,3 @@
-Analysis succeeded for SonarQube project "", version  [Analysis results](https://sonarcloud.io/dashboard/index/customerreviewmodule)
+Analysis succeeded for SonarQube project "", version  [Analysis results](http://localhost:9000/dashboard/index/CustomerReveiwVote)
 - Product projects: 3, test projects: 1
 - Invalid projects: 0, skipped projects: 0, excluded projects: 0

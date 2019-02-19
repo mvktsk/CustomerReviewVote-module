@@ -1,5 +1,5 @@
 Î
-ed:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Migrations\201902030903567_Initial.cs
+eD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Migrations\201902030903567_Initial.cs
 
   
 
@@ -14,7 +14,7 @@ ed:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Migrations\2019
 CC CC" #CC. /
 
 GG !³
-[d:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Migrations\Configuration.cs
+[D:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Migrations\Configuration.cs
 
 		 %
 
@@ -30,7 +30,7 @@ ed:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Migrations\2019
 ž ¡
 Ÿ ¢
 Ÿ ¢Ý
-]d:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Model\CustomerReviewEntity.cs
+]D:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Model\CustomerReviewEntity.cs
 
 
  %== +TT" 6
@@ -54,7 +54,7 @@ ed:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Migrations\2019
 
 TT !F
 TT7 =VV WW7 =YY ZZ [[ \\ ï
-ad:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Model\CustomerReviewVoteEntity.cs
+aD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Model\CustomerReviewVoteEntity.cs
  )** />>" :2
  ##* 277 CC CC &2
  "$$, 688 DD DD  *
@@ -71,8 +71,8 @@ ad:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Model\CustomerR
 
 >> !2
 >>; A@@ AA7 =CC DD \
-Zd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Properties\AssemblyInfo.cs–
-hd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Repositories\CustomerReviewRepository.cs
+ZD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Properties\AssemblyInfo.cs–
+hD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Repositories\CustomerReviewRepository.cs
 
 		 )
 
@@ -115,7 +115,7 @@ hd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Repositories\Cu
 HH7 :JJ% (
 JJ KK! &
 KK MM ï
-id:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Repositories\ICustomerReviewRepository.cs
+iD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Repositories\ICustomerReviewRepository.cs
 
  .
 
@@ -141,7 +141,7 @@ id:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Repositories\IC
 
 0 3
 
-gd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\CustomerReviewSearchService.cs
+gD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\CustomerReviewSearchService.cs
 
  ,(
 9 K   $ 6aa$ 6(
@@ -177,98 +177,113 @@ gd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\Custom
 jj kk mm oo/ 8
 ss )xxE ZyyE Z
 uu) *uu. /
-yy@ Ayyc d
-ad:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\CustomerReviewService.cs
+yy@ Ayyc dÓ
+aD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\CustomerReviewService.cs
 
- &\
-9 K $ 6!!$ 6--$ 6GG$ 6OO$ 6[[$ 6
-‡‡$ 6
+ &\
+9 K $ 6  $ 6..$ 6HH$ 6PP$ 6``$ 6
+‘‘$ 6
 
- $
-E V! 2
+ $
+E V! 2
 
- (
-2 51 4
- !  (
+ (
+2 51 4
+ !  (
 
-  .
-8 ;##1 4
-!! !## !
-##= >##B C
+  .
+8 ;""1 4
+   !"" !
+""= >""B C
 
-'' '2
-''9 >)) **7 <11I N227 < 
-,, 
-44‡ ŒAA 2
--- !//< F11/ 9== &@@" ,
-// (88 )
-11 ,55+ ?
-11U V11[ \
-11s t11x y
-22! 3	44s …(
-44 (55\ h99 (==+ 7(
-55 (66 (881 =99/ ;
-55O P55T U
+&& '2
+&&9 >(( **7 <22I N337 < 
+-- 
+55‡ ŒBB 2
+.. !00< F22/ 9>> &AA" ,
+00 (99 )
+22 ,66+ ?
+22U V22[ \
+22s t22x y
+33! 3	55s …(
+55 (66\ h:: (>>+ 7(
+66 (77 (991 =::/ ;
+66O P66T U
 
-EE )
-EE3 6II1 4
-GG !II JJ (
+FF )
+FF3 6JJ1 4
+HH !JJ KK (
 
-MM$ 0
-MM: =QQ/ 2
-OO !QQ !
-QQ; <QQ@ A
+NN$ 0
+NN: =RR/ 2
+PP !RR !
+RR; <RR@ A
 
-UU +<
-UUA FWW XX7 <__G L``7 <oo$ ) 
-ZZ 
-bb‹ ss <
-[[ !]]< F__/ 9kk &pp3 =rr" ,
-]] (ff )
-__ ,cc+ ?
-__S T__Y Z
-__q r__v w
-``! 3	bbw ‰(
-bb (cc\ hgg (kk+ 7(
-cc (dd (ff1 =gg/ ;
-ccO PccT U
-oo !pp? H
-oo1 2oo6 7 
-yy 2pp 2
- .
-yyM W{{ &
-yyb k{{6 ?
-{{ }}' ,t
-}} # . 2
- ”
-€€ 
-€€- 1€€Ž ’
- 
-+ /
-e i
-M NS Tz {$
+VV +<
+VVA FXX ZZ7 <ddG Lee7 <tt$ ) 
+]] 
+gg‹ xx 
 
-€€L M
-€€R S
-€€x y
+^^ 
 
-J K
-O P
+__ <
+`` !bb< Fdd/ 9pp &uu3 =ww" ,
+bb (kk )
+dd ,hh+ ?
+ddS TddY Z
+ddq rddv w
+ee! 3	ggw ‰(
+gg (hh\ hll (pp+ 7(
+hh (ii (kk1 =ll/ ;
+hhO PhhT U
+tt !uu? H
+tt1 2tt6 7 
+~~ 2uu 2
+—— ..
+~~M W
+ 
+ƒƒ7 A
+…… "
+~~b k
+……2 ;
 
-…… -$
+…… 
+‡‡! &|
 
-……7 :
-ŠŠ8 ;
-ŒŒ5 8<
+‡‡ 
+‰‰ 
+‰‰* .‰‰Œ 
+ŠŠ 
+ŠŠ) -ŠŠŠ Ž
+‹‹ 
+‹‹' +
+‹‹a e$
 
-‡‡ !
-ŠŠ  *
-ŒŒ 
-/ 9
-ŽŽ (
+‰‰I J
+‰‰O P
+‰‰v w$
 
-ŠŠ 
-; D
+ŠŠH I
+ŠŠN O
+ŠŠt u
 
-ŠŠD E
-ŠŠI J
+‹‹F G
+‹‹K L
+
+ -$
+
+7 :
+””8 ;
+––5 8<
+
+‘‘ !
+””  *
+–– 
+——/ 9
+˜˜ (
+
+”” 
+——; D
+
+””D E
+””I J

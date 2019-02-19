@@ -1,5 +1,5 @@
 Ä>
-sd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Controllers\Api\customerReviewVotes.WebController.cs
+sD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Controllers\Api\customerReviewVotes.WebController.cs
 	namespace 	
 CustomerReviewVotes
  
@@ -45,10 +45,10 @@ sd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Controllers\Api\
 ICustomerReviewSearchService' C'
 customerReviewSearchServiceD _
 ,_ `"
-ICustomerReviewServiceb x"
-customerReviewService	y é
+ICustomerReviewServicea w"
+customerReviewService	x ç
 )
-é è
+ç é
 { 	(
 _customerReviewSearchService (
 =) *'
@@ -407,7 +407,7 @@ StatusCodett 
 }uu 	
 }vv 
 }ww ´&
-Hd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Module.cs
+HD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Module.cs
 	namespace 	
 CustomerReviewVotes
  
@@ -706,7 +706,7 @@ _container44! +
 }:: 	
 };; 
 }<< ê
-Yd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Properties\AssemblyInfo.cs
+YD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Properties\AssemblyInfo.cs
 [ 
 assembly 	
 :	 
@@ -841,7 +841,7 @@ ComVisible 
 false$$ 
 )$$ 
 ]$$ ¢
-`d:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Security\PredefinedPermissions.cs
+`D:\Data\Sources\CustomerReviewVote-module\newManagedModule.Web\Security\PredefinedPermissions.cs
 	namespace 	
 CustomerReviewVotes
  

@@ -1,9 +1,9 @@
-﻿using System.Net;
-using System.Web.Http;
-using System.Web.Http.Description;
-using CustomerReviewVotes.Core.Model;
+﻿using CustomerReviewVotes.Core.Model;
 using CustomerReviewVotes.Core.Services;
 using CustomerReviewVotes.Web.Security;
+using System.Net;
+using System.Web.Http;
+using System.Web.Http.Description;
 using VirtoCommerce.Domain.Commerce.Model.Search;
 using VirtoCommerce.Platform.Core.Web.Security;
 
@@ -15,12 +15,12 @@ namespace CustomerReviewVotes.Web.Controllers.Api
     {
         private readonly ICustomerReviewSearchService _customerReviewSearchService;
         private readonly ICustomerReviewService _customerReviewService;
-        
+
         public ManagedModuleController()
         {
         }
 
-        public ManagedModuleController(ICustomerReviewSearchService customerReviewSearchService,  ICustomerReviewService customerReviewService)
+        public ManagedModuleController(ICustomerReviewSearchService customerReviewSearchService, ICustomerReviewService customerReviewService)
         {
             _customerReviewSearchService = customerReviewSearchService;
             _customerReviewService = customerReviewService;
@@ -40,7 +40,7 @@ namespace CustomerReviewVotes.Web.Controllers.Api
             var result = _customerReviewSearchService.SearchCustomerReviews(criteria);
             return Ok(result);
         }
-        
+
         /// <summary>
         /// Create new or update existing customer review
         /// </summary>

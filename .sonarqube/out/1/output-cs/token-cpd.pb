@@ -1,5 +1,5 @@
 •I
-ed:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Migrations\201902030903567_Initial.cs
+eD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Migrations\201902030903567_Initial.cs
 	namespace 	
 CustomerReviewVotes
  
@@ -564,7 +564,7 @@ Dictionary__ &
 }ee 	
 }ff 
 }gg ç.
-[d:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Migrations\Configuration.cs
+[D:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Migrations\Configuration.cs
 	namespace 	
 CustomerReviewVotes
  
@@ -979,7 +979,7 @@ ReviewRateq {
 } 	
 }   
 }!! ∫9
-]d:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Model\CustomerReviewEntity.cs
+]D:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Model\CustomerReviewEntity.cs
 	namespace 	
 CustomerReviewVotes
  
@@ -1373,7 +1373,7 @@ ModifiedByGG( 2
 }]] 	
 }^^ 
 }__ ≤*
-ad:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Model\CustomerReviewVoteEntity.cs
+aD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Model\CustomerReviewVoteEntity.cs
 	namespace 	
 CustomerReviewVotes
  
@@ -1664,7 +1664,7 @@ ReviewRateDD  *
 }FF 	
 }JJ 
 }KK Ö
-Zd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Properties\AssemblyInfo.cs
+ZD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Properties\AssemblyInfo.cs
 [ 
 assembly 	
 :	 
@@ -1790,7 +1790,7 @@ ComVisible 
 $str$$ (
 )$$( )
 ]$$) *ôC
-hd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Repositories\CustomerReviewRepository.cs
+hD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Repositories\CustomerReviewRepository.cs
 	namespace 	
 CustomerReviewVotes
  
@@ -2266,7 +2266,7 @@ IQueryableAA 
 }OO 	
 }RR 
 }SS Û
-id:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Repositories\ICustomerReviewRepository.cs
+iD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Repositories\ICustomerReviewRepository.cs
 	namespace 	
 CustomerReviewVotes
  
@@ -2362,7 +2362,7 @@ IQueryable
 ;4 5
 } 
 } Ç[
-gd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\CustomerReviewSearchService.cs
+gD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\CustomerReviewSearchService.cs
 	namespace
 
  	
@@ -3022,167 +3022,180 @@ TotalCountqq !
 }|| 
 }}} 	
 } 
-}ÄÄ ¢u
-ad:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\CustomerReviewService.cs
-	namespace 	
-CustomerReviewVotes
+}ÄÄ Ãz
+aD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Data\Services\CustomerReviewService.cs
+	namespace
+
+ 	
+CustomerReviewVotes
+
+
  
-. 
-Data "
-." #
-Services# +
-{ 
-public 
+.
+
+ 
+Data
+
+ "
+.
+
+" #
+Services
+
+# +
+{ 
+public 
 
-class !
-CustomerReviewService &
-:' (
-ServiceBase) 4
-,4 5"
-ICustomerReviewService6 L
-{ 
-private 
-readonly 
-Func 
-< %
-ICustomerReviewRepository 7
->7 8
-_repositoryFactory9 K
-;K L
-public !
-CustomerReviewService $
-($ %
-Func% )
-<) *%
-ICustomerReviewRepository* C
->C D
-repositoryFactoryE V
-)V W
-{ 	
-_repositoryFactory 
-=  
-repositoryFactory! 2
-;2 3
-} 	
-public 
-void  
-DeleteCustomerRevies (
-(( )
-string) /
-[/ 0
-]0 1
-ids2 5
-)5 6
-{ 	
-using 
-( 
-var 
+class !
+CustomerReviewService &
+:' (
+ServiceBase) 4
+,4 5"
+ICustomerReviewService6 L
+{ 
+private 
+readonly 
+Func 
+< %
+ICustomerReviewRepository 7
+>7 8
+_repositoryFactory9 K
+;K L
+public !
+CustomerReviewService $
+($ %
+Func% )
+<) *%
+ICustomerReviewRepository* C
+>C D
+repositoryFactoryE V
+)V W
+{ 	
+_repositoryFactory 
+=  
+repositoryFactory! 2
+;2 3
+} 	
+public 
+void  
+DeleteCustomerRevies (
+(( )
+string) /
+[/ 0
+]0 1
+ids2 5
+)5 6
+{ 	
+using 
+( 
+var 
 
-repository !
-=" #
-_repositoryFactory$ 6
-(6 7
-)7 8
-)8 9
-{ 
+repository !
+=" #
+_repositoryFactory$ 6
+(6 7
+)7 8
+)8 9
+{ 
 
-repository 
-. !
-DeleteCustomerReviews 0
-(0 1
-ids1 4
-)4 5
-;5 6
-CommitChanges 
-( 
+repository 
+. !
+DeleteCustomerReviews 0
+(0 1
+ids1 4
+)4 5
+;5 6
+CommitChanges 
+( 
 
-repository (
-)( )
-;) *
-} 
-} 	
-public 
-CustomerReview 
-[ 
-] 
-GetReviewByIds  .
-(. /
-string/ 5
-[5 6
-]6 7
-ids8 ;
-); <
-{   	
-using!! 
-(!! 
-var!! 
+repository (
+)( )
+;) *
+} 
+} 	
+public 
+CustomerReview 
+[ 
+] 
+GetReviewByIds  .
+(. /
+string/ 5
+[5 6
+]6 7
+ids8 ;
+); <
+{ 	
+using   
+(   
+var   
 
-repository!! !
-=!!" #
-_repositoryFactory!!$ 6
-(!!6 7
-)!!7 8
-)!!8 9
-{"" 
-return## 
+repository   !
+=  " #
+_repositoryFactory  $ 6
+(  6 7
+)  7 8
+)  8 9
+{!! 
+return"" 
 
-repository## !
-.##! "
-GetReviewByIds##" 0
-(##0 1
-ids##1 4
-)##4 5
-.##5 6
-Select##6 <
-(##< =
-x##= >
-=>##? A
-x##B C
-.##C D
-ToModel##D K
-(##K L
-AbstractTypeFactory##L _
-<##_ `
-CustomerReview##` n
->##n o
-.##o p
-TryCreateInstance	##p Å
+repository"" !
+.""! "
+GetReviewByIds""" 0
+(""0 1
+ids""1 4
+)""4 5
+.""5 6
+Select""6 <
+(""< =
+x""= >
+=>""? A
+x""B C
+.""C D
+ToModel""D K
+(""K L
+AbstractTypeFactory""L _
+<""_ `
+CustomerReview""` n
+>""n o
+.""o p
+TryCreateInstance	""p Å
 (
-##Å Ç
+""Å Ç
 )
-##Ç É
+""Ç É
 )
-##É Ñ
+""É Ñ
 )
-##Ñ Ö
+""Ñ Ö
 .
-##Ö Ü
+""Ö Ü
 ToArray
-##Ü ç
+""Ü ç
 (
-##ç é
+""ç é
 )
-##é è
+""é è
 ;
-##è ê
-}$$ 
-}%% 	
-public'' 
-void'' 
-SaveCustomerReviews'' '
-(''' (
-CustomerReview''( 6
-[''6 7
-]''7 8
-items''9 >
-)''> ?
-{(( 	
-if)) 
-()) 
-items)) 
-==)) 
-null)) 
-))) 
+""è ê
+}## 
+}$$ 	
+public&& 
+void&& 
+SaveCustomerReviews&& '
+(&&' (
+CustomerReview&&( 6
+[&&6 7
+]&&7 8
+items&&9 >
+)&&> ?
+{'' 	
+if(( 
+((( 
+items(( 
+==(( 
+null(( 
+)(( 
+{)) 
 throw** 
 new** !
 ArgumentNullException** /
@@ -3192,812 +3205,899 @@ repository## !
 items**7 <
 )**< =
 )**= >
-;**> ?
-var,, 
-pkMap,, 
-=,, 
-new,, "
-PrimaryKeyResolvingMap,, 2
-(,,2 3
-),,3 4
-;,,4 5
-using-- 
-(-- 
-var-- 
+;**> ?
+}++ 
+var-- 
+pkMap-- 
+=-- 
+new-- "
+PrimaryKeyResolvingMap-- 2
+(--2 3
+)--3 4
+;--4 5
+using.. 
+(.. 
+var.. 
 
-repository-- !
-=--" #
-_repositoryFactory--$ 6
-(--6 7
-)--7 8
-)--8 9
-{.. 
-using// 
-(// 
-var// 
-changeTracker// (
-=//) *
-GetChangeTracker//+ ;
-(//; <
+repository.. !
+=.." #
+_repositoryFactory..$ 6
+(..6 7
+)..7 8
+)..8 9
+{// 
+using00 
+(00 
+var00 
+changeTracker00 (
+=00) *
+GetChangeTracker00+ ;
+(00; <
 
-repository//< F
-)//F G
-)//G H
-{00 
-var11  
-alreadyExistEntities11 ,
-=11- .
+repository00< F
+)00F G
+)00G H
+{11 
+var22  
+alreadyExistEntities22 ,
+=22- .
 
-repository11/ 9
-.119 :
-GetReviewByIds11: H
-(11H I
-items11I N
-.11N O
-Where11O T
-(11T U
-m11U V
-=>11W Y
-!11Z [
-m11[ \
-.11\ ]
-IsTransient11] h
-(11h i
-)11i j
-)11j k
-.11k l
-Select11l r
-(11r s
-x11s t
-=>11u w
-x11x y
-.11y z
-Id11z |
-)11| }
-.11} ~
-ToArray	11~ Ö
+repository22/ 9
+.229 :
+GetReviewByIds22: H
+(22H I
+items22I N
+.22N O
+Where22O T
+(22T U
+m22U V
+=>22W Y
+!22Z [
+m22[ \
+.22\ ]
+IsTransient22] h
+(22h i
+)22i j
+)22j k
+.22k l
+Select22l r
+(22r s
+x22s t
+=>22u w
+x22x y
+.22y z
+Id22z |
+)22| }
+.22} ~
+ToArray	22~ Ö
 (
-11Ö Ü
+22Ö Ü
 )
-11Ü á
+22Ü á
 )
-11á à
+22á à
 ;
-11à â
-foreach22 
-(22 
-var22  
-devirativeContract22! 3
-in224 6
-items227 <
-)22< =
-{33 
-var44 
-sourceEntity44 (
-=44) *
-AbstractTypeFactory44+ >
-<44> ? 
-CustomerReviewEntity44? S
->44S T
-.44T U
-TryCreateInstance44U f
-(44f g
-)44g h
-.44h i
-	FromModel44i r
-(44r s
-devirativeContract	44s Ö
-,
-44Ö Ü
-pkMap
-44á å
-)
-44å ç
-;
-44ç é
+22à â
+foreach33 
+(33 
+var33  
+derivativeContract33! 3
+in334 6
+items337 <
+)33< =
+{44 
 var55 
-targetEntuty55 (
-=55) * 
-alreadyExistEntities55+ ?
-.55? @
-FirstOrDefault55@ N
-(55N O
-x55O P
-=>55Q S
-x55T U
-.55U V
-Id55V X
-==55Y [
-sourceEntity55\ h
-.55h i
-Id55i k
-)55k l
-;55l m
-if66 
-(66 
-targetEntuty66 (
-!=66) +
-null66, 0
-)660 1
-{77 
-changeTracker88 )
-.88) *
-Attach88* 0
-(880 1
-targetEntuty881 =
-)88= >
-;88> ?
-sourceEntity99 (
-.99( )
-Patch99) .
-(99. /
-targetEntuty99/ ;
-)99; <
-;99< =
-}:: 
-else;; 
-{<< 
-
-repository== &
-.==& '
-Add==' *
-(==* +
-sourceEntity==+ 7
-)==7 8
-;==8 9
-}>> 
-}?? 
-CommitChanges@@ !
-(@@! "
-
-repository@@" ,
-)@@, -
-;@@- .
-pkMapAA 
-.AA 
-ResolvePrimaryKeysAA ,
-(AA, -
-)AA- .
-;AA. /
-}BB 
-}CC 
-}DD 	
-publicEE 
-voidEE !
-DeleteCustomerReviewsEE )
-(EE) *
-stringEE* 0
-[EE0 1
-]EE1 2
-idsEE3 6
-)EE6 7
-{FF 	
-usingGG 
-(GG 
-varGG 
-
-repositoryGG !
-=GG" #
-_repositoryFactoryGG$ 6
-(GG6 7
-)GG7 8
-)GG8 9
-{HH 
-
-repositoryII 
-.II !
-DeleteCustomerReviewsII 0
-(II0 1
-idsII1 4
-)II4 5
-;II5 6
-CommitChangesJJ 
-(JJ 
-
-repositoryJJ (
-)JJ( )
-;JJ) *
-}KK 
-}LL 	
-publicMM 
-CustomerReviewVoteMM !
-[MM! "
-]MM" #
-GetVoteByIdsMM$ 0
-(MM0 1
-stringMM1 7
-[MM7 8
-]MM8 9
-idsMM: =
-)MM= >
-{NN 	
-usingOO 
-(OO 
-varOO 
-
-repositoryOO !
-=OO" #
-_repositoryFactoryOO$ 6
-(OO6 7
-)OO7 8
-)OO8 9
-{PP 
-returnQQ 
-
-repositoryQQ !
-.QQ! "
-GetVoteByIdsQQ" .
-(QQ. /
-idsQQ/ 2
-)QQ2 3
-.QQ3 4
-SelectQQ4 :
-(QQ: ;
-xQQ; <
-=>QQ= ?
-xQQ@ A
-.QQA B
-ToModelQQB I
-(QQI J
-AbstractTypeFactoryQQJ ]
-<QQ] ^
-CustomerReviewVoteQQ^ p
->QQp q
-.QQq r
-TryCreateInstance	QQr É
-(
-QQÉ Ñ
-)
-QQÑ Ö
-)
-QQÖ Ü
-)
-QQÜ á
-.
-QQá à
-ToArray
-QQà è
-(
-QQè ê
-)
-QQê ë
-;
-QQë í
-}RR 
-}SS 	
-publicUU 
-voidUU #
-SaveCustomerReviewVotesUU +
-(UU+ ,
-CustomerReviewVoteUU, >
-[UU> ?
-]UU? @
-itemsUUA F
-)UUF G
-{VV 	
-ifWW 
-(WW 
-itemsWW 
-==WW 
-nullWW 
-)WW 
-throwXX 
-newXX !
-ArgumentNullExceptionXX /
-(XX/ 0
-nameofXX0 6
-(XX6 7
-itemsXX7 <
-)XX< =
-)XX= >
-;XX> ?
-varZZ 
-pkMapZZ 
-=ZZ 
-newZZ "
-PrimaryKeyResolvingMapZZ 2
-(ZZ2 3
-)ZZ3 4
-;ZZ4 5
-using[[ 
-([[ 
-var[[ 
-
-repository[[ !
-=[[" #
-_repositoryFactory[[$ 6
-([[6 7
-)[[7 8
-)[[8 9
-{\\ 
-using]] 
-(]] 
-var]] 
-changeTracker]] (
-=]]) *
-GetChangeTracker]]+ ;
-(]]; <
-
-repository]]< F
-)]]F G
-)]]G H
-{^^ 
-var__  
-alreadyExistEntities__ ,
-=__- .
-
-repository__/ 9
-.__9 :
-GetVoteByIds__: F
-(__F G
-items__G L
-.__L M
-Where__M R
-(__R S
-m__S T
-=>__U W
-!__X Y
-m__Y Z
-.__Z [
-IsTransient__[ f
-(__f g
-)__g h
-)__h i
-.__i j
-Select__j p
-(__p q
-x__q r
-=>__s u
-x__v w
-.__w x
-Id__x z
-)__z {
-.__{ |
-ToArray	__| É
-(
-__É Ñ
-)
-__Ñ Ö
-)
-__Ö Ü
-;
-__Ü á
-foreach`` 
-(`` 
-var``  
-devirativeContract``! 3
-in``4 6
-items``7 <
-)``< =
-{aa 
-varbb 
-sourceEntitybb (
-=bb) *
-AbstractTypeFactorybb+ >
-<bb> ?$
-CustomerReviewVoteEntitybb? W
->bbW X
-.bbX Y
-TryCreateInstancebbY j
-(bbj k
-)bbk l
-.bbl m
-	FromModelbbm v
-(bbv w
-devirativeContract	bbw â
+sourceEntity55 (
+=55) *
+AbstractTypeFactory55+ >
+<55> ? 
+CustomerReviewEntity55? S
+>55S T
+.55T U
+TryCreateInstance55U f
+(55f g
+)55g h
+.55h i
+	FromModel55i r
+(55r s
+derivativeContract	55s Ö
 ,
-bbâ ä
+55Ö Ü
 pkMap
-bbã ê
+55á å
 )
-bbê ë
+55å ç
 ;
-bbë í
-varcc 
-targetEntutycc (
-=cc) * 
-alreadyExistEntitiescc+ ?
-.cc? @
-FirstOrDefaultcc@ N
-(ccN O
-xccO P
-=>ccQ S
-xccT U
-.ccU V
-IdccV X
-==ccY [
-sourceEntitycc\ h
-.cch i
-Idcci k
-)cck l
-;ccl m
-ifdd 
-(dd 
-targetEntutydd (
-!=dd) +
-nulldd, 0
-)dd0 1
-{ee 
-changeTrackerff )
-.ff) *
-Attachff* 0
-(ff0 1
-targetEntutyff1 =
-)ff= >
-;ff> ?
+55ç é
+var66 
+targetEntity66 (
+=66) * 
+alreadyExistEntities66+ ?
+.66? @
+FirstOrDefault66@ N
+(66N O
+x66O P
+=>66Q S
+x66T U
+.66U V
+Id66V X
+==66Y [
+sourceEntity66\ h
+.66h i
+Id66i k
+)66k l
+;66l m
+if77 
+(77 
+targetEntity77 (
+!=77) +
+null77, 0
+)770 1
+{88 
+changeTracker99 )
+.99) *
+Attach99* 0
+(990 1
+targetEntity991 =
+)99= >
+;99> ?
+sourceEntity:: (
+.::( )
+Patch::) .
+(::. /
+targetEntity::/ ;
+)::; <
+;::< =
+};; 
+else<< 
+{== 
+
+repository>> &
+.>>& '
+Add>>' *
+(>>* +
+sourceEntity>>+ 7
+)>>7 8
+;>>8 9
+}?? 
+}@@ 
+CommitChangesAA !
+(AA! "
+
+repositoryAA" ,
+)AA, -
+;AA- .
+pkMapBB 
+.BB 
+ResolvePrimaryKeysBB ,
+(BB, -
+)BB- .
+;BB. /
+}CC 
+}DD 
+}EE 	
+publicFF 
+voidFF !
+DeleteCustomerReviewsFF )
+(FF) *
+stringFF* 0
+[FF0 1
+]FF1 2
+idsFF3 6
+)FF6 7
+{GG 	
+usingHH 
+(HH 
+varHH 
+
+repositoryHH !
+=HH" #
+_repositoryFactoryHH$ 6
+(HH6 7
+)HH7 8
+)HH8 9
+{II 
+
+repositoryJJ 
+.JJ !
+DeleteCustomerReviewsJJ 0
+(JJ0 1
+idsJJ1 4
+)JJ4 5
+;JJ5 6
+CommitChangesKK 
+(KK 
+
+repositoryKK (
+)KK( )
+;KK) *
+}LL 
+}MM 	
+publicNN 
+CustomerReviewVoteNN !
+[NN! "
+]NN" #
+GetVoteByIdsNN$ 0
+(NN0 1
+stringNN1 7
+[NN7 8
+]NN8 9
+idsNN: =
+)NN= >
+{OO 	
+usingPP 
+(PP 
+varPP 
+
+repositoryPP !
+=PP" #
+_repositoryFactoryPP$ 6
+(PP6 7
+)PP7 8
+)PP8 9
+{QQ 
+returnRR 
+
+repositoryRR !
+.RR! "
+GetVoteByIdsRR" .
+(RR. /
+idsRR/ 2
+)RR2 3
+.RR3 4
+SelectRR4 :
+(RR: ;
+xRR; <
+=>RR= ?
+xRR@ A
+.RRA B
+ToModelRRB I
+(RRI J
+AbstractTypeFactoryRRJ ]
+<RR] ^
+CustomerReviewVoteRR^ p
+>RRp q
+.RRq r
+TryCreateInstance	RRr É
+(
+RRÉ Ñ
+)
+RRÑ Ö
+)
+RRÖ Ü
+)
+RRÜ á
+.
+RRá à
+ToArray
+RRà è
+(
+RRè ê
+)
+RRê ë
+;
+RRë í
+}SS 
+}TT 	
+publicVV 
+voidVV #
+SaveCustomerReviewVotesVV +
+(VV+ ,
+CustomerReviewVoteVV, >
+[VV> ?
+]VV? @
+itemsVVA F
+)VVF G
+{WW 	
+ifXX 
+(XX 
+itemsXX 
+==XX 
+nullXX 
+)XX 
+{YY 
+throwZZ 
+newZZ !
+ArgumentNullExceptionZZ /
+(ZZ/ 0
+nameofZZ0 6
+(ZZ6 7
+itemsZZ7 <
+)ZZ< =
+)ZZ= >
+;ZZ> ?
+}[[ 
+var]] 
+pkMap]] 
+=]] 
+new]] "
+PrimaryKeyResolvingMap]] 2
+(]]2 3
+)]]3 4
+;]]4 5
+int^^ 
+i^^ 
+=^^ 
+$num^^ 
+;^^ 
+int__ 
+r__ 
+=__ 
+$num__ 
+;__ 
+using`` 
+(`` 
+var`` 
+
+repository`` !
+=``" #
+_repositoryFactory``$ 6
+(``6 7
+)``7 8
+)``8 9
+{aa 
+usingbb 
+(bb 
+varbb 
+changeTrackerbb (
+=bb) *
+GetChangeTrackerbb+ ;
+(bb; <
+
+repositorybb< F
+)bbF G
+)bbG H
+{cc 
+vardd  
+alreadyExistEntitiesdd ,
+=dd- .
+
+repositorydd/ 9
+.dd9 :
+GetVoteByIdsdd: F
+(ddF G
+itemsddG L
+.ddL M
+WhereddM R
+(ddR S
+mddS T
+=>ddU W
+!ddX Y
+mddY Z
+.ddZ [
+IsTransientdd[ f
+(ddf g
+)ddg h
+)ddh i
+.ddi j
+Selectddj p
+(ddp q
+xddq r
+=>dds u
+xddv w
+.ddw x
+Idddx z
+)ddz {
+.dd{ |
+ToArray	dd| É
+(
+ddÉ Ñ
+)
+ddÑ Ö
+)
+ddÖ Ü
+;
+ddÜ á
+foreachee 
+(ee 
+varee  
+derivativeContractee! 3
+inee4 6
+itemsee7 <
+)ee< =
+{ff 
+vargg 
 sourceEntitygg (
-.gg( )
-Patchgg) .
-(gg. /
-targetEntutygg/ ;
-)gg; <
-;gg< =
-}hh 
-elseii 
-{jj 
-
-repositorykk &
-.kk& '
-Addkk' *
-(kk* +
-sourceEntitykk+ 7
-)kk7 8
-;kk8 9
-}ll 
-}mm 
-varoo 
-	reveiwIdsoo !
-=oo" #
-itemsoo$ )
-.oo) *
-Selectoo* 0
-(oo0 1
-xoo1 2
-=>oo3 5
-xoo6 7
-.oo7 8
-CustomerReviewIdoo8 H
-)ooH I
-.ooI J
-ToArrayooJ Q
-(ooQ R
-)ooR S
-;ooS T*
-UpdateCustomerReviewVotesCountpp 2
-(pp2 3
-
-repositorypp3 =
-,pp= >
-	reveiwIdspp? H
-)ppH I
-;ppI J
-CommitChangesrr !
-(rr! "
-
-repositoryrr" ,
-)rr, -
-;rr- .
-pkMapss 
-.ss 
-ResolvePrimaryKeysss ,
-(ss, -
-)ss- .
-;ss. /
-}tt 
-}uu 
-}ww 	
-publicyy 
-voidyy *
-UpdateCustomerReviewVotesCountyy 2
-(yy2 3%
-ICustomerReviewRepositoryyy3 L
-
-repositoryyyM W
-,yyW X
-stringyyY _
-[yy_ `
-]yy` a
-	reviewIdsyyb k
-)yyk l
-{zz 	
-var{{ 
-query{{ 
-={{ 
-
-repository{{ &
-.{{& '
-GetReviewByIds{{' 5
-({{5 6
-	reviewIds{{6 ?
-){{? @
-;{{@ A
-foreach}} 
-(}} 
-var}} 
-item}} #
-in}}$ &
-query}}' ,
-)}}, -
-{~~ 
-item 
-. 
-HelpfullVotesCount +
-=, -
-item. 2
-.2 3
-CustomerReviewVotes3 F
-.F G
-CountG L
-(L M
-xM N
-=>O Q
-(R S
-xS T
-.T U
-
-ReviewRateU _
-==` b
-VoteRatec k
-.k l
-Helpfulll t
-)t u
-&&v x
-(y z
-xz {
-.{ |
-CustomerReviewId	| å
-==
-ç è
-item
-ê î
-.
-î ï
-Id
-ï ó
+=gg) *
+AbstractTypeFactorygg+ >
+<gg> ?$
+CustomerReviewVoteEntitygg? W
+>ggW X
+.ggX Y
+TryCreateInstanceggY j
+(ggj k
+)ggk l
+.ggl m
+	FromModelggm v
+(ggv w
+derivativeContract	ggw â
+,
+ggâ ä
+pkMap
+ggã ê
 )
-ó ò
-)
-ò ô
+ggê ë
 ;
-ô ö
-item
-ÄÄ 
-.
-ÄÄ 
-UselessVotesCount
-ÄÄ *
+ggë í
+varhh 
+targetEntityhh (
+=hh) * 
+alreadyExistEntitieshh+ ?
+.hh? @
+FirstOrDefaulthh@ N
+(hhN O
+xhhO P
+=>hhQ S
+xhhT U
+.hhU V
+IdhhV X
+==hhY [
+sourceEntityhh\ h
+.hhh i
+Idhhi k
+)hhk l
+;hhl m
+ifii 
+(ii 
+targetEntityii (
+!=ii) +
+nullii, 0
+)ii0 1
+{jj 
+changeTrackerkk )
+.kk) *
+Attachkk* 0
+(kk0 1
+targetEntitykk1 =
+)kk= >
+;kk> ?
+sourceEntityll (
+.ll( )
+Patchll) .
+(ll. /
+targetEntityll/ ;
+)ll; <
+;ll< =
+}mm 
+elsenn 
+{oo 
+
+repositorypp &
+.pp& '
+Addpp' *
+(pp* +
+sourceEntitypp+ 7
+)pp7 8
+;pp8 9
+}qq 
+}rr 
+vartt 
+	reviewIdstt !
+=tt" #
+itemstt$ )
+.tt) *
+Selecttt* 0
+(tt0 1
+xtt1 2
+=>tt3 5
+xtt6 7
+.tt7 8
+CustomerReviewIdtt8 H
+)ttH I
+.ttI J
+ToArrayttJ Q
+(ttQ R
+)ttR S
+;ttS T*
+UpdateCustomerReviewVotesCountuu 2
+(uu2 3
+
+repositoryuu3 =
+,uu= >
+	reviewIdsuu? H
+)uuH I
+;uuI J
+CommitChangesww !
+(ww! "
+
+repositoryww" ,
+)ww, -
+;ww- .
+pkMapxx 
+.xx 
+ResolvePrimaryKeysxx ,
+(xx, -
+)xx- .
+;xx. /
+}yy 
+}zz 
+}|| 	
+public~~ 
+void~~ *
+UpdateCustomerReviewVotesCount~~ 2
+(~~2 3%
+ICustomerReviewRepository~~3 L
+
+repository~~M W
+,~~W X
+string~~Y _
+[~~_ `
+]~~` a
+	reviewIds~~b k
+)~~k l
+{ 	
+if
+ÅÅ 
+(
+ÅÅ 
+
+repository
+ÅÅ 
+==
+ÅÅ 
+null
+ÅÅ "
+)
+ÅÅ" #
+{
+ÇÇ 
+throw
+ÉÉ 
+new
+ÉÉ #
+ArgumentNullException
+ÉÉ /
+(
+ÉÉ/ 0
+nameof
+ÉÉ0 6
+(
+ÉÉ6 7
+
+repository
+ÉÉ7 A
+)
+ÉÉA B
+)
+ÉÉB C
+;
+ÉÉC D
+}
+ÑÑ 
+var
+ÖÖ 
+query
+ÖÖ 
 =
-ÄÄ+ ,
+ÖÖ 
+
+repository
+ÖÖ "
+.
+ÖÖ" #
+GetReviewByIds
+ÖÖ# 1
+(
+ÖÖ1 2
+	reviewIds
+ÖÖ2 ;
+)
+ÖÖ; <
+;
+ÖÖ< =
+foreach
+áá 
+(
+áá 
+var
+áá 
 item
-ÄÄ- 1
+áá 
+in
+áá  
+query
+áá! &
+)
+áá& '
+{
+àà 
+item
+ââ 
 .
-ÄÄ1 2!
+ââ  
+HelpfullVotesCount
+ââ '
+=
+ââ( )
+item
+ââ* .
+.
+ââ. /!
 CustomerReviewVotes
-ÄÄ2 E
+ââ/ B
 .
-ÄÄE F
+ââB C
 Count
-ÄÄF K
+ââC H
 (
-ÄÄK L
+ââH I
 x
-ÄÄL M
+ââI J
 =>
-ÄÄN P
+ââK M
 (
-ÄÄQ R
+ââN O
 x
-ÄÄR S
+ââO P
 .
-ÄÄS T
+ââP Q
 
 ReviewRate
-ÄÄT ^
+ââQ [
 ==
-ÄÄ_ a
+ââ\ ^
 VoteRate
-ÄÄb j
+ââ_ g
 .
-ÄÄj k
-Useless
-ÄÄk r
+ââg h
+Helpfull
+ââh p
 )
-ÄÄr s
+ââp q
 &&
-ÄÄt v
+ââr t
 (
-ÄÄw x
+ââu v
 x
-ÄÄx y
+ââv w
 .
-ÄÄy z
-CustomerReviewIdÄÄz ä
-==ÄÄã ç
-itemÄÄé í
-.ÄÄí ì
-IdÄÄì ï
-)ÄÄï ñ
-)ÄÄñ ó
-;ÄÄó ò
+ââw x
+CustomerReviewIdââx à
+==âââ ã
+itemââå ê
+.ââê ë
+Idââë ì
+)ââì î
+)ââî ï
+;ââï ñ
 item
-ÅÅ 
+ää 
 .
-ÅÅ 
-TotalVotesCount
-ÅÅ (
+ää 
+UselessVotesCount
+ää &
 =
-ÅÅ) *
+ää' (
 item
-ÅÅ+ /
+ää) -
 .
-ÅÅ/ 0!
+ää- .!
 CustomerReviewVotes
-ÅÅ0 C
+ää. A
 .
-ÅÅC D
+ääA B
 Count
-ÅÅD I
+ääB G
 (
-ÅÅI J
+ääG H
 x
-ÅÅJ K
+ääH I
 =>
-ÅÅL N
+ääJ L
+(
+ääM N
 x
-ÅÅO P
+ääN O
 .
-ÅÅP Q
-CustomerReviewId
-ÅÅQ a
+ääO P
+
+ReviewRate
+ääP Z
 ==
-ÅÅb d
+ää[ ]
+VoteRate
+ää^ f
+.
+ääf g
+Useless
+ääg n
+)
+ään o
+&&
+ääp r
+(
+ääs t
+x
+äät u
+.
+ääu v
+CustomerReviewIdääv Ü
+==ääá â
+itemäää é
+.ääé è
+Idääè ë
+)ääë í
+)ääí ì
+;ääì î
 item
-ÅÅe i
+ãã 
 .
-ÅÅi j
-Id
-ÅÅj l
-)
-ÅÅl m
-;
-ÅÅm n
-}
-ÇÇ 
-}
-ÉÉ 	
-public
-ÖÖ 
-void
-ÖÖ '
-DeleteCustomerReviewVotes
-ÖÖ -
-(
-ÖÖ- .
-string
-ÖÖ. 4
-[
-ÖÖ4 5
-]
-ÖÖ5 6
-ids
-ÖÖ7 :
-)
-ÖÖ: ;
-{
-ÜÜ 	
-using
-áá 
-(
-áá 
-var
-áá 
-
-repository
-áá !
+ãã 
+TotalVotesCount
+ãã $
 =
-áá" # 
-_repositoryFactory
-áá$ 6
-(
-áá6 7
-)
-áá7 8
-)
-áá8 9
-{
-àà 
-var
-ää 
-	reveiwIds
-ää 
-=
-ää 
-
-repository
-ää  *
+ãã% &
+item
+ãã' +
 .
-ää* +
-GetVoteByIds
-ää+ 7
-(
-ää7 8
-ids
-ää8 ;
-)
-ää; <
+ãã+ ,!
+CustomerReviewVotes
+ãã, ?
 .
-ää< =
-Select
-ää= C
+ãã? @
+Count
+ãã@ E
 (
-ääC D
+ããE F
 x
-ääD E
+ããF G
 =>
-ääF H
+ããH J
 x
-ääI J
+ããK L
 .
-ääJ K
+ããL M
 CustomerReviewId
-ääK [
-)
-ää[ \
+ããM ]
+==
+ãã^ `
+item
+ããa e
 .
-ää\ ]
-ToArray
-ää] d
-(
-ääd e
+ããe f
+Id
+ããf h
 )
-ääe f
+ããh i
 ;
-ääf g
-
-repository
-åå 
-.
-åå '
+ããi j
+}
+åå 
+}
+çç 	
+public
+èè 
+void
+èè '
 DeleteCustomerReviewVotes
-åå 4
+èè -
 (
-åå4 5
+èè- .
+string
+èè. 4
+[
+èè4 5
+]
+èè5 6
 ids
-åå5 8
+èè7 :
 )
-åå8 9
+èè: ;
+{
+êê 	
+using
+ëë 
+(
+ëë 
+var
+ëë 
+
+repository
+ëë !
+=
+ëë" # 
+_repositoryFactory
+ëë$ 6
+(
+ëë6 7
+)
+ëë7 8
+)
+ëë8 9
+{
+íí 
+var
+îî 
+	reviewIds
+îî 
+=
+îî 
+
+repository
+îî  *
+.
+îî* +
+GetVoteByIds
+îî+ 7
+(
+îî7 8
+ids
+îî8 ;
+)
+îî; <
+.
+îî< =
+Select
+îî= C
+(
+îîC D
+x
+îîD E
+=>
+îîF H
+x
+îîI J
+.
+îîJ K
+CustomerReviewId
+îîK [
+)
+îî[ \
+.
+îî\ ]
+ToArray
+îî] d
+(
+îîd e
+)
+îîe f
 ;
-åå9 :,
+îîf g
+
+repository
+ññ 
+.
+ññ '
+DeleteCustomerReviewVotes
+ññ 4
+(
+ññ4 5
+ids
+ññ5 8
+)
+ññ8 9
+;
+ññ9 :,
 UpdateCustomerReviewVotesCount
-çç .
+óó .
 (
-çç. /
+óó. /
 
 repository
-çç/ 9
+óó/ 9
 ,
-çç9 :
-	reveiwIds
-çç; D
+óó9 :
+	reviewIds
+óó; D
 )
-ççD E
+óóD E
 ;
-ççE F
+óóE F
 CommitChanges
-éé 
+òò 
 (
-éé 
+òò 
 
 repository
-éé (
+òò (
 )
-éé( )
+òò( )
 ;
-éé) *
+òò) *
 }
-èè 
+ôô 
 }
-êê 	
+öö 	
 }
-ëë 
-}íí 
+ùù 
+}ûû 

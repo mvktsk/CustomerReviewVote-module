@@ -1,9 +1,9 @@
 `
-Wd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReview.csutf-8n
-ed:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewSearchCriteria.csutf-8d
-[d:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewVote.csutf-8r
-id:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewVoteSearchCriteria.csutf-8Z
-Qd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\VoteRate.csutf-8c
-Zd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Properties\AssemblyInfo.csutf-8q
-hd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICustomerReviewSearchService.csutf-8k
-bd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICustomerReviewService.csutf-8
+WD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReview.csutf-8n
+eD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewSearchCriteria.csutf-8d
+[D:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewVote.csutf-8r
+iD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewVoteSearchCriteria.csutf-8Z
+QD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\VoteRate.csutf-8c
+ZD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Properties\AssemblyInfo.csutf-8q
+hD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICustomerReviewSearchService.csutf-8k
+bD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICustomerReviewService.csutf-8

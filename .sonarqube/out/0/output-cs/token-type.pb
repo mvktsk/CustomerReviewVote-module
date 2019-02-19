@@ -1,5 +1,5 @@
 é
-Wd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReview.cs
+WD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReview.cs
  
  	 
   " 1  ' *, /    #% (		 		 		 "		$ '
@@ -11,11 +11,11 @@ Wd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerR
 " %
 
 ' *  * -/ 2  ( +- 0  ' *, /  % (* -ß
-ed:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewSearchCriteria.cs
+eD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewSearchCriteria.cs
  
  	 
   -0 B  % (* -  ! $& )    #% (Õ
-[d:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewVote.cs
+[D:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewVote.cs
  
  	 
   #& 5  ! $& )		 		 		% (		* -
@@ -27,14 +27,14 @@ ed:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerR
 ) ,
 
 . 1ó
-id:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewVoteSearchCriteria.cs
+iD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\CustomerReviewVoteSearchCriteria.cs
  
  	 
   14 F  , /1 4Á
-Qd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\VoteRate.cs
+QD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Model\VoteRate.cs
  	 
     6  5Ä
-Zd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Properties\AssemblyInfo.cs
+ZD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Properties\AssemblyInfo.cs
  
  
  
@@ -61,12 +61,12 @@ Zd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Properties\Asse
    S
 !! #
 "" '## 	## ## $$$ 	$$ $$ (Œ
-hd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICustomerReviewSearchService.cs
+hD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICustomerReviewSearchService.cs
  
  
  	 
   1  *B ^		 		 .		J jÎ
-bd:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICustomerReviewService.cs
+bD:\Data\Sources\CustomerReviewVote-module\newManagedModule.Core\Services\ICustomerReviewService.cs
  
  	 
   + ( .		 		! / # ) * 0 % 7 ' -
